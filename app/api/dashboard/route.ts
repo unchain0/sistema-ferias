@@ -3,10 +3,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { getProfessionals, getVacationPeriods } from '@/lib/db';
 import { DashboardData } from '@/types';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -14,8 +14,31 @@ export async function GET() {
   }
 
   try {
+    // Get query parameters for date filtering
+    const { searchParams } = new URL(request.url);
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+
     const professionals = await getProfessionals(session.user.id);
-    const vacations = await getVacationPeriods(session.user.id);
+    let vacations = await getVacationPeriods(session.user.id);
+
+    // Filter vacations by date range if provided
+    if (startDate && endDate) {
+      const filterStart = parseISO(startDate);
+      const filterEnd = parseISO(endDate);
+
+      vacations = vacations.filter(vacation => {
+        const vacationStart = parseISO(vacation.usageStartDate);
+        const vacationEnd = parseISO(vacation.usageEndDate);
+
+        // Include vacation if it overlaps with the filter range
+        return (
+          isWithinInterval(vacationStart, { start: filterStart, end: filterEnd }) ||
+          isWithinInterval(vacationEnd, { start: filterStart, end: filterEnd }) ||
+          (vacationStart <= filterStart && vacationEnd >= filterEnd)
+        );
+      });
+    }
 
     const totalProfessionals = professionals.length;
     const totalVacationDays = vacations.reduce((sum, v) => sum + v.totalDays, 0);

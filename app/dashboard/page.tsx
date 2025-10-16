@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Card } from '@/components/Card';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { DateRangeFilter, DateRange } from '@/components/DateRangeFilter';
 import { DashboardData } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -12,14 +13,16 @@ import { Users, Calendar, DollarSign, TrendingDown } from 'lucide-react';
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
-  const fetchDashboard = async () => {
+  const fetchDashboard = useCallback(async () => {
+    setLoading(true);
     try {
-      const response = await fetch('/api/dashboard');
+      let url = '/api/dashboard';
+      if (dateRange) {
+        url += `?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
+      }
+      const response = await fetch(url);
       if (response.ok) {
         const dashboardData = await response.json();
         setData(dashboardData);
@@ -29,6 +32,14 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  }, [dateRange]);
+
+  useEffect(() => {
+    fetchDashboard();
+  }, [fetchDashboard]);
+
+  const handleFilterChange = (range: DateRange | null) => {
+    setDateRange(range);
   };
 
   if (loading) {
@@ -87,6 +98,9 @@ export default function DashboardPage() {
             Visualização do impacto financeiro das férias dos profissionais
           </p>
         </div>
+
+        {/* Date Range Filter */}
+        <DateRangeFilter onFilterChange={handleFilterChange} />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
