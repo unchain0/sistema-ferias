@@ -7,7 +7,7 @@ import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection'
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
 
@@ -20,6 +20,7 @@ export async function PUT(
   }
 
   try {
+    const { id } = await params;
     const data = await request.json();
     const {
       professionalId,
@@ -50,7 +51,7 @@ export async function PUT(
       revenueDeduction,
     };
 
-    const vacation = await updateVacationPeriod(params.id, session.user.id, updates);
+    const vacation = await updateVacationPeriod(id, session.user.id, updates);
 
     if (!vacation) {
       return NextResponse.json(
@@ -71,7 +72,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
 
@@ -84,7 +85,8 @@ export async function DELETE(
   }
 
   try {
-    const success = await deleteVacationPeriod(params.id, session.user.id);
+    const { id } = await params;
+    const success = await deleteVacationPeriod(id, session.user.id);
 
     if (!success) {
       return NextResponse.json(
