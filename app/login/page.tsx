@@ -8,18 +8,17 @@ import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Calendar, Eye } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
@@ -30,20 +29,20 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('Email ou senha incorretos');
+        toast.error('❌ Email ou senha incorretos');
       } else {
+        toast.success('✅ Login realizado com sucesso!');
         router.push('/dashboard');
         router.refresh();
       }
     } catch (err) {
-      setError('Erro ao fazer login');
+      toast.error('❌ Erro ao fazer login');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDemoLogin = async () => {
-    setError('');
     setDemoLoading(true);
 
     try {
@@ -60,13 +59,14 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('Erro ao acessar demonstração');
+        toast.error('❌ Erro ao acessar demonstração');
       } else {
+        toast.success('✅ Acesso demo liberado!');
         router.push('/dashboard');
         router.refresh();
       }
     } catch (err) {
-      setError('Erro ao acessar demonstração');
+      toast.error('❌ Erro ao acessar demonstração');
     } finally {
       setDemoLoading(false);
     }
@@ -86,12 +86,6 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            </div>
-          )}
-
           <Input
             label="Email"
             type="email"

@@ -7,6 +7,7 @@ import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Calendar } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,20 +15,18 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (password !== confirmPassword) {
-      setError('As senhas não coincidem');
+      toast.error('❌ As senhas não coincidem');
       return;
     }
 
     if (password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
+      toast.error('❌ A senha deve ter pelo menos 6 caracteres');
       return;
     }
 
@@ -43,12 +42,13 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Erro ao criar conta');
+        toast.error(`❌ ${data.error || 'Erro ao criar conta'}`);
       } else {
-        router.push('/login?registered=true');
+        toast.success('✅ Conta criada com sucesso!');
+        router.push('/login');
       }
     } catch (err) {
-      setError('Erro ao criar conta');
+      toast.error('❌ Erro ao criar conta');
     } finally {
       setLoading(false);
     }
@@ -68,12 +68,6 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            </div>
-          )}
-
           <Input
             label="Nome"
             type="text"
