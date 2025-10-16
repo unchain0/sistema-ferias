@@ -23,20 +23,20 @@ Sistema completo de gestão de férias profissionais com dashboard de impacto fi
 
 ## 📦 Instalação
 
-1. **Clone o repositório**
+**Clone o repositório**
 
 ```bash
 git clone <repository-url>
 cd sistema-ferias
 ```
 
-2. **Instale as dependências**
+**Instale as dependências**
 
 ```bash
 npm install
 ```
 
-3. **Configure as variáveis de ambiente**
+**Configure as variáveis de ambiente**
 
 Crie um arquivo `.env.local` na raiz do projeto:
 
@@ -51,13 +51,13 @@ Para gerar uma chave secreta segura, execute:
 openssl rand -base64 32
 ```
 
-4. **Execute o servidor de desenvolvimento**
+**Execute o servidor de desenvolvimento**
 
 ```bash
 npm run dev
 ```
 
-5. **Acesse a aplicação**
+**Acesse a aplicação**
 
 Abra [http://localhost:3000](http://localhost:3000) no seu navegador
 
@@ -66,6 +66,7 @@ Abra [http://localhost:3000](http://localhost:3000) no seu navegador
 ### 🎯 Modo Demonstração (Recomendado para Primeiro Acesso)
 
 Na tela de login, clique no botão **"Acessar Demonstração"** para explorar o sistema com dados de exemplo pré-carregados:
+
 - **12 profissionais** cadastrados
 - **42 períodos de férias** com distribuição variada ao longo de 2024
 - **Dashboard completo** com gráficos interativos e métricas
@@ -74,6 +75,7 @@ Na tela de login, clique no botão **"Acessar Demonstração"** para explorar o 
 - **Somente visualização** - modificações não são permitidas
 
 Credenciais de demonstração (caso queira fazer login manual):
+
 - Email: `demo@sistema-ferias.com`
 - Senha: `demo123`
 
@@ -194,12 +196,14 @@ npm run lint     # Executa o linter
 Se você encontrar o erro `[webpack.cache.PackFileCacheStrategy] Caching failed for pack`:
 
 **Solução rápida (PowerShell):**
+
 ```powershell
 .\clear-cache.ps1
 npm run dev
 ```
 
 **Solução manual:**
+
 ```powershell
 # Parar o servidor (Ctrl+C)
 Remove-Item -Recurse -Force .next
@@ -234,14 +238,16 @@ A Vercel é a plataforma oficial para Next.js e oferece deploy gratuito com:
 
 #### Opção 1: Via Dashboard Web
 
-1. Acesse https://vercel.com/new
+1. Acesse o [vercel](https://vercel.com/new)
 2. Conecte sua conta GitHub
 3. Importe este repositório
 4. Configure as variáveis de ambiente:
-   ```
+
+   ```env
    NEXTAUTH_URL=https://seu-projeto.vercel.app
    NEXTAUTH_SECRET=sua-chave-secreta-aqui
    ```
+
 5. Clique em "Deploy"
 
 #### Opção 2: Via CLI
@@ -268,6 +274,7 @@ vercel env add NEXTAUTH_URL production
 ```
 
 **Nota:** Gere uma chave segura com:
+
 ```bash
 openssl rand -base64 32
 ```
