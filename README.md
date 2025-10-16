@@ -241,12 +241,13 @@ A Vercel é a plataforma oficial para Next.js e oferece deploy gratuito com:
 1. Acesse o [vercel](https://vercel.com/new)
 2. Conecte sua conta GitHub
 3. Importe este repositório
-4. Configure as variáveis de ambiente:
+4. Configure a variável de ambiente:
 
    ```env
-   NEXTAUTH_URL=https://seu-projeto.vercel.app
    NEXTAUTH_SECRET=sua-chave-secreta-aqui
    ```
+
+   > 💡 **Nota:** A `NEXTAUTH_URL` é detectada automaticamente pela Vercel, não precisa configurar!
 
 5. Clique em "Deploy"
 
@@ -263,21 +264,24 @@ vercel login
 vercel --prod
 ```
 
-#### Configurar Variáveis de Ambiente
+#### Configurar Variável de Ambiente
 
 ```bash
-# Adicionar NEXTAUTH_SECRET
+# Adicionar NEXTAUTH_SECRET (OBRIGATÓRIO)
 vercel env add NEXTAUTH_SECRET production
-
-# Adicionar NEXTAUTH_URL
-vercel env add NEXTAUTH_URL production
 ```
 
-**Nota:** Gere uma chave segura com:
+**Gere uma chave segura com:**
 
 ```bash
+# No Git Bash ou WSL (Windows)
 openssl rand -base64 32
+
+# Ou no PowerShell
+[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))
 ```
+
+> 💡 **Dica:** A `NEXTAUTH_URL` não é necessária - a Vercel detecta automaticamente!
 
 ### ⚠️ Importante: Persistência de Dados
 
