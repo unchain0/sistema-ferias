@@ -4,6 +4,6 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "env": {
-    "NEXTAUTH_SECRET": "@nextauth_secret"
+    "NEXTAUTH_SECRET": "@NEXTAUTH_SECRET"
   }
 }
