@@ -29,7 +29,7 @@ export async function GET() {
         acc[month] = { month, count: 0, impact: 0 };
       }
       
-      acc[month].count += 1;
+      acc[month].count += vacation.totalDays;
       acc[month].impact += vacation.revenueDeduction;
       
       return acc;

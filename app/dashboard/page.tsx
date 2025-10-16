@@ -144,7 +144,7 @@ export default function DashboardPage() {
                   <Legend 
                     wrapperStyle={{ color: '#D1D5DB' }}
                   />
-                  <Bar dataKey="count" fill="#3B82F6" name="Quantidade" />
+                  <Bar dataKey="count" fill="#3B82F6" name="Dias de Férias" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
