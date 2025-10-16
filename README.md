@@ -286,14 +286,27 @@ openssl rand -base64 32
 
 ### ⚠️ Importante: Persistência de Dados
 
-Esta aplicação usa arquivos JSON locais para armazenamento. Em produção na Vercel:
+Esta aplicação usa **armazenamento adaptativo**:
 
-- ✅ O **modo demonstração** funciona perfeitamente
+**Desenvolvimento Local:**
+- ✅ Dados salvos em arquivos JSON (`/data` folder)
+- ✅ Dados persistem entre reinicializações
+
+**Produção (Vercel):**
+- ✅ O **modo demonstração** funciona perfeitamente (in-memory)
+- ⚠️ **SEM banco de dados:** Armazenamento volátil - dados perdidos a cada reinicialização
 - ⚠️ Dados de usuários **não persistem** entre deploys
-- 📝 Para uso real, migre para um banco de dados:
-  - Supabase (PostgreSQL)
-  - Vercel Postgres
-  - MongoDB Atlas
+
+**🎯 Para Produção Real - Use Supabase!**
+
+Este projeto está **pronto para Supabase** - basta configurar! Veja o guia completo em [`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md)
+
+**Benefícios do Supabase:**
+- ✅ PostgreSQL real e robusto
+- ✅ Dados persistem permanentemente
+- ✅ Gratuito até 500MB
+- ✅ Configuração em ~10 minutos
+- ✅ Código já está preparado!
 
 ## 📄 Licença
 

@@ -1,12 +1,23 @@
 import { NextResponse } from 'next/server';
-import { getUsers, getUserByEmail, createUser, getProfessionals, createProfessional, getVacationPeriods, createVacationPeriod } from '@/lib/db';
+import { getUserByEmail, createUser, createProfessional, createVacationPeriod, initializeMemoryStorage } from '@/lib/db';
 import { createDemoData } from '@/lib/seed-demo';
+
+const IS_SERVERLESS = process.env.VERCEL === '1' || (process.env.NODE_ENV === 'production' && !process.env.USE_FILESYSTEM);
 
 export async function POST() {
   try {
     const demoData = await createDemoData();
     
-    // Check if demo user already exists
+    // For serverless environments, initialize memory storage directly
+    if (IS_SERVERLESS) {
+      await initializeMemoryStorage(demoData);
+      return NextResponse.json({ 
+        message: 'Dados demo inicializados com sucesso (in-memory)',
+        email: demoData.user.email 
+      });
+    }
+    
+    // For local development, use filesystem
     const existingUser = await getUserByEmail(demoData.user.email);
     
     if (!existingUser) {
