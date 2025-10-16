@@ -220,6 +220,69 @@ A aplicação é totalmente responsiva e funciona em:
 
 O sistema suporta dark mode automático baseado nas preferências do sistema operacional do usuário.
 
+## 🚀 Deploy
+
+### Deploy na Vercel (Recomendado)
+
+A Vercel é a plataforma oficial para Next.js e oferece deploy gratuito com:
+
+- ✅ HTTPS automático
+- ✅ Proteção DDoS incluída
+- ✅ CDN global
+- ✅ Preview URLs para cada PR
+- ✅ Zero configuração necessária
+
+#### Opção 1: Via Dashboard Web
+
+1. Acesse https://vercel.com/new
+2. Conecte sua conta GitHub
+3. Importe este repositório
+4. Configure as variáveis de ambiente:
+   ```
+   NEXTAUTH_URL=https://seu-projeto.vercel.app
+   NEXTAUTH_SECRET=sua-chave-secreta-aqui
+   ```
+5. Clique em "Deploy"
+
+#### Opção 2: Via CLI
+
+```bash
+# Instalar Vercel CLI
+npm install -g vercel
+
+# Fazer login
+vercel login
+
+# Deploy em produção
+vercel --prod
+```
+
+#### Configurar Variáveis de Ambiente
+
+```bash
+# Adicionar NEXTAUTH_SECRET
+vercel env add NEXTAUTH_SECRET production
+
+# Adicionar NEXTAUTH_URL
+vercel env add NEXTAUTH_URL production
+```
+
+**Nota:** Gere uma chave segura com:
+```bash
+openssl rand -base64 32
+```
+
+### ⚠️ Importante: Persistência de Dados
+
+Esta aplicação usa arquivos JSON locais para armazenamento. Em produção na Vercel:
+
+- ✅ O **modo demonstração** funciona perfeitamente
+- ⚠️ Dados de usuários **não persistem** entre deploys
+- 📝 Para uso real, migre para um banco de dados:
+  - Supabase (PostgreSQL)
+  - Vercel Postgres
+  - MongoDB Atlas
+
 ## 📄 Licença
 
 Este projeto é privado e de uso interno.

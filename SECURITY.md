@@ -16,7 +16,7 @@ Proteção contra ataques de força bruta e abuso de API:
 
 Headers implementados automaticamente em todas as páginas:
 
-```
+```txt
 ✓ Strict-Transport-Security (HSTS)
 ✓ X-Frame-Options (SAMEORIGIN) - Previne clickjacking
 ✓ X-Content-Type-Options (nosniff)
@@ -88,6 +88,7 @@ O Cloudflare oferece proteção gratuita contra DDoS e outras ameaças. Siga est
 ### Passo 5: Configurar Proteções (Dashboard Cloudflare)
 
 #### A. Proteção contra DDoS (Já ativa por padrão!)
+
 - ✅ Proteção automática contra DDoS Layer 3/4
 - ✅ Mitigação automática de ataques volumétricos
 
@@ -95,7 +96,7 @@ O Cloudflare oferece proteção gratuita contra DDoS e outras ameaças. Siga est
 
 Em **Security > WAF**, configure regras:
 
-```
+```txt
 1. Bloquear países suspeitos (opcional):
    - Campo: Country
    - Operador: equals
@@ -112,12 +113,14 @@ Em **Security > WAF**, configure regras:
 #### C. Bot Protection
 
 Em **Security > Bots**:
+
 - ✅ Ative "Bot Fight Mode" (grátis)
 - Protege contra bots maliciosos automaticamente
 
 #### D. SSL/TLS
 
 Em **SSL/TLS**:
+
 - Selecione: **"Full (strict)"**
 - Ative: "Always Use HTTPS"
 - Ative: "Automatic HTTPS Rewrites"
@@ -125,10 +128,12 @@ Em **SSL/TLS**:
 #### E. Cache e Performance
 
 Em **Caching**:
+
 - Development Mode: OFF
 - Caching Level: Standard
 
 Em **Speed > Optimization**:
+
 - ✅ Auto Minify (JS, CSS, HTML)
 - ✅ Brotli compression
 - ✅ Rocket Loader (melhora performance)
@@ -139,7 +144,7 @@ Em **Speed > Optimization**:
 
 Criar regras para otimizar:
 
-```
+```txt
 1. Regra para APIs:
    URL: *meusite.com/api/*
    Settings:
@@ -156,36 +161,54 @@ Criar regras para otimizar:
 #### Under Attack Mode
 
 Se estiver sob ataque DDoS:
+
 1. Vá em **Security > Settings**
 2. Mude Security Level para **"I'm Under Attack!"**
 3. Visitantes verão uma verificação antes de acessar o site
 4. Volte ao normal quando o ataque cessar
 
-## 🌐 Alternativas Gratuitas ao Cloudflare
+## 🚀 Deploy na Vercel
 
-### 1. **Vercel** (Recomendado para Next.js)
-- Deploy nativo de aplicações Next.js
-- Proteção DDoS incluída
-- CDN global
-- HTTPS automático
-- Gratuito para projetos pessoais
+### **Vercel** (Plataforma Oficial para Next.js)
 
-**Como usar:**
+A Vercel é a plataforma recomendada e oficial para aplicações Next.js, oferecendo:
+
+- ✅ Deploy nativo com zero configuração
+- ✅ Proteção DDoS incluída gratuitamente
+- ✅ CDN global em 70+ regiões
+- ✅ HTTPS automático com certificados SSL
+- ✅ Preview URLs para cada commit
+- ✅ Rollback instantâneo
+- ✅ Edge Functions integradas
+- ✅ 100% gratuito para projetos pessoais
+
+**Deploy via CLI:**
+
 ```bash
+# Instalar Vercel CLI
 npm install -g vercel
+
+# Login
 vercel login
+
+# Deploy em produção
 vercel --prod
 ```
 
-### 2. **Netlify**
-- Proteção DDoS básica
-- CDN global
-- HTTPS automático
-- 100GB bandwidth/mês grátis
+**Deploy via Dashboard:**
 
-### 3. **AWS CloudFront** (Free Tier)
+1. Acesse https://vercel.com/new
+2. Conecte seu repositório GitHub
+3. Configure variáveis de ambiente:
+   - `NEXTAUTH_URL`: URL do seu projeto
+   - `NEXTAUTH_SECRET`: Chave secreta (mínimo 32 caracteres)
+4. Clique em "Deploy"
+
+### Alternativa: AWS CloudFront (Para Casos Específicos)
+
 - 1TB de transferência grátis (12 meses)
 - Proteção DDoS com AWS Shield Standard
+- Requer configuração manual avançada
 
 ## 🔐 Checklist de Segurança para Produção
 
