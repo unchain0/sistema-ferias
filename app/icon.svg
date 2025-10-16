@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 24 24" fill="none">
+  <!-- Fundo -->
+  <rect x="2" y="3.5" width="20" height="18" rx="3" fill="#1E40AF"/>
+  <!-- Cabeçalho -->
+  <rect x="2" y="5" width="20" height="4" fill="#3B82F6"/>
+  <!-- Argolas -->
+  <rect x="7" y="2" width="2" height="4" rx="1" fill="#FFFFFF"/>
+  <rect x="15" y="2" width="2" height="4" rx="1" fill="#FFFFFF"/>
+  <!-- Grade dos dias (pontos) -->
+  <g fill="#DBEAFE">
+    <circle cx="7" cy="11" r="0.7"/>
+    <circle cx="12" cy="11" r="0.7"/>
+    <circle cx="17" cy="11" r="0.7"/>
+
+    <circle cx="7" cy="15" r="0.7"/>
+    <circle cx="12" cy="15" r="0.7"/>
+    <circle cx="17" cy="15" r="0.7"/>
+
+    <circle cx="7" cy="19" r="0.7"/>
+    <circle cx="12" cy="19" r="0.7"/>
+    <circle cx="17" cy="19" r="0.7"/>
+  </g>
+  <!-- Destaque um dia -->
+  <rect x="10.5" y="13.5" width="3" height="3" rx="0.6" fill="#22C55E"/>
+  <!-- Borda -->
+  <rect x="2" y="3.5" width="20" height="18" rx="3" stroke="#93C5FD" stroke-width="0.8" fill="none"/>
+</svg>
