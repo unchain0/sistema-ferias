@@ -7,7 +7,7 @@ import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Professional, VacationPeriod } from '@/types';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, computeConcessivePeriod } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, Calendar, AlertCircle } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { handleDemoError } from '@/lib/handle-demo-error';
@@ -274,6 +274,15 @@ export default function VacationsPage() {
                 />
               </div>
 
+              {(formData.acquisitionStartDate && formData.acquisitionEndDate) && (
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="font-semibold">Período Concessivo: </span>
+                  {computeConcessivePeriod(formData.acquisitionStartDate, formData.acquisitionEndDate).start}
+                  {" "}até{" "}
+                  {computeConcessivePeriod(formData.acquisitionStartDate, formData.acquisitionEndDate).end}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   label="Início Período de Gozo"
@@ -327,14 +336,14 @@ export default function VacationsPage() {
                       </h3>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
                           Período Aquisitivo
                         </p>
                         <p className="text-sm text-gray-900 dark:text-white">
-                          {formatDate(vacation.acquisitionStartDate)} até{' '}
-                          {formatDate(vacation.acquisitionEndDate)}
+                          {vacation.acquisitionStartDate} até{' '}
+                          {vacation.acquisitionEndDate}
                         </p>
                       </div>
 
@@ -343,8 +352,18 @@ export default function VacationsPage() {
                           Período de Gozo
                         </p>
                         <p className="text-sm text-gray-900 dark:text-white">
-                          {formatDate(vacation.usageStartDate)} até{' '}
-                          {formatDate(vacation.usageEndDate)}
+                          {vacation.usageStartDate} até{' '}
+                          {vacation.usageEndDate}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                          Período Concessivo
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-white">
+                          {computeConcessivePeriod(vacation.acquisitionStartDate, vacation.acquisitionEndDate).start} até{' '}
+                          {computeConcessivePeriod(vacation.acquisitionStartDate, vacation.acquisitionEndDate).end}
                         </p>
                       </div>
                     </div>

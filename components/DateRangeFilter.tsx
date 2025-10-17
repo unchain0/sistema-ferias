@@ -3,7 +3,6 @@
 import { useState, startTransition } from 'react';
 import { format, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear } from 'date-fns';
 import { Calendar } from 'lucide-react';
-import { APP_LOCALE } from '@/lib/i18n';
 
 export interface DateRange {
   startDate: string;
@@ -71,12 +70,8 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
   };
 
   const applyCustomFilter = () => {
-    if (customStartDate && customEndDate) {
-      onFilterChange({
-        startDate: customStartDate,
-        endDate: customEndDate,
-      });
-    }
+    if (!customStartDate || !customEndDate) return;
+    onFilterChange({ startDate: customStartDate, endDate: customEndDate });
   };
 
   return (
@@ -114,7 +109,6 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
             </label>
             <input
               type="date"
-              lang={APP_LOCALE}
               value={customStartDate}
               onChange={(e) => setCustomStartDate(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -126,7 +120,6 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
             </label>
             <input
               type="date"
-              lang={APP_LOCALE}
               value={customEndDate}
               onChange={(e) => setCustomEndDate(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"

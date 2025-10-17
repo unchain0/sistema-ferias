@@ -56,8 +56,8 @@ export function Navbar() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600 dark:text-gray-300 max-w-[120px] truncate">
+          <div className="flex items-center space-x-4 min-w-0">
+            <span className="text-sm text-gray-600 dark:text-gray-300 text-right truncate md:overflow-visible md:whitespace-normal md:text-clip max-w-[clamp(8rem,25vw,28rem)] md:max-w-none">
               {session.user?.name}
             </span>
             <Button
@@ -67,7 +67,7 @@ export function Navbar() {
               className="flex items-center space-x-2"
             >
               <LogOut className="w-4 h-4" />
-              <span>Sair</span>
+              <span className="hidden sm:inline">Sair</span>
             </Button>
           </div>
         </div>
