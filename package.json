@@ -10,9 +10,10 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
-    "jsonwebtoken": "^9.0.2",
+    "@vercel/speed-insights": "^1.2.0",
     "bcryptjs": "^2.4.3",
     "date-fns": "^3.0.0",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.295.0",
     "next": "15.0.0",
     "next-auth": "^4.24.5",
