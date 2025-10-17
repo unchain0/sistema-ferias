@@ -7,7 +7,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { DateRangeFilter, DateRange } from '@/components/DateRangeFilter';
 import { DashboardData } from '@/types';
 import { formatCurrency } from '@/lib/utils';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import dynamic from 'next/dynamic';
 import { Users, Calendar, DollarSign, TrendingDown } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -58,6 +58,21 @@ export default function DashboardPage() {
   const deferredTableData = useDeferredValue(tableData);
   const animateCharts = useMemo(() => deferredChartData.length <= 24, [deferredChartData]);
   const shouldAnimate = animateCharts && !hasAnimatedRef.current;
+
+  const DashboardCharts = useMemo(() => dynamic(() => import('@/components/DashboardCharts'), {
+    ssr: false,
+    loading: () => (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="h-[360px] rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse" />
+        <div className="h-[360px] rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse" />
+      </div>
+    )
+  }), []);
+
+  const VirtualizedTable = useMemo(() => dynamic(() => import('@/components/VirtualizedTable'), {
+    ssr: false,
+    loading: () => <div className="h-[420px] rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse" />
+  }), []);
 
   useEffect(() => {
     if (data && !hasAnimatedRef.current) {
@@ -150,134 +165,15 @@ export default function DashboardPage() {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Vacations by Month */}
-          {deferredChartData.length > 0 && (
-            <Card title="Férias por Mês">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={deferredChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="#9CA3AF"
-                    tick={{ fill: '#D1D5DB' }}
-                    style={{ fontSize: '12px', fontWeight: 500 }}
-                  />
-                  <YAxis 
-                    stroke="#9CA3AF"
-                    tick={{ fill: '#D1D5DB' }}
-                    style={{ fontSize: '12px' }}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: '#1F2937',
-                      border: '1px solid #374151',
-                      borderRadius: '8px',
-                      color: '#F3F4F6'
-                    }}
-                    labelStyle={{ color: '#F3F4F6', fontWeight: 'bold' }}
-                    itemStyle={{ color: '#F3F4F6' }}
-                  />
-                  <Legend 
-                    wrapperStyle={{ color: '#D1D5DB' }}
-                  />
-                  <Bar
-                    dataKey="count"
-                    fill="#3B82F6"
-                    name="Dias de Férias"
-                    isAnimationActive={shouldAnimate}
-                    animationDuration={250}
-                    animationBegin={0}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-          )}
-
-          {/* Revenue Impact by Month */}
-          {deferredChartData.length > 0 && (
-            <Card title="Impacto Financeiro por Mês">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={deferredChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="#9CA3AF"
-                    tick={{ fill: '#D1D5DB' }}
-                    style={{ fontSize: '12px', fontWeight: 500 }}
-                  />
-                  <YAxis 
-                    stroke="#9CA3AF"
-                    tick={{ fill: '#D1D5DB' }}
-                    style={{ fontSize: '12px' }}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => formatCurrency(value)}
-                    contentStyle={{
-                      backgroundColor: '#1F2937',
-                      border: '1px solid #374151',
-                      borderRadius: '8px',
-                      color: '#F3F4F6'
-                    }}
-                    labelStyle={{ color: '#F3F4F6', fontWeight: 'bold' }}
-                    itemStyle={{ color: '#F3F4F6' }}
-                  />
-                  <Legend 
-                    wrapperStyle={{ color: '#D1D5DB' }}
-                  />
-                  <Bar
-                    dataKey="impact"
-                    fill="#EF4444"
-                    name="Impacto (R$)"
-                    isAnimationActive={shouldAnimate}
-                    animationDuration={250}
-                    animationBegin={0}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-          )}
-        </div>
+        {deferredChartData.length > 0 && (
+          <DashboardCharts data={deferredChartData} shouldAnimate={shouldAnimate} formatCurrency={formatCurrency} />
+        )}
 
         {/* Professional Impacts Table */}
         {deferredTableData.length > 0 && (
-          <Card title="Impacto por Profissional" className="mt-6">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b dark:border-gray-700">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                      Profissional
-                    </th>
-                    <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                      Total de Dias
-                    </th>
-                    <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                      Impacto no Faturamento
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {deferredTableData.map((impact, index) => (
-                    <tr
-                      key={index}
-                      className="border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                    >
-                      <td className="py-3 px-4 text-gray-900 dark:text-white">
-                        {impact.professionalName}
-                      </td>
-                      <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
-                        {impact.totalDays} dias
-                      </td>
-                      <td className="py-3 px-4 text-right font-semibold text-red-600 dark:text-red-400">
-                        {formatCurrency(impact.revenueImpact)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+          <div className="mt-6">
+            <VirtualizedTable items={deferredTableData} formatCurrency={formatCurrency} />
+          </div>
         )}
 
         {/* Empty State */}
