@@ -51,6 +51,7 @@ export default function DashboardPage() {
 
   const chartData = useMemo(() => data?.vacationsByMonth ?? [], [data]);
   const tableData = useMemo(() => data?.professionalImpacts ?? [], [data]);
+  const animateCharts = useMemo(() => chartData.length <= 24, [chartData]);
 
   if (loading && !data) {
     return (
@@ -168,7 +169,14 @@ export default function DashboardPage() {
                   <Legend 
                     wrapperStyle={{ color: '#D1D5DB' }}
                   />
-                  <Bar dataKey="count" fill="#3B82F6" name="Dias de Férias" isAnimationActive={false} />
+                  <Bar
+                    dataKey="count"
+                    fill="#3B82F6"
+                    name="Dias de Férias"
+                    isAnimationActive={animateCharts}
+                    animationDuration={400}
+                    animationBegin={0}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -205,7 +213,14 @@ export default function DashboardPage() {
                   <Legend 
                     wrapperStyle={{ color: '#D1D5DB' }}
                   />
-                  <Bar dataKey="impact" fill="#EF4444" name="Impacto (R$)" isAnimationActive={false} />
+                  <Bar
+                    dataKey="impact"
+                    fill="#EF4444"
+                    name="Impacto (R$)"
+                    isAnimationActive={animateCharts}
+                    animationDuration={400}
+                    animationBegin={0}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
