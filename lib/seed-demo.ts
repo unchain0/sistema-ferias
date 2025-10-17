@@ -694,6 +694,57 @@ export async function createDemoData() {
     },
   ];
 
+  const profIds = demoProfessionals.map(p => p.id);
+  const revenueByProf = new Map(demoProfessionals.map(p => [p.id, p.monthlyRevenue]));
+  function pad(n: number) { return n < 10 ? `0${n}` : `${n}`; }
+  function lastDay(y: number, m: number) { return new Date(y, m, 0).getDate(); }
+  function pushVacation(year: number, month: number, day: number, dur: number, profIndex: number, idSuffix: string, acqYear: number) {
+    const profId = profIds[profIndex % profIds.length];
+    const ld = lastDay(year, month);
+    const td = Math.max(1, Math.min(dur, ld - day + 1));
+    const start = `${year}-${pad(month)}-${pad(day)}`;
+    const endDay = day + td - 1;
+    const end = `${year}-${pad(month)}-${pad(endDay)}`;
+    const daily = (revenueByProf.get(profId) || 0) / 30;
+    const rev = parseFloat((daily * td).toFixed(2));
+    demoVacations.push({
+      id: `vac-${year}-${pad(month)}-${idSuffix}`,
+      professionalId: profId,
+      userId: demoUserId,
+      acquisitionStartDate: `${acqYear}-01-01`,
+      acquisitionEndDate: `${acqYear}-12-31`,
+      usageStartDate: start,
+      usageEndDate: end,
+      totalDays: td,
+      revenueDeduction: rev,
+      createdAt: new Date(`${year}-${pad(month)}-01`).toISOString(),
+    });
+  }
+
+  for (let m = 1; m <= 12; m++) {
+    pushVacation(2024, m, 3, 5, m - 1, 'a', 2023);
+    pushVacation(2024, m, 12, 7, m + 1, 'b', 2023);
+    pushVacation(2024, m, 21, 10, m + 3, 'c', 2023);
+  }
+
+  const add2025: Array<{ m: number; count: number }> = [
+    { m: 1, count: 2 },
+    { m: 2, count: 1 },
+    { m: 3, count: 2 },
+    { m: 9, count: 2 },
+    { m: 10, count: 1 },
+    { m: 11, count: 2 },
+  ];
+  let idx = 0;
+  for (const { m, count } of add2025) {
+    const starts = [2, 9, 20];
+    const durs = [5, 7, 5];
+    for (let i = 0; i < count; i++) {
+      pushVacation(2025, m, starts[i], durs[i], idx + i, String.fromCharCode(97 + i), 2024);
+    }
+    idx += count;
+  }
+
   return {
     user: demoUser,
     professionals: demoProfessionals,
