@@ -1,5 +1,7 @@
 import { User, Professional, VacationPeriod } from '@/types';
 import { supabase } from './supabase';
+import { createSupabaseForClaims } from './supabase-server';
+import { randomUUID } from 'crypto';
 
 // Users
 export async function getUsers(): Promise<User[]> {
@@ -18,13 +20,13 @@ export async function getUsers(): Promise<User[]> {
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {
-  const { data, error } = await supabase
+  const s = createSupabaseForClaims({ email });
+  const { data, error } = await s
     .from('users')
     .select('*')
     .eq('email', email)
     .single();
-  
-  if (error && error.code !== 'PGRST116') throw error; // PGRST116 = not found
+  if (error && error.code !== 'PGRST116') throw error;
   return data ? {
     id: data.id,
     email: data.email,
@@ -35,12 +37,12 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 }
 
 export async function getUserById(id: string): Promise<User | null> {
-  const { data, error } = await supabase
+  const s = createSupabaseForClaims({ sub: id });
+  const { data, error } = await s
     .from('users')
     .select('*')
     .eq('id', id)
     .single();
-  
   if (error && error.code !== 'PGRST116') throw error;
   return data ? {
     id: data.id,
@@ -52,16 +54,18 @@ export async function getUserById(id: string): Promise<User | null> {
 }
 
 export async function createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
-  const { data, error } = await supabase
+  const id = randomUUID();
+  const s = createSupabaseForClaims({ sub: id });
+  const { data, error } = await s
     .from('users')
     .insert([{
+      id,
       email: user.email,
       name: user.name,
       password: user.password,
     }])
     .select()
     .single();
-  
   if (error) throw error;
   return {
     id: data.id,
@@ -74,11 +78,11 @@ export async function createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<
 
 // Professionals
 export async function getProfessionals(userId: string): Promise<Professional[]> {
-  const { data, error } = await supabase
+  const s = createSupabaseForClaims({ sub: userId });
+  const { data, error } = await s
     .from('professionals')
     .select('*')
     .eq('user_id', userId);
-  
   if (error) throw error;
   return (data || []).map((p: any) => ({
     id: p.id,
@@ -91,13 +95,13 @@ export async function getProfessionals(userId: string): Promise<Professional[]> 
 }
 
 export async function getProfessionalById(id: string, userId: string): Promise<Professional | null> {
-  const { data, error } = await supabase
+  const s = createSupabaseForClaims({ sub: userId });
+  const { data, error } = await s
     .from('professionals')
     .select('*')
     .eq('id', id)
     .eq('user_id', userId)
     .single();
-  
   if (error && error.code !== 'PGRST116') throw error;
   return data ? {
     id: data.id,
@@ -110,7 +114,8 @@ export async function getProfessionalById(id: string, userId: string): Promise<P
 }
 
 export async function createProfessional(professional: Omit<Professional, 'id' | 'createdAt'>): Promise<Professional> {
-  const { data, error } = await supabase
+  const s = createSupabaseForClaims({ sub: professional.userId });
+  const { data, error } = await s
     .from('professionals')
     .insert([{
       user_id: professional.userId,
@@ -120,16 +125,13 @@ export async function createProfessional(professional: Omit<Professional, 'id' |
     }])
     .select()
     .single();
-  
   if (error) throw error;
-  
-  // Convert snake_case to camelCase
   return {
     id: data.id,
     userId: data.user_id,
     name: data.name,
     clientManager: data.client_manager,
-    monthlyRevenue: data.monthly_revenue,
+    monthlyRevenue: typeof data.monthly_revenue === 'string' ? parseFloat(data.monthly_revenue) : data.monthly_revenue,
     createdAt: data.created_at,
   };
 }
@@ -144,7 +146,8 @@ export async function updateProfessional(
   if (updates.clientManager) updateData.client_manager = updates.clientManager;
   if (updates.monthlyRevenue !== undefined) updateData.monthly_revenue = updates.monthlyRevenue;
 
-  const { data, error } = await supabase
+  const s = createSupabaseForClaims({ sub: userId });
+  const { data, error } = await s
     .from('professionals')
     .update(updateData)
     .eq('id', id)
@@ -162,13 +165,14 @@ export async function updateProfessional(
     userId: data.user_id,
     name: data.name,
     clientManager: data.client_manager,
-    monthlyRevenue: data.monthly_revenue,
+    monthlyRevenue: typeof data.monthly_revenue === 'string' ? parseFloat(data.monthly_revenue) : data.monthly_revenue,
     createdAt: data.created_at,
   };
 }
 
 export async function deleteProfessional(id: string, userId: string): Promise<boolean> {
-  const { error, count } = await supabase
+  const s = createSupabaseForClaims({ sub: userId });
+  const { error, count } = await s
     .from('professionals')
     .delete({ count: 'exact' })
     .eq('id', id)
@@ -180,13 +184,12 @@ export async function deleteProfessional(id: string, userId: string): Promise<bo
 
 // Vacation Periods
 export async function getVacationPeriods(userId: string): Promise<VacationPeriod[]> {
-  const { data, error } = await supabase
+  const s = createSupabaseForClaims({ sub: userId });
+  const { data, error } = await s
     .from('vacation_periods')
     .select('*')
     .eq('user_id', userId);
-  
   if (error) throw error;
-  
   return (data || []).map((v: any) => ({
     id: v.id,
     professionalId: v.professional_id,
@@ -196,7 +199,7 @@ export async function getVacationPeriods(userId: string): Promise<VacationPeriod
     usageStartDate: v.usage_start_date,
     usageEndDate: v.usage_end_date,
     totalDays: v.total_days,
-    revenueDeduction: v.revenue_deduction,
+    revenueDeduction: typeof v.revenue_deduction === 'string' ? parseFloat(v.revenue_deduction) : v.revenue_deduction,
     createdAt: v.created_at,
   }));
 }
@@ -205,7 +208,8 @@ export async function getVacationsByProfessional(
   professionalId: string,
   userId: string
 ): Promise<VacationPeriod[]> {
-  const { data, error } = await supabase
+  const s = createSupabaseForClaims({ sub: userId });
+  const { data, error } = await s
     .from('vacation_periods')
     .select('*')
     .eq('professional_id', professionalId)
@@ -222,13 +226,14 @@ export async function getVacationsByProfessional(
     usageStartDate: v.usage_start_date,
     usageEndDate: v.usage_end_date,
     totalDays: v.total_days,
-    revenueDeduction: v.revenue_deduction,
+    revenueDeduction: typeof v.revenue_deduction === 'string' ? parseFloat(v.revenue_deduction) : v.revenue_deduction,
     createdAt: v.created_at,
   }));
 }
 
 export async function createVacationPeriod(vacation: Omit<VacationPeriod, 'id' | 'createdAt'>): Promise<VacationPeriod> {
-  const { data, error } = await supabase
+  const s = createSupabaseForClaims({ sub: vacation.userId });
+  const { data, error } = await s
     .from('vacation_periods')
     .insert([{
       professional_id: vacation.professionalId,
@@ -242,9 +247,7 @@ export async function createVacationPeriod(vacation: Omit<VacationPeriod, 'id' |
     }])
     .select()
     .single();
-  
   if (error) throw error;
-  
   return {
     id: data.id,
     professionalId: data.professional_id,
@@ -254,7 +257,7 @@ export async function createVacationPeriod(vacation: Omit<VacationPeriod, 'id' |
     usageStartDate: data.usage_start_date,
     usageEndDate: data.usage_end_date,
     totalDays: data.total_days,
-    revenueDeduction: data.revenue_deduction,
+    revenueDeduction: typeof data.revenue_deduction === 'string' ? parseFloat(data.revenue_deduction) : data.revenue_deduction,
     createdAt: data.created_at,
   };
 }
@@ -272,7 +275,8 @@ export async function updateVacationPeriod(
   if (updates.totalDays !== undefined) updateData.total_days = updates.totalDays;
   if (updates.revenueDeduction !== undefined) updateData.revenue_deduction = updates.revenueDeduction;
 
-  const { data, error } = await supabase
+  const s = createSupabaseForClaims({ sub: userId });
+  const { data, error } = await s
     .from('vacation_periods')
     .update(updateData)
     .eq('id', id)
@@ -294,13 +298,14 @@ export async function updateVacationPeriod(
     usageStartDate: data.usage_start_date,
     usageEndDate: data.usage_end_date,
     totalDays: data.total_days,
-    revenueDeduction: data.revenue_deduction,
+    revenueDeduction: typeof data.revenue_deduction === 'string' ? parseFloat(data.revenue_deduction) : data.revenue_deduction,
     createdAt: data.created_at,
   };
 }
 
 export async function deleteVacationPeriod(id: string, userId: string): Promise<boolean> {
-  const { error, count } = await supabase
+  const s = createSupabaseForClaims({ sub: userId });
+  const { error, count } = await s
     .from('vacation_periods')
     .delete({ count: 'exact' })
     .eq('id', id)
