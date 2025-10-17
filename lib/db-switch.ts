@@ -4,7 +4,8 @@
 import { randomUUID } from 'crypto';
 import { User, Professional, VacationPeriod } from '@/types';
 
-const USE_SUPABASE = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+const IS_PROD = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
+const USE_SUPABASE = IS_PROD;
 
 // Import from the appropriate module
 import * as dbFileSystem from './db';
