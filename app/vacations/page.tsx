@@ -260,8 +260,6 @@ export default function VacationsPage() {
                 <Input
                   label="Início Período Aquisitivo"
                   type="date"
-                  lang="pt-BR"
-                  placeholder="dd/mm/aaaa"
                   value={formData.acquisitionStartDate}
                   onChange={(e) => setFormData({ ...formData, acquisitionStartDate: e.target.value })}
                   required
@@ -270,8 +268,6 @@ export default function VacationsPage() {
                 <Input
                   label="Fim Período Aquisitivo"
                   type="date"
-                  lang="pt-BR"
-                  placeholder="dd/mm/aaaa"
                   value={formData.acquisitionEndDate}
                   onChange={(e) => setFormData({ ...formData, acquisitionEndDate: e.target.value })}
                   required
@@ -282,8 +278,6 @@ export default function VacationsPage() {
                 <Input
                   label="Início Período de Gozo"
                   type="date"
-                  lang="pt-BR"
-                  placeholder="dd/mm/aaaa"
                   value={formData.usageStartDate}
                   onChange={(e) => setFormData({ ...formData, usageStartDate: e.target.value })}
                   required
@@ -292,8 +286,6 @@ export default function VacationsPage() {
                 <Input
                   label="Fim Período de Gozo"
                   type="date"
-                  lang="pt-BR"
-                  placeholder="dd/mm/aaaa"
                   value={formData.usageEndDate}
                   onChange={(e) => setFormData({ ...formData, usageEndDate: e.target.value })}
                   required

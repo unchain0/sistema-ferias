@@ -1,5 +1,6 @@
 import { InputHTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
+import { APP_LOCALE } from '@/lib/i18n';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -9,8 +10,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className, type, placeholder, lang, ...props }, ref) => {
     const isDate = type === 'date';
-    const resolvedPlaceholder = placeholder ?? (isDate ? 'dd/mm/aaaa' : undefined);
-    const resolvedLang = lang ?? (isDate ? 'pt-BR' : undefined);
+    const resolvedPlaceholder = placeholder; // do not force date placeholder
+    const resolvedLang = lang ?? (isDate ? APP_LOCALE : undefined);
     return (
       <div className="w-full">
         {label && (

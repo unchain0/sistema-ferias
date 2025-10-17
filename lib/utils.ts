@@ -1,5 +1,5 @@
 import { differenceInDays, format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { dateFnsLocale } from '@/lib/i18n';
 
 export function calculateVacationDays(startDate: string, endDate: string): number {
   const start = parseISO(startDate);
@@ -24,7 +24,7 @@ export function formatCurrency(value: number): string {
 }
 
 export function formatDate(date: string): string {
-  return format(parseISO(date), 'dd/MM/yyyy', { locale: ptBR });
+  return format(parseISO(date), 'dd/MM/yyyy', { locale: dateFnsLocale });
 }
 
 export function cn(...classes: (string | undefined | null | false)[]): string {
