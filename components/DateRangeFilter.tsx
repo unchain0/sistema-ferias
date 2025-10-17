@@ -112,6 +112,8 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
             </label>
             <input
               type="date"
+              lang="pt-BR"
+              placeholder="dd/mm/aaaa"
               value={customStartDate}
               onChange={(e) => setCustomStartDate(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -123,6 +125,8 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
             </label>
             <input
               type="date"
+              lang="pt-BR"
+              placeholder="dd/mm/aaaa"
               value={customEndDate}
               onChange={(e) => setCustomEndDate(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
