@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, startTransition, useDeferredValue } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Card } from '@/components/Card';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const hasAnimatedRef = useRef(false);
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -46,12 +47,23 @@ export default function DashboardPage() {
   }, [fetchDashboard]);
 
   const handleFilterChange = (range: DateRange | null) => {
-    setDateRange(range);
+    startTransition(() => {
+      setDateRange(range);
+    });
   };
 
   const chartData = useMemo(() => data?.vacationsByMonth ?? [], [data]);
   const tableData = useMemo(() => data?.professionalImpacts ?? [], [data]);
-  const animateCharts = useMemo(() => chartData.length <= 24, [chartData]);
+  const deferredChartData = useDeferredValue(chartData);
+  const deferredTableData = useDeferredValue(tableData);
+  const animateCharts = useMemo(() => deferredChartData.length <= 24, [deferredChartData]);
+  const shouldAnimate = animateCharts && !hasAnimatedRef.current;
+
+  useEffect(() => {
+    if (data && !hasAnimatedRef.current) {
+      hasAnimatedRef.current = true;
+    }
+  }, [data]);
 
   if (loading && !data) {
     return (
@@ -140,10 +152,10 @@ export default function DashboardPage() {
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Vacations by Month */}
-          {chartData.length > 0 && (
+          {deferredChartData.length > 0 && (
             <Card title="Férias por Mês">
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData}>
+                <BarChart data={deferredChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis 
                     dataKey="month" 
@@ -173,8 +185,8 @@ export default function DashboardPage() {
                     dataKey="count"
                     fill="#3B82F6"
                     name="Dias de Férias"
-                    isAnimationActive={animateCharts}
-                    animationDuration={400}
+                    isAnimationActive={shouldAnimate}
+                    animationDuration={250}
                     animationBegin={0}
                   />
                 </BarChart>
@@ -183,10 +195,10 @@ export default function DashboardPage() {
           )}
 
           {/* Revenue Impact by Month */}
-          {chartData.length > 0 && (
+          {deferredChartData.length > 0 && (
             <Card title="Impacto Financeiro por Mês">
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData}>
+                <BarChart data={deferredChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis 
                     dataKey="month" 
@@ -217,8 +229,8 @@ export default function DashboardPage() {
                     dataKey="impact"
                     fill="#EF4444"
                     name="Impacto (R$)"
-                    isAnimationActive={animateCharts}
-                    animationDuration={400}
+                    isAnimationActive={shouldAnimate}
+                    animationDuration={250}
                     animationBegin={0}
                   />
                 </BarChart>
@@ -228,7 +240,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Professional Impacts Table */}
-        {tableData.length > 0 && (
+        {deferredTableData.length > 0 && (
           <Card title="Impacto por Profissional" className="mt-6">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -246,7 +258,7 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {tableData.map((impact, index) => (
+                  {deferredTableData.map((impact, index) => (
                     <tr
                       key={index}
                       className="border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"

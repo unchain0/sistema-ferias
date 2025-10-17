@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, startTransition } from 'react';
 import { format, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Calendar } from 'lucide-react';
@@ -31,7 +31,9 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
   ];
 
   const applyQuickFilter = (filterId: QuickFilter) => {
-    setActiveFilter(filterId);
+    startTransition(() => {
+      setActiveFilter(filterId);
+    });
     const today = new Date();
 
     switch (filterId) {
