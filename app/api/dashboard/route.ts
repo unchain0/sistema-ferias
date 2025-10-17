@@ -44,32 +44,33 @@ export async function GET(request: Request) {
     const totalVacationDays = vacations.reduce((sum, v) => sum + v.totalDays, 0);
     const totalRevenueImpact = vacations.reduce((sum, v) => sum + v.revenueDeduction, 0);
 
-    // Group by month
-    const vacationsByMonth = vacations.reduce((acc, vacation) => {
-      const month = format(parseISO(vacation.usageStartDate), 'MMM yyyy', { locale: ptBR });
-      
-      if (!acc[month]) {
-        acc[month] = { month, count: 0, impact: 0 };
-      }
-      
-      acc[month].count += vacation.totalDays;
-      acc[month].impact += vacation.revenueDeduction;
-      
-      return acc;
-    }, {} as Record<string, { month: string; count: number; impact: number }>);
+    const monthMap = new Map<string, { monthKey: string; count: number; impact: number }>();
+    for (const v of vacations) {
+      const key = v.usageStartDate.slice(0, 7); // YYYY-MM
+      const entry = monthMap.get(key) || { monthKey: key, count: 0, impact: 0 };
+      entry.count += v.totalDays;
+      entry.impact += v.revenueDeduction;
+      monthMap.set(key, entry);
+    }
+    const vacationsByMonth = Array.from(monthMap.values())
+      .sort((a, b) => a.monthKey.localeCompare(b.monthKey))
+      .map(({ monthKey, count, impact }) => ({
+        month: format(parseISO(`${monthKey}-01`), 'MMM yyyy', { locale: ptBR }),
+        count,
+        impact,
+      }));
 
-    // Professional impacts
-    const professionalImpacts = professionals.map(prof => {
-      const profVacations = vacations.filter(v => v.professionalId === prof.id);
-      const totalDays = profVacations.reduce((sum, v) => sum + v.totalDays, 0);
-      const revenueImpact = profVacations.reduce((sum, v) => sum + v.revenueDeduction, 0);
-      
-      return {
-        professionalName: prof.name,
-        totalDays,
-        revenueImpact,
-      };
-    }).filter(p => p.totalDays > 0);
+    const profAgg = new Map<string, { totalDays: number; revenueImpact: number }>();
+    for (const v of vacations) {
+      const cur = profAgg.get(v.professionalId) || { totalDays: 0, revenueImpact: 0 };
+      cur.totalDays += v.totalDays;
+      cur.revenueImpact += v.revenueDeduction;
+      profAgg.set(v.professionalId, cur);
+    }
+    const nameById = new Map(professionals.map(p => [p.id, p.name] as const));
+    const professionalImpacts = Array.from(profAgg.entries())
+      .map(([id, agg]) => ({ professionalName: nameById.get(id) || 'Desconhecido', ...agg }))
+      .filter(p => p.totalDays > 0);
 
     const dashboardData: DashboardData = {
       totalProfessionals,

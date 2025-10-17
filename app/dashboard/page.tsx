@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Card } from '@/components/Card';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -14,21 +14,28 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
     try {
+      if (abortRef.current) abortRef.current.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       let url = '/api/dashboard';
       if (dateRange) {
         url += `?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
       }
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
       if (response.ok) {
         const dashboardData = await response.json();
         setData(dashboardData);
       }
-    } catch (error) {
-      console.error('Error fetching dashboard:', error);
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') {
+        console.error('Error fetching dashboard:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -41,6 +48,9 @@ export default function DashboardPage() {
   const handleFilterChange = (range: DateRange | null) => {
     setDateRange(range);
   };
+
+  const chartData = useMemo(() => data?.vacationsByMonth ?? [], [data]);
+  const tableData = useMemo(() => data?.professionalImpacts ?? [], [data]);
 
   if (loading && !data) {
     return (
@@ -129,10 +139,10 @@ export default function DashboardPage() {
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Vacations by Month */}
-          {data.vacationsByMonth.length > 0 && (
+          {chartData.length > 0 && (
             <Card title="Férias por Mês">
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data.vacationsByMonth}>
+                <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis 
                     dataKey="month" 
@@ -158,17 +168,17 @@ export default function DashboardPage() {
                   <Legend 
                     wrapperStyle={{ color: '#D1D5DB' }}
                   />
-                  <Bar dataKey="count" fill="#3B82F6" name="Dias de Férias" />
+                  <Bar dataKey="count" fill="#3B82F6" name="Dias de Férias" isAnimationActive={false} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
           )}
 
           {/* Revenue Impact by Month */}
-          {data.vacationsByMonth.length > 0 && (
+          {chartData.length > 0 && (
             <Card title="Impacto Financeiro por Mês">
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data.vacationsByMonth}>
+                <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis 
                     dataKey="month" 
@@ -195,7 +205,7 @@ export default function DashboardPage() {
                   <Legend 
                     wrapperStyle={{ color: '#D1D5DB' }}
                   />
-                  <Bar dataKey="impact" fill="#EF4444" name="Impacto (R$)" />
+                  <Bar dataKey="impact" fill="#EF4444" name="Impacto (R$)" isAnimationActive={false} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -203,7 +213,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Professional Impacts Table */}
-        {data.professionalImpacts.length > 0 && (
+        {tableData.length > 0 && (
           <Card title="Impacto por Profissional" className="mt-6">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -221,7 +231,7 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.professionalImpacts.map((impact, index) => (
+                  {tableData.map((impact, index) => (
                     <tr
                       key={index}
                       className="border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
