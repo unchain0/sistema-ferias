@@ -9,9 +9,12 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Professional } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, AlertCircle } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import { handleDemoError } from '@/lib/handle-demo-error';
 
 export default function ProfessionalsPage() {
+  const { data: session } = useSession();
+  const isDemo = session?.user?.email === 'demo@sistema-ferias.com';
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -158,6 +161,7 @@ export default function ProfessionalsPage() {
           {!showForm && (
             <Button 
               onClick={() => setShowForm(true)}
+              disabled={isDemo}
               className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
             >
               <Plus className="w-5 h-5 mr-2" />
@@ -186,7 +190,7 @@ export default function ProfessionalsPage() {
         )}
 
         {/* Form */}
-        {showForm && (
+        {showForm && !isDemo && (
           <Card className="mb-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -276,6 +280,7 @@ export default function ProfessionalsPage() {
                       size="sm"
                       variant="secondary"
                       onClick={() => handleEdit(professional)}
+                      disabled={isDemo}
                       className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -285,6 +290,7 @@ export default function ProfessionalsPage() {
                       size="sm"
                       variant="danger"
                       onClick={() => handleDelete(professional.id)}
+                      disabled={isDemo}
                       className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
                     >
                       <Trash2 className="w-4 h-4" />
