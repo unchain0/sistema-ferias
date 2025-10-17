@@ -57,7 +57,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600 dark:text-gray-300 hidden sm:block">
+            <span className="text-sm text-gray-600 dark:text-gray-300 max-w-[120px] truncate">
               {session.user?.name}
             </span>
             <Button
@@ -69,6 +69,29 @@ export function Navbar() {
               <LogOut className="w-4 h-4" />
               <span>Sair</span>
             </Button>
+          </div>
+        </div>
+        {/* Mobile Nav */}
+        <div className="md:hidden py-2">
+          <div className="grid grid-cols-3 gap-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+                    isActive
+                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
