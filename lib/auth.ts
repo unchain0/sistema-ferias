@@ -1,5 +1,5 @@
 import { compare, hash } from 'bcryptjs';
-import { getUserByEmail, createUser } from './db';
+import { getUserByEmail, createUser } from './db-switch';
 import { User } from '@/types';
 
 export async function hashPassword(password: string): Promise<string> {
@@ -34,14 +34,10 @@ export async function registerUser(email: string, password: string, name: string
   }
   
   const hashedPassword = await hashPassword(password);
-  
-  const user: User = {
-    id: crypto.randomUUID(),
+
+  return createUser({
     email,
     password: hashedPassword,
     name,
-    createdAt: new Date().toISOString(),
-  };
-  
-  return createUser(user);
+  });
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { getProfessionals, getVacationPeriods } from '@/lib/db';
+import { getProfessionals, getVacationPeriods } from '@/lib/db-switch';
 import { DashboardData } from '@/types';
 import { format, parseISO, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

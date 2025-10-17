@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { getVacationPeriods, createVacationPeriod, getProfessionalById } from '@/lib/db';
+import { getVacationPeriods, createVacationPeriod, getProfessionalById } from '@/lib/db-switch';
 import { VacationPeriod } from '@/types';
 import { calculateVacationDays, calculateRevenueDeduction } from '@/lib/utils';
 import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
@@ -57,8 +57,7 @@ export async function POST(request: Request) {
     const totalDays = calculateVacationDays(usageStartDate, usageEndDate);
     const revenueDeduction = calculateRevenueDeduction(professional.monthlyRevenue, totalDays);
 
-    const vacation: VacationPeriod = {
-      id: crypto.randomUUID(),
+    const created = await createVacationPeriod({
       professionalId,
       userId: session.user.id,
       acquisitionStartDate,
@@ -67,11 +66,8 @@ export async function POST(request: Request) {
       usageEndDate,
       totalDays,
       revenueDeduction,
-      createdAt: new Date().toISOString(),
-    };
-
-    await createVacationPeriod(vacation);
-    return NextResponse.json(vacation, { status: 201 });
+    });
+    return NextResponse.json(created, { status: 201 });
   } catch (error) {
     console.error('Create vacation error:', error);
     return NextResponse.json(

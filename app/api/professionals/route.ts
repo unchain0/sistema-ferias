@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { getProfessionals, createProfessional } from '@/lib/db';
+import { getProfessionals, createProfessional } from '@/lib/db-switch';
 import { Professional } from '@/types';
 import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
 
@@ -38,17 +38,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const professional: Professional = {
-      id: crypto.randomUUID(),
+    const created = await createProfessional({
       userId: session.user.id,
       name,
       clientManager,
       monthlyRevenue: parseFloat(monthlyRevenue),
-      createdAt: new Date().toISOString(),
-    };
-
-    await createProfessional(professional);
-    return NextResponse.json(professional, { status: 201 });
+    });
+    return NextResponse.json(created, { status: 201 });
   } catch (error) {
     console.error('Create professional error:', error);
     return NextResponse.json(

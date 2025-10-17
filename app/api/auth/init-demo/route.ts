@@ -1,37 +1,46 @@
 import { NextResponse } from 'next/server';
-import { getUserByEmail, createUser, createProfessional, createVacationPeriod, initializeMemoryStorage } from '@/lib/db';
+import { getUserByEmail, createUser, createProfessional, createVacationPeriod } from '@/lib/db-switch';
 import { createDemoData } from '@/lib/seed-demo';
-
-const IS_SERVERLESS = process.env.VERCEL === '1' || (process.env.NODE_ENV === 'production' && !process.env.USE_FILESYSTEM);
 
 export async function POST() {
   try {
     const demoData = await createDemoData();
-    
-    // For serverless environments, initialize memory storage directly
-    if (IS_SERVERLESS) {
-      await initializeMemoryStorage(demoData);
-      return NextResponse.json({ 
-        message: 'Dados demo inicializados com sucesso (in-memory)',
-        email: demoData.user.email 
-      });
-    }
-    
-    // For local development, use filesystem
+
     const existingUser = await getUserByEmail(demoData.user.email);
-    
+
     if (!existingUser) {
-      // Create demo user
-      await createUser(demoData.user);
-      
-      // Create demo professionals
-      for (const professional of demoData.professionals) {
-        await createProfessional(professional);
+      const user = await createUser({
+        email: demoData.user.email,
+        name: demoData.user.name,
+        password: demoData.user.password,
+      });
+
+      const profIdMap: Record<string, string> = {};
+      for (const p of demoData.professionals) {
+        const created = await createProfessional({
+          userId: user.id,
+          name: p.name,
+          clientManager: p.clientManager,
+          monthlyRevenue: p.monthlyRevenue,
+        });
+        profIdMap[p.id] = created.id;
       }
-      
-      // Create demo vacations
-      for (const vacation of demoData.vacations) {
-        await createVacationPeriod(vacation);
+
+      for (const v of demoData.vacations) {
+        const mappedProfessionalId = profIdMap[v.professionalId];
+        if (!mappedProfessionalId) {
+          continue;
+        }
+        await createVacationPeriod({
+          professionalId: mappedProfessionalId,
+          userId: user.id,
+          acquisitionStartDate: v.acquisitionStartDate,
+          acquisitionEndDate: v.acquisitionEndDate,
+          usageStartDate: v.usageStartDate,
+          usageEndDate: v.usageEndDate,
+          totalDays: v.totalDays,
+          revenueDeduction: v.revenueDeduction,
+        });
       }
     }
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { updateProfessional, deleteProfessional } from '@/lib/db';
+import { updateProfessional, deleteProfessional } from '@/lib/db-switch';
 import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
 
 export async function PUT(

@@ -8,7 +8,13 @@ export async function getUsers(): Promise<User[]> {
     .select('*');
   
   if (error) throw error;
-  return data || [];
+  return (data || []).map((u: any) => ({
+    id: u.id,
+    email: u.email,
+    name: u.name,
+    password: u.password,
+    createdAt: u.created_at,
+  }));
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {
@@ -19,7 +25,13 @@ export async function getUserByEmail(email: string): Promise<User | null> {
     .single();
   
   if (error && error.code !== 'PGRST116') throw error; // PGRST116 = not found
-  return data || null;
+  return data ? {
+    id: data.id,
+    email: data.email,
+    name: data.name,
+    password: data.password,
+    createdAt: data.created_at,
+  } : null;
 }
 
 export async function getUserById(id: string): Promise<User | null> {
@@ -30,7 +42,13 @@ export async function getUserById(id: string): Promise<User | null> {
     .single();
   
   if (error && error.code !== 'PGRST116') throw error;
-  return data || null;
+  return data ? {
+    id: data.id,
+    email: data.email,
+    name: data.name,
+    password: data.password,
+    createdAt: data.created_at,
+  } : null;
 }
 
 export async function createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
@@ -45,7 +63,13 @@ export async function createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<
     .single();
   
   if (error) throw error;
-  return data;
+  return {
+    id: data.id,
+    email: data.email,
+    name: data.name,
+    password: data.password,
+    createdAt: data.created_at,
+  };
 }
 
 // Professionals
@@ -56,7 +80,14 @@ export async function getProfessionals(userId: string): Promise<Professional[]> 
     .eq('user_id', userId);
   
   if (error) throw error;
-  return data || [];
+  return (data || []).map((p: any) => ({
+    id: p.id,
+    userId: p.user_id,
+    name: p.name,
+    clientManager: p.client_manager,
+    monthlyRevenue: typeof p.monthly_revenue === 'string' ? parseFloat(p.monthly_revenue) : p.monthly_revenue,
+    createdAt: p.created_at,
+  }));
 }
 
 export async function getProfessionalById(id: string, userId: string): Promise<Professional | null> {
@@ -68,7 +99,14 @@ export async function getProfessionalById(id: string, userId: string): Promise<P
     .single();
   
   if (error && error.code !== 'PGRST116') throw error;
-  return data || null;
+  return data ? {
+    id: data.id,
+    userId: data.user_id,
+    name: data.name,
+    clientManager: data.client_manager,
+    monthlyRevenue: typeof data.monthly_revenue === 'string' ? parseFloat(data.monthly_revenue) : data.monthly_revenue,
+    createdAt: data.created_at,
+  } : null;
 }
 
 export async function createProfessional(professional: Omit<Professional, 'id' | 'createdAt'>): Promise<Professional> {

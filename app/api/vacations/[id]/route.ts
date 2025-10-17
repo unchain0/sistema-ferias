@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { updateVacationPeriod, deleteVacationPeriod, getProfessionalById } from '@/lib/db';
+import { updateVacationPeriod, deleteVacationPeriod, getProfessionalById } from '@/lib/db-switch';
 import { calculateVacationDays, calculateRevenueDeduction } from '@/lib/utils';
 import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
 
