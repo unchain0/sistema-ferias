@@ -45,6 +45,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (password.length > 100) {
+      return NextResponse.json(
+        { error: 'Senha deve ter no máximo 100 caracteres' },
+        { status: 400 }
+      );
+    }
+
     // Validate and sanitize name
     const nameValidation = nameSchema.safeParse(name);
     if (!nameValidation.success) {

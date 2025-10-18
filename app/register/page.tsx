@@ -30,6 +30,11 @@ export default function RegisterPage() {
       return;
     }
 
+    if (password.length > 100) {
+      toast.error('❌ A senha deve ter no máximo 100 caracteres');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -93,6 +98,7 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
+            maxLength={100}
           />
 
           <Input
@@ -102,6 +108,7 @@ export default function RegisterPage() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="••••••••"
             required
+            maxLength={100}
           />
 
           <Button
