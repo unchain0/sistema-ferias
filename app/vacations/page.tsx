@@ -37,7 +37,7 @@ export default function VacationsPage() {
   const fetchData = async () => {
     try {
       const [vacationsRes, professionalsRes] = await Promise.all([
-        fetch('/api/vacations'),
+        fetch('/api/vacations?order=createdAt:desc&limit=50'),
         fetch('/api/professionals'),
       ]);
 
@@ -152,14 +152,7 @@ export default function VacationsPage() {
     return professional?.name || 'Desconhecido';
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  // Note: do not short-circuit on loading to prevent large layout swaps (CLS)
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -179,7 +172,7 @@ export default function VacationsPage() {
           {!showForm && professionals.length > 0 && (
             <Button 
               onClick={() => setShowForm(true)}
-              disabled={isDemo}
+              disabled={isDemo || loading}
               className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
             >
               <Plus className="w-5 h-5 mr-2" />
@@ -207,7 +200,7 @@ export default function VacationsPage() {
           </div>
         )}
 
-        {professionals.length === 0 && (
+        {professionals.length === 0 && !loading && (
           <Card>
             <div className="text-center py-12">
               <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -314,7 +307,7 @@ export default function VacationsPage() {
         )}
 
         {/* Vacations List */}
-        {professionals.length > 0 && vacations.length === 0 && !showForm && (
+        {professionals.length > 0 && vacations.length === 0 && !showForm && !loading && (
           <Card>
             <div className="text-center py-12">
               <p className="text-gray-600 dark:text-gray-400">
@@ -324,7 +317,29 @@ export default function VacationsPage() {
           </Card>
         )}
 
-        {vacations.length > 0 && (
+        {/* Skeleton list during initial load to preserve layout height */}
+        {loading && (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <Card key={`skeleton-${i}`}>
+                <div className="animate-pulse">
+                  <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {!loading && vacations.length > 0 && (
           <div className="space-y-4">
             {vacations.map((vacation) => (
               <Card key={vacation.id}>

@@ -6,15 +6,46 @@ import { VacationPeriod } from '@/types';
 import { calculateVacationDays, calculateRevenueDeduction } from '@/lib/utils';
 import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
-  const vacations = await getVacationPeriods(session.user.id);
-  return NextResponse.json(vacations);
+  // Parse pagination and ordering params with sensible defaults
+  const { searchParams } = new URL(request.url);
+  const limitParam = searchParams.get('limit');
+  const offsetParam = searchParams.get('offset');
+  const orderParam = searchParams.get('order') || 'createdAt:desc';
+
+  const limit = Math.min(Math.max(parseInt(limitParam || '50', 10) || 50, 1), 200);
+  const offset = Math.max(parseInt(offsetParam || '0', 10) || 0, 0);
+
+  const [orderField, orderDir] = orderParam.split(':');
+
+  const all = await getVacationPeriods(session.user.id);
+
+  // Stable sort to avoid shifting order between responses
+  const sorted = [...all].sort((a, b) => {
+    const dir = orderDir?.toLowerCase() === 'asc' ? 1 : -1;
+    const aVal = (a as any)[orderField as keyof VacationPeriod] ?? '';
+    const bVal = (b as any)[orderField as keyof VacationPeriod] ?? '';
+    if (aVal < bVal) return -1 * dir;
+    if (aVal > bVal) return 1 * dir;
+    // tie-breaker by id for determinism
+    return a.id.localeCompare(b.id) * dir;
+  });
+
+  const paged = sorted.slice(offset, offset + limit);
+
+  const headers = new Headers();
+  headers.set('X-Total-Count', String(all.length));
+  // Private caching for logged-in user; keeps UI snappy without sharing across users
+  headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=300');
+  headers.set('Vary', 'Cookie');
+
+  return NextResponse.json(paged, { headers });
 }
 
 export async function POST(request: Request) {
@@ -67,7 +98,10 @@ export async function POST(request: Request) {
       totalDays,
       revenueDeduction,
     });
-    return NextResponse.json(created, { status: 201 });
+    const headers = new Headers();
+    // Ensure mutations are never cached
+    headers.set('Cache-Control', 'no-store');
+    return NextResponse.json(created, { status: 201, headers });
   } catch (error) {
     console.error('Create vacation error:', error);
     return NextResponse.json(
