@@ -19,11 +19,13 @@ export const getProfessionals = USE_SUPABASE ? dbSupabase.getProfessionals : dbF
 export const getProfessionalById = USE_SUPABASE ? dbSupabase.getProfessionalById : dbFileSystem.getProfessionalById;
 export const updateProfessional = USE_SUPABASE ? dbSupabase.updateProfessional : dbFileSystem.updateProfessional;
 export const deleteProfessional = USE_SUPABASE ? dbSupabase.deleteProfessional : dbFileSystem.deleteProfessional;
+export const deleteAllProfessionals = USE_SUPABASE ? dbSupabase.deleteAllProfessionals : dbFileSystem.deleteAllProfessionals;
 
 export const getVacationPeriods = USE_SUPABASE ? dbSupabase.getVacationPeriods : dbFileSystem.getVacationPeriods;
 export const getVacationsByProfessional = USE_SUPABASE ? dbSupabase.getVacationsByProfessional : dbFileSystem.getVacationsByProfessional;
 export const updateVacationPeriod = USE_SUPABASE ? dbSupabase.updateVacationPeriod : dbFileSystem.updateVacationPeriod;
 export const deleteVacationPeriod = USE_SUPABASE ? dbSupabase.deleteVacationPeriod : dbFileSystem.deleteVacationPeriod;
+export const deleteAllVacationPeriods = USE_SUPABASE ? dbSupabase.deleteAllVacationPeriods : dbFileSystem.deleteAllVacationPeriods;
 
 export async function createUser(input: Omit<User, 'id' | 'createdAt'>): Promise<User> {
   if (USE_SUPABASE) {
