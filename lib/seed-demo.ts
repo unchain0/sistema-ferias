@@ -721,12 +721,6 @@ export async function createDemoData() {
     });
   }
 
-  for (let m = 1; m <= 12; m++) {
-    pushVacation(2024, m, 3, 5, m - 1, 'a', 2023);
-    pushVacation(2024, m, 12, 7, m + 1, 'b', 2023);
-    pushVacation(2024, m, 21, 10, m + 3, 'c', 2023);
-  }
-
   const add2025: Array<{ m: number; count: number }> = [
     { m: 1, count: 2 },
     { m: 2, count: 1 },
