@@ -4,11 +4,10 @@ import {
   createUser, 
   createProfessional, 
   createVacationPeriod, 
-  getProfessionals, 
-  getVacationPeriods,
-  updateProfessional,
   deleteAllProfessionals,
   deleteAllVacationPeriods,
+  getProfessionals,
+  getVacationPeriods,
 } from '@/lib/db-switch';
 import { createDemoData } from '@/lib/seed-demo';
 
@@ -31,6 +30,7 @@ export async function POST() {
 
     // Create professionals
     const profIdMap: Record<string, string> = {};
+    let createdProfessionals = 0;
     for (const p of demoData.professionals) {
       const created = await createProfessional({
         userId: user.id,
@@ -39,9 +39,11 @@ export async function POST() {
         monthlyRevenue: p.monthlyRevenue,
       });
       profIdMap[p.id] = created.id;
+      createdProfessionals++;
     }
 
     // Create vacations
+    let createdVacations = 0;
     for (const v of demoData.vacations) {
       const mappedProfessionalId = profIdMap[v.professionalId];
       if (!mappedProfessionalId) continue;
@@ -55,11 +57,20 @@ export async function POST() {
         totalDays: v.totalDays,
         revenueDeduction: v.revenueDeduction,
       });
+      createdVacations++;
     }
+
+    // Fetch totals to confirm persisted counts
+    const totalProfessionals = (await getProfessionals(user.id)).length;
+    const totalVacations = (await getVacationPeriods(user.id)).length;
 
     return NextResponse.json({ 
       message: 'Dados demo inicializados com sucesso',
-      email: demoData.user.email 
+      email: demoData.user.email,
+      createdProfessionals,
+      createdVacations,
+      totalProfessionals,
+      totalVacations,
     });
   } catch (error) {
     console.error('Error initializing demo data:', error);

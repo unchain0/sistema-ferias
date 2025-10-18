@@ -183,7 +183,8 @@ export async function deleteProfessional(id: string, userId: string): Promise<bo
 }
 
 export async function deleteAllProfessionals(userId: string): Promise<void> {
-  const { error } = await supabase
+  const s = createSupabaseForClaims({ sub: userId });
+  const { error } = await s
     .from('professionals')
     .delete()
     .eq('user_id', userId);
@@ -324,7 +325,8 @@ export async function deleteVacationPeriod(id: string, userId: string): Promise<
 }
 
 export async function deleteAllVacationPeriods(userId: string): Promise<void> {
-  const { error } = await supabase
+  const s = createSupabaseForClaims({ sub: userId });
+  const { error } = await s
     .from('vacation_periods')
     .delete()
     .eq('user_id', userId);
