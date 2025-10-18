@@ -7,11 +7,9 @@ import {
   getProfessionals, 
   getVacationPeriods,
   updateProfessional,
-} from '@/lib/db-switch';
-import { 
-  deleteAllProfessionals, 
+  deleteAllProfessionals,
   deleteAllVacationPeriods,
-} from '@/lib/db-admin';
+} from '@/lib/db-switch';
 import { createDemoData } from '@/lib/seed-demo';
 
 export async function POST() {
