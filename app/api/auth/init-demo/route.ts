@@ -23,6 +23,26 @@ export async function POST() {
         password: demoData.user.password,
       });
     } else {
+      // Fast path: if counts already match the seed, skip heavy re-processing
+      const existingProfessionals = await getProfessionals(user.id);
+      const existingVacations = await getVacationPeriods(user.id);
+      const seedProfessionalsCount = demoData.professionals.length;
+      const seedVacationsCount = demoData.vacations.length;
+      if (
+        existingProfessionals.length === seedProfessionalsCount &&
+        existingVacations.length === seedVacationsCount
+      ) {
+        return NextResponse.json({
+          message: 'Dados demo já estavam atualizados (sem reinicialização)',
+          email: demoData.user.email,
+          createdProfessionals: 0,
+          createdVacations: 0,
+          totalProfessionals: existingProfessionals.length,
+          totalVacations: existingVacations.length,
+          skipped: true,
+        });
+      }
+
       // Reset demo data: delete existing vacations and professionals
       await deleteAllVacationPeriods(user.id);
       await deleteAllProfessionals(user.id);
