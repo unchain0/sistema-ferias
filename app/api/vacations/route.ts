@@ -23,14 +23,19 @@ export async function GET(request: Request) {
   const offset = Math.max(parseInt(offsetParam || '0', 10) || 0, 0);
 
   const [orderField, orderDir] = orderParam.split(':');
+  
+  // Validate orderField to ensure it's a valid key of VacationPeriod
+  const validOrderFields = ['id', 'professionalId', 'userId', 'acquisitionStartDate', 'acquisitionEndDate', 
+                            'usageStartDate', 'usageEndDate', 'totalDays', 'revenueDeduction', 'createdAt', 'updatedAt'];
+  const validatedOrderField = validOrderFields.includes(orderField) ? orderField : 'createdAt';
 
   const all = await getVacationPeriods(session.user.id);
 
   // Stable sort to avoid shifting order between responses
   const sorted = [...all].sort((a, b) => {
     const dir = orderDir?.toLowerCase() === 'asc' ? 1 : -1;
-    const aVal = (a as any)[orderField as keyof VacationPeriod] ?? '';
-    const bVal = (b as any)[orderField as keyof VacationPeriod] ?? '';
+    const aVal = (a as any)[validatedOrderField as keyof VacationPeriod] ?? '';
+    const bVal = (b as any)[validatedOrderField as keyof VacationPeriod] ?? '';
     if (aVal < bVal) return -1 * dir;
     if (aVal > bVal) return 1 * dir;
     // tie-breaker by id for determinism
@@ -41,8 +46,8 @@ export async function GET(request: Request) {
 
   const headers = new Headers();
   headers.set('X-Total-Count', String(all.length));
-  // Private caching for logged-in user; keeps UI snappy without sharing across users
-  headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=300');
+  // Private caching for logged-in user with must-revalidate to ensure data consistency
+  headers.set('Cache-Control', 'private, max-age=5, must-revalidate');
   headers.set('Vary', 'Cookie');
 
   return NextResponse.json(paged, { headers });
