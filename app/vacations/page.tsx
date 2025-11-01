@@ -7,7 +7,7 @@ import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Professional, VacationPeriod } from '@/types';
-import { formatCurrency, computeConcessivePeriod, formatDateToPtBR } from '@/lib/utils';
+import { formatCurrency, computeConcessivePeriod, formatDateToPtBR, formatDateForInput } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, Calendar, AlertCircle } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { handleDemoError } from '@/lib/handle-demo-error';
@@ -94,10 +94,10 @@ export default function VacationsPage() {
   const handleEdit = (vacation: VacationPeriod) => {
     setFormData({
       professionalId: vacation.professionalId,
-      acquisitionStartDate: vacation.acquisitionStartDate,
-      acquisitionEndDate: vacation.acquisitionEndDate,
-      usageStartDate: vacation.usageStartDate,
-      usageEndDate: vacation.usageEndDate,
+      acquisitionStartDate: formatDateForInput(vacation.acquisitionStartDate),
+      acquisitionEndDate: formatDateForInput(vacation.acquisitionEndDate),
+      usageStartDate: formatDateForInput(vacation.usageStartDate),
+      usageEndDate: formatDateForInput(vacation.usageEndDate),
     });
     setEditingId(vacation.id);
     setShowForm(true);
