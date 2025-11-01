@@ -22,6 +22,11 @@ export function formatCurrency(value: number): string {
   }).format(value);
 }
 
+export function formatDateToPtBR(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('pt-BR');
+}
+
 export function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(' ');
 }
