@@ -26,7 +26,8 @@ export function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-// Given acquisition period, compute concessive period (12 months after acquisition, inclusive)
+// Given acquisition period, compute concessivo period (período concessivo - the 12-month period 
+// after acquisition when vacation can be taken, as defined in Brazilian labor law)
 export function computeConcessivePeriod(
   acquisitionStartDate: string,
   acquisitionEndDate: string

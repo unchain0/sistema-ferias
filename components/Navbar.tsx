@@ -57,7 +57,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4 min-w-0">
-            <span className="text-sm text-gray-600 dark:text-gray-300 text-right truncate md:overflow-visible md:whitespace-normal md:text-clip max-w-[clamp(8rem,25vw,28rem)] md:max-w-none">
+            <span className="text-sm text-gray-600 dark:text-gray-300 text-right truncate md:overflow-visible md:whitespace-normal max-w-[clamp(8rem,25vw,28rem)] md:max-w-none">
               {session.user?.name}
             </span>
             <Button

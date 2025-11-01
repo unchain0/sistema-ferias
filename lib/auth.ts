@@ -11,9 +11,20 @@ export async function hashPassword(password: string): Promise<string> {
     }
     
     // O bcrypt tem um limite de 72 bytes (não caracteres)
-    // Se a senha for muito longa, vamos truncá-la para 72 caracteres
-    // para evitar problemas de compatibilidade
-    const passwordToHash = password.length > 72 ? password.substring(0, 72) : password;
+    // Verifica o tamanho em bytes e trunca se necessário
+    let passwordToHash = password;
+    if (Buffer.byteLength(password, 'utf8') > 72) {
+      // Trunca para 72 bytes, respeitando limites de caracteres UTF-8
+      let byteLength = 0;
+      let charIndex = 0;
+      while (charIndex < password.length && byteLength < 72) {
+        const charBytes = Buffer.byteLength(password[charIndex], 'utf8');
+        if (byteLength + charBytes > 72) break;
+        byteLength += charBytes;
+        charIndex++;
+      }
+      passwordToHash = password.substring(0, charIndex);
+    }
     
     const hashed = await hash(passwordToHash, 12);
     
@@ -80,10 +91,11 @@ export async function authenticateUser(email: string, password: string): Promise
     const user = await getUserByEmail(email.trim().toLowerCase());
     
     if (!user) {
-      console.log('User not found:', email);
+      console.log('User not found');
       // Não revelar que o usuário não existe por questões de segurança
       // Simulamos a verificação de senha para evitar timing attacks
-      await verifyPassword('dummy_password', '$2a$12$dummyhash.dummyhash.dummyhash');
+      // Hash válido gerado de uma senha dummy para manter timing consistente
+      await verifyPassword('dummy_password', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5eSVEGrwQcxIq');
       return null;
     }
     
@@ -91,11 +103,11 @@ export async function authenticateUser(email: string, password: string): Promise
     const isValid = await verifyPassword(password, user.password);
     
     if (!isValid) {
-      console.log('Invalid password for user:', email);
+      console.log('Invalid password for user');
       return null;
     }
     
-    console.log('Authentication successful for user:', email);
+    console.log('Authentication successful');
     return user;
   } catch (error) {
     console.error('Error in authenticateUser:', error);
@@ -105,7 +117,7 @@ export async function authenticateUser(email: string, password: string): Promise
 
 export async function registerUser(email: string, password: string, name: string): Promise<User | null> {
   try {
-    console.log('Starting user registration for:', email);
+    console.log('Starting user registration');
     
     // Validação básica
     if (typeof password !== 'string' || password.length < 6 || password.length > MAX_PASSWORD_LENGTH) {
@@ -116,7 +128,7 @@ export async function registerUser(email: string, password: string, name: string
     // Verifica se o usuário já existe
     const existingUser = await getUserByEmail(email);
     if (existingUser) {
-      console.log('User already exists:', email);
+      console.log('User already exists');
       return null;
     }
     
@@ -141,7 +153,7 @@ export async function registerUser(email: string, password: string, name: string
       return null;
     }
 
-    console.log('User created successfully:', user.id);
+    console.log('User created successfully');
     return user;
   } catch (error) {
     console.error('Error in registerUser:', error);

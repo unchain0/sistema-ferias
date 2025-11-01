@@ -267,14 +267,17 @@ export default function VacationsPage() {
                 />
               </div>
 
-              {(formData.acquisitionStartDate && formData.acquisitionEndDate) && (
-                <div className="text-sm text-gray-700 dark:text-gray-300">
-                  <span className="font-semibold">Período Concessivo: </span>
-                  {computeConcessivePeriod(formData.acquisitionStartDate, formData.acquisitionEndDate).start}
-                  {" "}até{" "}
-                  {computeConcessivePeriod(formData.acquisitionStartDate, formData.acquisitionEndDate).end}
-                </div>
-              )}
+              {(formData.acquisitionStartDate && formData.acquisitionEndDate) && (() => {
+                const concessivePeriod = computeConcessivePeriod(formData.acquisitionStartDate, formData.acquisitionEndDate);
+                return (
+                  <div className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold">Período Concessivo: </span>
+                    {concessivePeriod.start}
+                    {" "}até{" "}
+                    {concessivePeriod.end}
+                  </div>
+                );
+              })()}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
@@ -377,8 +380,10 @@ export default function VacationsPage() {
                           Período Concessivo
                         </p>
                         <p className="text-sm text-gray-900 dark:text-white">
-                          {computeConcessivePeriod(vacation.acquisitionStartDate, vacation.acquisitionEndDate).start} até{' '}
-                          {computeConcessivePeriod(vacation.acquisitionStartDate, vacation.acquisitionEndDate).end}
+                          {(() => {
+                            const concessivePeriod = computeConcessivePeriod(vacation.acquisitionStartDate, vacation.acquisitionEndDate);
+                            return `${concessivePeriod.start} até ${concessivePeriod.end}`;
+                          })()}
                         </p>
                       </div>
                     </div>
