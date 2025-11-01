@@ -4,8 +4,8 @@
 import { randomUUID } from 'crypto';
 import { User, Professional, VacationPeriod } from '@/types';
 
-const IS_PROD = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
-const USE_SUPABASE = IS_PROD;
+const HAS_SUPABASE = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const USE_SUPABASE = HAS_SUPABASE;
 
 // Import from the appropriate module
 import * as dbFileSystem from './db';
@@ -19,11 +19,13 @@ export const getProfessionals = USE_SUPABASE ? dbSupabase.getProfessionals : dbF
 export const getProfessionalById = USE_SUPABASE ? dbSupabase.getProfessionalById : dbFileSystem.getProfessionalById;
 export const updateProfessional = USE_SUPABASE ? dbSupabase.updateProfessional : dbFileSystem.updateProfessional;
 export const deleteProfessional = USE_SUPABASE ? dbSupabase.deleteProfessional : dbFileSystem.deleteProfessional;
+export const deleteAllProfessionals = USE_SUPABASE ? dbSupabase.deleteAllProfessionals : dbFileSystem.deleteAllProfessionals;
 
 export const getVacationPeriods = USE_SUPABASE ? dbSupabase.getVacationPeriods : dbFileSystem.getVacationPeriods;
 export const getVacationsByProfessional = USE_SUPABASE ? dbSupabase.getVacationsByProfessional : dbFileSystem.getVacationsByProfessional;
 export const updateVacationPeriod = USE_SUPABASE ? dbSupabase.updateVacationPeriod : dbFileSystem.updateVacationPeriod;
 export const deleteVacationPeriod = USE_SUPABASE ? dbSupabase.deleteVacationPeriod : dbFileSystem.deleteVacationPeriod;
+export const deleteAllVacationPeriods = USE_SUPABASE ? dbSupabase.deleteAllVacationPeriods : dbFileSystem.deleteAllVacationPeriods;
 
 export async function createUser(input: Omit<User, 'id' | 'createdAt'>): Promise<User> {
   if (USE_SUPABASE) {

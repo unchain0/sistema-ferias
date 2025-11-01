@@ -13,8 +13,8 @@ export function sanitizeString(input: string): string {
 // Email validation
 export const emailSchema = z.string().email().max(255);
 
-// Password validation
-export const passwordSchema = z.string().min(6).max(128);
+// Password validation (72 chars = max para bcrypt no pgcrypto)
+export const passwordSchema = z.string().min(6).max(72);
 
 // Name validation
 export const nameSchema = z.string().min(2).max(100);

@@ -17,16 +17,40 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const validatePassword = (pwd: string): { valid: boolean; message?: string } => {
+    if (pwd.length < 6) {
+      return { valid: false, message: 'A senha deve ter pelo menos 6 caracteres' };
+    }
+    if (pwd.length > 72) {
+      return { valid: false, message: 'A senha deve ter no máximo 72 caracteres' };
+    }
+    return { valid: true };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validação básica do formulário
+    if (!name || !email || !password || !confirmPassword) {
+      toast.error('❌ Todos os campos são obrigatórios');
+      return;
+    }
 
+    // Validação de email
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error('❌ Por favor, insira um email válido');
+      return;
+    }
+
+    // Validação de senha
     if (password !== confirmPassword) {
       toast.error('❌ As senhas não coincidem');
       return;
     }
 
-    if (password.length < 6) {
-      toast.error('❌ A senha deve ter pelo menos 6 caracteres');
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      toast.error(`❌ ${passwordValidation.message}`);
       return;
     }
 
@@ -93,6 +117,7 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
+            maxLength={72}
           />
 
           <Input
@@ -102,6 +127,7 @@ export default function RegisterPage() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="••••••••"
             required
+            maxLength={72}
           />
 
           <Button

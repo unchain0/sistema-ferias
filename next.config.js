@@ -2,16 +2,24 @@
 const nextConfig = {
   reactStrictMode: true,
   
-  // Webpack configuration to fix cache warnings
   webpack: (config, { dev, isServer }) => {
-    // Disable cache snapshots to prevent "Unable to snapshot resolve dependencies" errors
+    // Desabilitar cache persistente completamente
+    config.cache = false;
+    
+    // Usar apenas cache em memória para desenvolvimento
     if (dev && !isServer) {
       config.cache = {
         type: 'memory',
       };
     }
     
-    // Ignore source map warnings
+    // Desabilitar snapshots que causam problemas no Windows
+    config.snapshot = {
+      managedPaths: [],
+      immutablePaths: [],
+    };
+    
+    // Ignorar warnings de source maps
     config.ignoreWarnings = [
       { module: /node_modules/ },
     ];

@@ -36,11 +36,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate password strength
+    // Validação de comprimento da senha
+    if (typeof password !== 'string' || password.length < 6 || password.length > 72) {
+      console.error('Invalid password length:', password?.length);
+      return NextResponse.json(
+        { error: 'A senha deve ter entre 6 e 72 caracteres' },
+        { status: 400 }
+      );
+    }
+
+    // Validação de força da senha
     const passwordValidation = passwordSchema.safeParse(password);
     if (!passwordValidation.success) {
+      console.error('Password validation failed:', passwordValidation.error);
       return NextResponse.json(
-        { error: 'Senha deve ter no mínimo 6 caracteres' },
+        { error: 'A senha não atende aos requisitos mínimos de segurança' },
         { status: 400 }
       );
     }

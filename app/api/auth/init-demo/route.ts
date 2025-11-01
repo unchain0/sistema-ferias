@@ -4,10 +4,10 @@ import {
   createUser, 
   createProfessional, 
   createVacationPeriod, 
-  getProfessionals, 
+  deleteAllProfessionals,
+  deleteAllVacationPeriods,
+  getProfessionals,
   getVacationPeriods,
-  updateProfessional,
-  updateVacationPeriod,
 } from '@/lib/db-switch';
 import { createDemoData } from '@/lib/seed-demo';
 
@@ -22,25 +22,36 @@ export async function POST() {
         name: demoData.user.name,
         password: demoData.user.password,
       });
+    } else {
+      // Fast path: if counts already match the seed, skip heavy re-processing
+      const existingProfessionals = await getProfessionals(user.id);
+      const existingVacations = await getVacationPeriods(user.id);
+      const seedProfessionalsCount = demoData.professionals.length;
+      const seedVacationsCount = demoData.vacations.length;
+      if (
+        existingProfessionals.length === seedProfessionalsCount &&
+        existingVacations.length === seedVacationsCount
+      ) {
+        return NextResponse.json({
+          message: 'Dados demo já estavam atualizados (sem reinicialização)',
+          email: demoData.user.email,
+          createdProfessionals: 0,
+          createdVacations: 0,
+          totalProfessionals: existingProfessionals.length,
+          totalVacations: existingVacations.length,
+          skipped: true,
+        });
+      }
+
+      // Reset demo data: delete existing vacations and professionals
+      await deleteAllVacationPeriods(user.id);
+      await deleteAllProfessionals(user.id);
     }
 
-    const existingProfessionals = await getProfessionals(user.id);
-    const professionalsByName = new Map(existingProfessionals.map(p => [p.name, p]));
-
+    // Create professionals
     const profIdMap: Record<string, string> = {};
+    let createdProfessionals = 0;
     for (const p of demoData.professionals) {
-      const existing = professionalsByName.get(p.name);
-      if (existing) {
-        profIdMap[p.id] = existing.id;
-        const updates: Partial<typeof existing> = {};
-        if (existing.clientManager !== p.clientManager) updates.clientManager = p.clientManager as any;
-        if (existing.monthlyRevenue !== p.monthlyRevenue) updates.monthlyRevenue = p.monthlyRevenue as any;
-        if (existing.name !== p.name) updates.name = p.name as any;
-        if (Object.keys(updates).length > 0) {
-          await updateProfessional(existing.id, user.id, updates as any);
-        }
-        continue;
-      }
       const created = await createProfessional({
         userId: user.id,
         name: p.name,
@@ -48,28 +59,14 @@ export async function POST() {
         monthlyRevenue: p.monthlyRevenue,
       });
       profIdMap[p.id] = created.id;
+      createdProfessionals++;
     }
 
-    const existingVacations = await getVacationPeriods(user.id);
-    const key = (pId: string, s: string, e: string) => `${pId}|${s}|${e}`;
-    const existingByKey = new Map(existingVacations.map(ev => [key(ev.professionalId, ev.usageStartDate, ev.usageEndDate), ev]));
-
+    // Create vacations
+    let createdVacations = 0;
     for (const v of demoData.vacations) {
       const mappedProfessionalId = profIdMap[v.professionalId];
       if (!mappedProfessionalId) continue;
-      const k = key(mappedProfessionalId, v.usageStartDate, v.usageEndDate);
-      const found = existingByKey.get(k);
-      if (found) {
-        const updates: Partial<typeof found> = {};
-        if (found.totalDays !== v.totalDays) updates.totalDays = v.totalDays as any;
-        if (found.revenueDeduction !== v.revenueDeduction) updates.revenueDeduction = v.revenueDeduction as any;
-        if (found.acquisitionStartDate !== v.acquisitionStartDate) updates.acquisitionStartDate = v.acquisitionStartDate as any;
-        if (found.acquisitionEndDate !== v.acquisitionEndDate) updates.acquisitionEndDate = v.acquisitionEndDate as any;
-        if (Object.keys(updates).length > 0) {
-          await updateVacationPeriod(found.id, user.id, updates as any);
-        }
-        continue;
-      }
       await createVacationPeriod({
         professionalId: mappedProfessionalId,
         userId: user.id,
@@ -80,11 +77,20 @@ export async function POST() {
         totalDays: v.totalDays,
         revenueDeduction: v.revenueDeduction,
       });
+      createdVacations++;
     }
+
+    // Fetch totals to confirm persisted counts
+    const totalProfessionals = (await getProfessionals(user.id)).length;
+    const totalVacations = (await getVacationPeriods(user.id)).length;
 
     return NextResponse.json({ 
       message: 'Dados demo inicializados com sucesso',
-      email: demoData.user.email 
+      email: demoData.user.email,
+      createdProfessionals,
+      createdVacations,
+      totalProfessionals,
+      totalVacations,
     });
   } catch (error) {
     console.error('Error initializing demo data:', error);

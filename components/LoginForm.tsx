@@ -85,6 +85,7 @@ export function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••"
           required
+          maxLength={100}
         />
 
         <Button type="submit" className="w-full" disabled={loading || demoLoading}>

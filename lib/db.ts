@@ -108,6 +108,13 @@ export async function deleteProfessional(id: string, userId: string): Promise<bo
   return true;
 }
 
+export async function deleteAllProfessionals(userId: string): Promise<void> {
+  const professionals = await getProfessionals(userId);
+  for (const p of professionals) {
+    await deleteProfessional(p.id, userId);
+  }
+}
+
 // Vacation Periods
 export async function getVacationPeriods(userId: string): Promise<VacationPeriod[]> {
   const vacations = await readJsonFile<VacationPeriod>(VACATIONS_FILE, 'vacations');
@@ -145,6 +152,13 @@ export async function deleteVacationPeriod(id: string, userId: string): Promise<
   
   await writeJsonFile(VACATIONS_FILE, filtered, 'vacations');
   return true;
+}
+
+export async function deleteAllVacationPeriods(userId: string): Promise<void> {
+  const vacations = await getVacationPeriods(userId);
+  for (const v of vacations) {
+    await deleteVacationPeriod(v.id, userId);
+  }
 }
 
 // Initialize demo data in memory storage (for serverless)

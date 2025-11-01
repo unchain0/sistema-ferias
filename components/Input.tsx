@@ -8,9 +8,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className, type, placeholder, lang, ...props }, ref) => {
-    const isDate = type === 'date';
-    const resolvedPlaceholder = placeholder ?? (isDate ? 'dd/mm/aaaa' : undefined);
-    const resolvedLang = lang ?? (isDate ? 'pt-BR' : undefined);
+    const resolvedPlaceholder = placeholder;
     return (
       <div className="w-full">
         {label && (
@@ -29,7 +27,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           type={type}
           placeholder={resolvedPlaceholder}
-          lang={resolvedLang}
+          {...(lang ? { lang } : {})}
           {...props}
         />
         {error && (

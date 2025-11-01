@@ -195,11 +195,11 @@ export async function createDemoData() {
       professionalId: 'prof-10',
       userId: demoUserId,
       acquisitionStartDate: '2023-03-01',
-      acquisitionEndDate: '2025-02-29',
+      acquisitionEndDate: '2025-02-28',
       usageStartDate: '2025-02-26',
-      usageEndDate: '2025-02-29',
-      totalDays: 4,
-      revenueDeduction: 2200,
+      usageEndDate: '2025-02-28',
+      totalDays: 3,
+      revenueDeduction: 1650,
       createdAt: new Date('2025-02-20').toISOString(),
     },
     // MARÇO - 3 férias
@@ -719,12 +719,6 @@ export async function createDemoData() {
       revenueDeduction: rev,
       createdAt: new Date(`${year}-${pad(month)}-01`).toISOString(),
     });
-  }
-
-  for (let m = 1; m <= 12; m++) {
-    pushVacation(2024, m, 3, 5, m - 1, 'a', 2023);
-    pushVacation(2024, m, 12, 7, m + 1, 'b', 2023);
-    pushVacation(2024, m, 21, 10, m + 3, 'c', 2023);
   }
 
   const add2025: Array<{ m: number; count: number }> = [

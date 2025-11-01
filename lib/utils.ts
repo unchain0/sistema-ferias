@@ -1,5 +1,4 @@
-import { differenceInDays, format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { differenceInDays, format, parseISO, addYears, addDays } from 'date-fns';
 
 export function calculateVacationDays(startDate: string, endDate: string): number {
   const start = parseISO(startDate);
@@ -23,10 +22,21 @@ export function formatCurrency(value: number): string {
   }).format(value);
 }
 
-export function formatDate(date: string): string {
-  return format(parseISO(date), 'dd/MM/yyyy', { locale: ptBR });
-}
-
 export function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(' ');
+}
+
+// Given acquisition period, compute concessivo period (período concessivo - the 12-month period 
+// after acquisition when vacation can be taken, as defined in Brazilian labor law)
+export function computeConcessivePeriod(
+  acquisitionStartDate: string,
+  acquisitionEndDate: string
+): { start: string; end: string } {
+  const endParsed = parseISO(acquisitionEndDate);
+  const concessiveStart = addDays(endParsed, 1);
+  const concessiveEnd = addDays(addYears(concessiveStart, 1), -1);
+  return {
+    start: format(concessiveStart, 'yyyy-MM-dd'),
+    end: format(concessiveEnd, 'yyyy-MM-dd'),
+  };
 }

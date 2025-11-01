@@ -182,6 +182,15 @@ export async function deleteProfessional(id: string, userId: string): Promise<bo
   return (count || 0) > 0;
 }
 
+export async function deleteAllProfessionals(userId: string): Promise<void> {
+  const s = createSupabaseForClaims({ sub: userId });
+  const { error } = await s
+    .from('professionals')
+    .delete()
+    .eq('user_id', userId);
+  if (error) throw error;
+}
+
 // Vacation Periods
 export async function getVacationPeriods(userId: string): Promise<VacationPeriod[]> {
   const s = createSupabaseForClaims({ sub: userId });
@@ -313,6 +322,15 @@ export async function deleteVacationPeriod(id: string, userId: string): Promise<
   
   if (error) throw error;
   return (count || 0) > 0;
+}
+
+export async function deleteAllVacationPeriods(userId: string): Promise<void> {
+  const s = createSupabaseForClaims({ sub: userId });
+  const { error } = await s
+    .from('vacation_periods')
+    .delete()
+    .eq('user_id', userId);
+  if (error) throw error;
 }
 
 // Initialize demo data in Supabase
