@@ -45,30 +45,17 @@ export function formatDateForInput(date: string | Date | null | undefined): stri
     return `${year}-${month}-${day}`;
   }
   
-  // If it's already in ISO format yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss
-  if (typeof date === 'string' && date.includes('-')) {
-    const dateOnly = date.split('T')[0]; // Remove time if exists
-    // Validate it's a proper ISO date (yyyy-MM-dd)
-    const isoPattern = /^\d{4}-\d{2}-\d{2}$/;
-    if (isoPattern.test(dateOnly)) {
-      return dateOnly;
+  // If it comes in Brazilian format dd/mm/yyyy
+  if (typeof date === 'string' && date.includes('/')) {
+    const [day, month, year] = date.split('/');
+    if (year && month && day) {
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
   }
   
-  // If it comes in Brazilian format dd/mm/yyyy
-  if (typeof date === 'string' && date.includes('/')) {
-    const parts = date.split('/');
-    if (parts.length === 3) {
-      const [day, month, year] = parts;
-      // Validate that we have reasonable values
-      const dayNum = parseInt(day, 10);
-      const monthNum = parseInt(month, 10);
-      const yearNum = parseInt(year, 10);
-      
-      if (dayNum >= 1 && dayNum <= 31 && monthNum >= 1 && monthNum <= 12 && yearNum > 1900) {
-        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      }
-    }
+  // If it's already in ISO format yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss
+  if (typeof date === 'string' && date.includes('-')) {
+    return date.split('T')[0]; // Remove time if exists
   }
   
   return '';
