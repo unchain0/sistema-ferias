@@ -8,7 +8,7 @@ import { Input } from '@/components/Input';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Professional, VacationPeriod } from '@/types';
 import { formatCurrency, computeConcessivePeriod, formatDateToPtBR, formatDateForInput } from '@/lib/utils';
-import { Plus, Edit2, Trash2, X, Calendar, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Calendar, AlertCircle, Search } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { handleDemoError } from '@/lib/handle-demo-error';
 
@@ -21,6 +21,7 @@ export default function VacationsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [formData, setFormData] = useState({
     professionalId: '',
@@ -152,6 +153,12 @@ export default function VacationsPage() {
     return professional?.name || 'Desconhecido';
   };
 
+  const filteredVacations = vacations.filter((vacation) => {
+    const query = searchQuery.toLowerCase();
+    const professionalName = getProfessionalName(vacation.professionalId).toLowerCase();
+    return professionalName.includes(query);
+  });
+
   // Note: do not short-circuit on loading to prevent large layout swaps (CLS)
 
   return (
@@ -159,26 +166,39 @@ export default function VacationsPage() {
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Períodos de Férias
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Gerencie os períodos aquisitivos e de gozo de férias
             </p>
           </div>
           
-          {!showForm && professionals.length > 0 && (
-            <Button 
-              onClick={() => setShowForm(true)}
-              disabled={isDemo || loading}
-              className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              <span className="font-semibold">Novo Período</span>
-            </Button>
-          )}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="relative w-full sm:max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por nome do profissional..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
+              />
+            </div>
+            
+            {!showForm && professionals.length > 0 && (
+              <Button 
+                onClick={() => setShowForm(true)}
+                disabled={isDemo || loading}
+                className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                <span className="font-semibold">Novo Período</span>
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Error Alert */}
@@ -342,9 +362,20 @@ export default function VacationsPage() {
           </div>
         )}
 
-        {!loading && vacations.length > 0 && (
+        {!loading && vacations.length > 0 && filteredVacations.length === 0 && (
+          <Card>
+            <div className="text-center py-12">
+              <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 dark:text-gray-400">
+                Nenhum período de férias encontrado para "{searchQuery}"
+              </p>
+            </div>
+          </Card>
+        )}
+
+        {!loading && filteredVacations.length > 0 && (
           <div className="space-y-4">
-            {vacations.map((vacation) => (
+            {filteredVacations.map((vacation) => (
               <Card key={vacation.id}>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
                   <div className="flex-1 space-y-3">
