@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
@@ -135,13 +135,15 @@ export default function ProfessionalsPage() {
     setError(null);
   };
 
-  const filteredProfessionals = professionals.filter((professional) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      professional.name.toLowerCase().includes(query) ||
-      professional.clientManager.toLowerCase().includes(query)
-    );
-  });
+  const filteredProfessionals = useMemo(() => {
+    return professionals.filter((professional) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        professional.name.toLowerCase().includes(query) ||
+        professional.clientManager.toLowerCase().includes(query)
+      );
+    });
+  }, [professionals, searchQuery]);
 
   if (loading) {
     return (

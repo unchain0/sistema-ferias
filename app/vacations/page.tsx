@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
@@ -153,11 +153,14 @@ export default function VacationsPage() {
     return professional?.name || 'Desconhecido';
   };
 
-  const filteredVacations = vacations.filter((vacation) => {
-    const query = searchQuery.toLowerCase();
-    const professionalName = getProfessionalName(vacation.professionalId).toLowerCase();
-    return professionalName.includes(query);
-  });
+  const filteredVacations = useMemo(() => {
+    return vacations.filter((vacation) => {
+      const query = searchQuery.toLowerCase();
+      const professional = professionals.find(p => p.id === vacation.professionalId);
+      const professionalName = (professional?.name || 'Desconhecido').toLowerCase();
+      return professionalName.includes(query);
+    });
+  }, [vacations, searchQuery, professionals]);
 
   // Note: do not short-circuit on loading to prevent large layout swaps (CLS)
 
