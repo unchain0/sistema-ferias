@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
@@ -8,7 +8,7 @@ import { Input } from '@/components/Input';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Professional } from '@/types';
 import { formatCurrency } from '@/lib/utils';
-import { Plus, Edit2, Trash2, X, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, AlertCircle, Search } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { handleDemoError } from '@/lib/handle-demo-error';
 
@@ -20,6 +20,7 @@ export default function ProfessionalsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [formData, setFormData] = useState({
     name: '',
@@ -134,6 +135,16 @@ export default function ProfessionalsPage() {
     setError(null);
   };
 
+  const filteredProfessionals = useMemo(() => {
+    return professionals.filter((professional) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        professional.name.toLowerCase().includes(query) ||
+        professional.clientManager.toLowerCase().includes(query)
+      );
+    });
+  }, [professionals, searchQuery]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -148,26 +159,39 @@ export default function ProfessionalsPage() {
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Profissionais
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Gerencie os profissionais e seus faturamentos
             </p>
           </div>
           
-          {!showForm && (
-            <Button 
-              onClick={() => setShowForm(true)}
-              disabled={isDemo}
-              className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              <span className="font-semibold">Novo Profissional</span>
-            </Button>
-          )}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="relative w-full sm:max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por nome ou gestor..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
+              />
+            </div>
+            
+            {!showForm && (
+              <Button 
+                onClick={() => setShowForm(true)}
+                disabled={isDemo}
+                className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                <span className="font-semibold">Novo Profissional</span>
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Error Alert */}
@@ -252,9 +276,18 @@ export default function ProfessionalsPage() {
               </p>
             </div>
           </Card>
+        ) : filteredProfessionals.length === 0 ? (
+          <Card>
+            <div className="text-center py-12">
+              <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 dark:text-gray-400">
+                Nenhum profissional encontrado para &quot;{searchQuery}&quot;
+              </p>
+            </div>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {professionals.map((professional) => (
+            {filteredProfessionals.map((professional) => (
               <Card key={professional.id}>
                 <div className="space-y-3">
                   <div>
