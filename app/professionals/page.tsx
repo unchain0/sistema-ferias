@@ -279,7 +279,7 @@ export default function ProfessionalsPage() {
             <div className="text-center py-12">
               <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600 dark:text-gray-400">
-                Nenhum profissional encontrado para "{searchQuery}"
+                Nenhum profissional encontrado para &quot;{searchQuery}&quot;
               </p>
             </div>
           </Card>

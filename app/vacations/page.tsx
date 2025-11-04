@@ -367,7 +367,7 @@ export default function VacationsPage() {
             <div className="text-center py-12">
               <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600 dark:text-gray-400">
-                Nenhum período de férias encontrado para "{searchQuery}"
+                Nenhum período de férias encontrado para &quot;{searchQuery}&quot;
               </p>
             </div>
           </Card>
