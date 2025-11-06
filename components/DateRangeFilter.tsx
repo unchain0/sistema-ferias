@@ -3,6 +3,7 @@
 import { useState, startTransition } from 'react';
 import { format, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear } from 'date-fns';
 import { Calendar } from 'lucide-react';
+import { DateInput } from './DateInput';
 
 export interface DateRange {
   startDate: string;
@@ -107,10 +108,9 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Data Inicial
             </label>
-            <input
-              type="date"
+            <DateInput
               value={customStartDate}
-              onChange={(e) => setCustomStartDate(e.target.value)}
+              onChange={setCustomStartDate}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -118,10 +118,9 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Data Final
             </label>
-            <input
-              type="date"
+            <DateInput
               value={customEndDate}
-              onChange={(e) => setCustomEndDate(e.target.value)}
+              onChange={setCustomEndDate}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
