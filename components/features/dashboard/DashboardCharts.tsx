@@ -93,26 +93,26 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+      <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm h-full">
         <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Férias por Período</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={processedData}>
             <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
-            <XAxis 
-              dataKey="month" 
-              stroke={axisStroke} 
-              tick={axisTick} 
+            <XAxis
+              dataKey="month"
+              stroke={axisStroke}
+              tick={axisTick}
               tickLine={false}
               axisLine={false}
-              style={{ fontSize: '12px', fontWeight: 500 }} 
+              style={{ fontSize: '12px', fontWeight: 500 }}
               dy={10}
             />
-            <YAxis 
-              stroke={axisStroke} 
-              tick={axisTick} 
+            <YAxis
+              stroke={axisStroke}
+              tick={axisTick}
               tickLine={false}
               axisLine={false}
-              style={{ fontSize: '12px' }} 
+              style={{ fontSize: '12px' }}
               dx={-10}
             />
             <Tooltip
@@ -122,38 +122,38 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
               labelStyle={{ color: tooltipStyles.color, fontWeight: 600, marginBottom: '0.25rem' }}
               itemStyle={{ color: tooltipStyles.color }}
             />
-            <Bar 
-              dataKey="count" 
-              fill="#4f46e5" 
-              name="Dias de Férias" 
+            <Bar
+              dataKey="count"
+              fill="#4f46e5"
+              name="Dias de Férias"
               radius={[4, 4, 0, 0]}
-              isAnimationActive={shouldAnimate} 
-              animationDuration={1000} 
+              isAnimationActive={shouldAnimate}
+              animationDuration={1000}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+      <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm h-full">
         <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Impacto Financeiro</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={processedData}>
             <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
-            <XAxis 
-              dataKey="month" 
-              stroke={axisStroke} 
-              tick={axisTick} 
+            <XAxis
+              dataKey="month"
+              stroke={axisStroke}
+              tick={axisTick}
               tickLine={false}
               axisLine={false}
-              style={{ fontSize: '12px', fontWeight: 500 }} 
+              style={{ fontSize: '12px', fontWeight: 500 }}
               dy={10}
             />
-            <YAxis 
-              stroke={axisStroke} 
-              tick={axisTick} 
+            <YAxis
+              stroke={axisStroke}
+              tick={axisTick}
               tickLine={false}
               axisLine={false}
-              style={{ fontSize: '12px' }} 
+              style={{ fontSize: '12px' }}
               dx={-10}
             />
             <Tooltip
@@ -163,13 +163,13 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
               labelStyle={{ color: tooltipStyles.color, fontWeight: 600, marginBottom: '0.25rem' }}
               itemStyle={{ color: tooltipStyles.color }}
             />
-            <Bar 
-              dataKey="impact" 
-              fill="#e11d48" 
-              name="Impacto (R$)" 
+            <Bar
+              dataKey="impact"
+              fill="#e11d48"
+              name="Impacto (R$)"
               radius={[4, 4, 0, 0]}
-              isAnimationActive={shouldAnimate} 
-              animationDuration={1000} 
+              isAnimationActive={shouldAnimate}
+              animationDuration={1000}
             />
           </BarChart>
         </ResponsiveContainer>
