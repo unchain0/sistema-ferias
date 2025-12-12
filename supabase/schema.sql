@@ -118,5 +118,3 @@ create policy vacations_delete_own on public.vacation_periods
 for delete using (
   user_id = (select auth.uid())
 );
-
--- Done

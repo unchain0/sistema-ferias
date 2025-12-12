@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Navbar } from '@/components/Navbar';
-import { Card } from '@/components/Card';
-import { Button } from '@/components/Button';
-import { Input } from '@/components/Input';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Navbar } from '@/components/layout/Navbar';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Professional, VacationPeriod } from '@/types';
 import { formatCurrency, computeConcessivePeriod, formatDateToPtBR, formatDateForInput } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, Calendar, AlertCircle, Search } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { handleDemoError } from '@/lib/handle-demo-error';
+import { createVacation, updateVacation, deleteVacation } from '@/app/actions/vacations';
 
 export default function VacationsPage() {
   const { data: session } = useSession();
@@ -60,32 +60,20 @@ export default function VacationsPage() {
     setError(null);
 
     try {
-      const url = editingId
-        ? `/api/vacations/${editingId}`
-        : '/api/vacations';
-      
-      const method = editingId ? 'PUT' : 'POST';
+      let result;
+      if (editingId) {
+        result = await updateVacation(editingId, formData);
+      } else {
+        result = await createVacation(formData);
+      }
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      const demoError = handleDemoError(response, data);
-
-      if (demoError) {
-        setError(demoError);
+      if (result.error) {
+        setError(result.error);
         return;
       }
 
-      if (response.ok) {
-        await fetchData();
-        resetForm();
-      } else {
-        setError(data.error || 'Erro ao salvar período de férias');
-      }
+      await fetchData();
+      resetForm();
     } catch (error) {
       console.error('Error saving vacation:', error);
       setError('Erro ao salvar período de férias');
@@ -112,23 +100,14 @@ export default function VacationsPage() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/vacations/${id}`, {
-        method: 'DELETE',
-      });
+      const result = await deleteVacation(id);
 
-      const data = await response.json();
-      const demoError = handleDemoError(response, data);
-
-      if (demoError) {
-        setError(demoError);
+      if (result.error) {
+        setError(result.error);
         return;
       }
 
-      if (response.ok) {
-        await fetchData();
-      } else {
-        setError(data.error || 'Erro ao excluir período de férias');
-      }
+      await fetchData();
     } catch (error) {
       console.error('Error deleting vacation:', error);
       setError('Erro ao excluir período de férias');
@@ -162,8 +141,6 @@ export default function VacationsPage() {
     });
   }, [vacations, searchQuery, professionals]);
 
-  // Note: do not short-circuit on loading to prevent large layout swaps (CLS)
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar />
@@ -191,7 +168,7 @@ export default function VacationsPage() {
               />
             </div>
             
-            {!showForm && professionals.length > 0 && (
+            {!showForm && (
               <Button 
                 onClick={() => setShowForm(true)}
                 disabled={isDemo || loading}
@@ -223,6 +200,7 @@ export default function VacationsPage() {
           </div>
         )}
 
+        {/* Empty state when no professionals */}
         {professionals.length === 0 && !loading && (
           <Card>
             <div className="text-center py-12">
@@ -332,8 +310,32 @@ export default function VacationsPage() {
           </Card>
         )}
 
+        {/* Loading Skeletons */}
+        {loading && (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <Card key={`skeleton-${i}`}>
+                <div className="space-y-4">
+                  <div className="flex flex-col md:flex-row md:justify-between gap-4">
+                     <Skeleton className="h-6 w-1/3" />
+                     <div className="flex gap-2">
+                       <Skeleton className="h-8 w-24" />
+                       <Skeleton className="h-8 w-24" />
+                     </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
         {/* Vacations List */}
-        {professionals.length > 0 && vacations.length === 0 && !showForm && !loading && (
+        {!loading && professionals.length > 0 && vacations.length === 0 && !showForm && (
           <Card>
             <div className="text-center py-12">
               <p className="text-gray-600 dark:text-gray-400">
@@ -341,28 +343,6 @@ export default function VacationsPage() {
               </p>
             </div>
           </Card>
-        )}
-
-        {/* Skeleton list during initial load to preserve layout height */}
-        {loading && (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <Card key={`skeleton-${i}`}>
-                <div className="animate-pulse">
-                  <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
-                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
         )}
 
         {!loading && vacations.length > 0 && filteredVacations.length === 0 && (
@@ -456,7 +436,7 @@ export default function VacationsPage() {
                     </Button>
                     <Button
                       size="sm"
-                      variant="danger"
+                      variant="destructive"
                       onClick={() => handleDelete(vacation.id)}
                       disabled={isDemo}
                       className="flex-1 md:flex-none md:w-28 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"

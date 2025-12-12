@@ -13,20 +13,25 @@
     "node": ">=18.x"
   },
   "dependencies": {
+    "@radix-ui/react-popover": "^1.1.15",
     "@supabase/supabase-js": "^2.39.0",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "bcryptjs": "^2.4.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "date-fns": "^3.0.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.295.0",
-    "next": "15.5.7",
+    "next": "^15.5.9",
     "next-auth": "^4.24.5",
     "react": "^18.3.1",
+    "react-day-picker": "^9.12.0",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.6.0",
     "react-virtuoso": "^4.14.1",
     "recharts": "^2.10.0",
+    "tailwind-merge": "^3.4.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

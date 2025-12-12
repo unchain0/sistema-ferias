@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { getProfessionals, createProfessional } from '@/lib/db-switch';
+import { getProfessionals, createProfessional } from '@/lib/db';
 import { Professional } from '@/types';
 import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
 

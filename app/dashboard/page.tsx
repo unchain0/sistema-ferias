@@ -1,19 +1,30 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef, startTransition, useDeferredValue } from 'react';
-import { Navbar } from '@/components/Navbar';
-import { Card } from '@/components/Card';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { DateRangeFilter, DateRange } from '@/components/DateRangeFilter';
+import { Navbar } from '@/components/layout/Navbar';
+import { Card } from '@/components/ui/Card';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { CalendarDateRangePicker } from '@/components/ui/CalendarDateRangePicker';
 import { DashboardData } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { Users, Calendar, DollarSign, TrendingDown } from 'lucide-react';
+import { AlertsFeed } from '@/components/features/dashboard/AlertsFeed';
+import { format, subDays } from 'date-fns';
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<DateRange | null>(null);
+  
+  // Initialize with default range (Last 30 days)
+  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string } | null>(() => {
+    const today = new Date();
+    return {
+      startDate: format(subDays(today, 30), "yyyy-MM-dd"),
+      endDate: format(today, "yyyy-MM-dd")
+    };
+  });
+
   const abortRef = useRef<AbortController | null>(null);
   const hasAnimatedRef = useRef(false);
 
@@ -46,32 +57,27 @@ export default function DashboardPage() {
     fetchDashboard();
   }, [fetchDashboard]);
 
-  const handleFilterChange = (range: DateRange | null) => {
+  const handleFilterChange = useCallback((range: { startDate: string; endDate: string } | null) => {
     startTransition(() => {
       setDateRange(range);
     });
-  };
+  }, []);
 
   const chartData = useMemo(() => data?.vacationsByMonth ?? [], [data]);
-  const tableData = useMemo(() => data?.professionalImpacts ?? [], [data]);
+  const alertsData = useMemo(() => data?.alerts ?? [], [data]);
   const deferredChartData = useDeferredValue(chartData);
-  const deferredTableData = useDeferredValue(tableData);
+  const deferredAlertsData = useDeferredValue(alertsData);
   const animateCharts = useMemo(() => deferredChartData.length <= 24, [deferredChartData]);
   const shouldAnimate = animateCharts && !hasAnimatedRef.current;
 
-  const DashboardCharts = useMemo(() => dynamic(() => import('@/components/DashboardCharts'), {
+  const DashboardCharts = useMemo(() => dynamic(() => import('@/components/features/dashboard/DashboardCharts'), {
     ssr: false,
     loading: () => (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="h-[360px] rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse" />
-        <div className="h-[360px] rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse" />
+        <Skeleton className="h-[360px] w-full" />
+        <Skeleton className="h-[360px] w-full" />
       </div>
     )
-  }), []);
-
-  const VirtualizedTable = useMemo(() => dynamic(() => import('@/components/VirtualizedTable'), {
-    ssr: false,
-    loading: () => <div className="h-[420px] rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse" />
   }), []);
 
   useEffect(() => {
@@ -80,115 +86,131 @@ export default function DashboardPage() {
     }
   }, [data]);
 
-  if (loading && !data) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <p className="text-center text-gray-600 dark:text-gray-400">
-            Erro ao carregar dados do dashboard
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const statCards = [
     {
       title: 'Total de Profissionais',
-      value: data.totalProfessionals,
+      value: data?.totalProfessionals,
       icon: Users,
-      color: 'bg-blue-500',
+      colorClass: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
     },
     {
       title: 'Total de Dias de Férias',
-      value: data.totalVacationDays,
+      value: data?.totalVacationDays,
       icon: Calendar,
-      color: 'bg-green-500',
+      colorClass: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
     },
     {
       title: 'Impacto no Faturamento',
-      value: formatCurrency(data.totalRevenueImpact),
+      value: data ? formatCurrency(data.totalRevenueImpact) : null,
       icon: TrendingDown,
-      color: 'bg-red-500',
+      colorClass: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400',
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Dashboard de Impacto Financeiro
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Dashboard
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Visualização do impacto financeiro das férias dos profissionais
+          <p className="text-gray-500 dark:text-gray-400 mt-2">
+            Visão geral do impacto financeiro e gestão de férias.
           </p>
         </div>
 
         {/* Date Range Filter */}
-        <DateRangeFilter onFilterChange={handleFilterChange} />
+        <CalendarDateRangePicker 
+          startDate={dateRange?.startDate} 
+          endDate={dateRange?.endDate} 
+          onDateChange={handleFilterChange} 
+        />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {statCards.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={stat.title}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      {stat.title}
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {stat.value}
-                    </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {loading && !data ? (
+             Array.from({ length: 3 }).map((_, i) => (
+               <Card key={i} className="p-6">
+                 <div className="flex items-center justify-between space-y-0 pb-2">
+                   <Skeleton className="h-4 w-[100px]" />
+                   <Skeleton className="h-8 w-8 rounded-full" />
+                 </div>
+                 <div className="space-y-2 mt-4">
+                    <Skeleton className="h-8 w-[60px]" />
+                 </div>
+               </Card>
+             ))
+          ) : (
+            statCards.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <Card key={stat.title} className="hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {stat.title}
+                      </p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                        {stat.value}
+                      </p>
+                    </div>
+                    <div className={`${stat.colorClass} p-3 rounded-xl`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
                   </div>
-                  <div className={`${stat.color} p-3 rounded-lg`}>
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
+                </Card>
+              );
+            })
+          )}
         </div>
 
-        {/* Charts */}
-        {deferredChartData.length > 0 && (
-          <DashboardCharts data={deferredChartData} shouldAnimate={shouldAnimate} formatCurrency={formatCurrency} />
-        )}
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            {/* Charts Section - Takes up 2/3 width on large screens */}
+            <div className="xl:col-span-2 space-y-6">
+                {loading && !data ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Skeleton className="h-[360px] w-full" />
+                    <Skeleton className="h-[360px] w-full" />
+                </div>
+                ) : (
+                data && deferredChartData.length > 0 && (
+                    <DashboardCharts data={deferredChartData} shouldAnimate={shouldAnimate} formatCurrency={formatCurrency} />
+                )
+                )}
+            </div>
 
-        {/* Professional Impacts Table */}
-        {deferredTableData.length > 0 && (
-          <div className="mt-6">
-            <VirtualizedTable items={deferredTableData} formatCurrency={formatCurrency} />
-          </div>
-        )}
+            {/* Alerts/Feed Section - Takes up 1/3 width on large screens */}
+            <div className="xl:col-span-1 h-full min-h-[400px]">
+                {loading && !data ? (
+                    <Skeleton className="h-[400px] w-full" />
+                ) : (
+                    <AlertsFeed alerts={deferredAlertsData} />
+                )}
+            </div>
+        </div>
 
         {/* Empty State */}
-        {data.totalProfessionals === 0 && (
+        {!loading && data && data.totalProfessionals === 0 && (
           <Card className="mt-6">
             <div className="text-center py-12">
-              <DollarSign className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <DollarSign className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 Nenhum dado disponível
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-500 dark:text-gray-400">
                 Comece cadastrando profissionais e períodos de férias
               </p>
             </div>
           </Card>
+        )}
+        
+        {!loading && !data && (
+           <div className="text-center py-12">
+             <p className="text-red-500">Erro ao carregar dados do dashboard.</p>
+           </div>
         )}
       </div>
     </div>

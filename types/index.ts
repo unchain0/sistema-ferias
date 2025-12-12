@@ -28,6 +28,15 @@ export interface VacationPeriod {
   createdAt: string;
 }
 
+export interface Alert {
+  id: string;
+  type: 'upcoming_vacation' | 'expiring_period';
+  professionalName: string;
+  date: string; // The relevant date (start date or expiration date)
+  daysRemaining: number;
+  details: string; // "Start in X days" or "Expires in Y days"
+}
+
 export interface DashboardData {
   totalProfessionals: number;
   totalVacationDays: number;
@@ -42,4 +51,5 @@ export interface DashboardData {
     totalDays: number;
     revenueImpact: number;
   }[];
+  alerts: Alert[];
 }

@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Input } from '@/components/Input';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 

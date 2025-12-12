@@ -1,5 +1,5 @@
 import { compare, hash } from 'bcryptjs';
-import { getUserByEmail, createUser } from './db-switch';
+import { getUserByEmail, createUser } from './db';
 import { User } from '@/types';
 
 const MAX_PASSWORD_LENGTH = 72; // Limite do bcrypt no pgcrypto

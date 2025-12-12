@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { getProfessionals, getVacationPeriods } from '@/lib/db-switch';
-import { DashboardData } from '@/types';
-import { format, parseISO, isWithinInterval } from 'date-fns';
+import { getProfessionals, getVacationPeriods } from '@/lib/db';
+import { DashboardData, Alert } from '@/types';
+import { format, parseISO, isWithinInterval, differenceInDays, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { computeConcessivePeriod } from '@/lib/utils';
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -20,7 +21,8 @@ export async function GET(request: Request) {
     const endDate = searchParams.get('endDate');
 
     const professionals = await getProfessionals(session.user.id);
-    let vacations = await getVacationPeriods(session.user.id);
+    const allVacations = await getVacationPeriods(session.user.id);
+    let vacations = [...allVacations];
 
     // Filter vacations by date range if provided
     if (startDate && endDate) {
@@ -72,12 +74,71 @@ export async function GET(request: Request) {
       .map(([id, agg]) => ({ professionalName: nameById.get(id) || 'Desconhecido', ...agg }))
       .filter(p => p.totalDays > 0);
 
+    // --- ALERTS LOGIC ---
+    const alerts: Alert[] = [];
+    const today = new Date();
+    
+    // We check ALL vacations for alerts, not just the filtered ones
+    for (const v of allVacations) {
+        const profName = nameById.get(v.professionalId) || 'Desconhecido';
+        const usageStart = parseISO(v.usageStartDate);
+        
+        // 1. Upcoming Vacations (Next 30 days)
+        const daysToStart = differenceInDays(usageStart, today);
+        if (daysToStart >= 0 && daysToStart <= 30) {
+            alerts.push({
+                id: `upcoming-${v.id}`,
+                type: 'upcoming_vacation',
+                professionalName: profName,
+                date: v.usageStartDate,
+                daysRemaining: daysToStart,
+                details: `Inicia em ${daysToStart === 0 ? 'hoje' : daysToStart + ' dias'}`,
+            });
+        }
+
+        // 2. Concessive Limit Risk
+        // If the vacation usage is dangerously close to the concessive period end
+        if (v.acquisitionStartDate && v.acquisitionEndDate) {
+            const concessive = computeConcessivePeriod(v.acquisitionStartDate, v.acquisitionEndDate);
+            const concessiveEnd = parseISO(concessive.end);
+            const usageEnd = parseISO(v.usageEndDate);
+            
+            // Check if usage extends beyond or is close to concessive end
+            // Note: In Brazil, vacation MUST be taken entirely within the concessive period
+            const daysUntilLimit = differenceInDays(concessiveEnd, usageEnd);
+            
+            if (daysUntilLimit < 0) {
+                 alerts.push({
+                    id: `expired-${v.id}`,
+                    type: 'expiring_period',
+                    professionalName: profName,
+                    date: concessive.end,
+                    daysRemaining: daysUntilLimit,
+                    details: `Ultrapassou limite concessivo (${format(concessiveEnd, 'dd/MM/yyyy')})`,
+                });
+            } else if (daysUntilLimit <= 30) {
+                alerts.push({
+                    id: `risk-${v.id}`,
+                    type: 'expiring_period',
+                    professionalName: profName,
+                    date: concessive.end,
+                    daysRemaining: daysUntilLimit,
+                    details: `Perto do limite concessivo (${format(concessiveEnd, 'dd/MM/yyyy')})`,
+                });
+            }
+        }
+    }
+    
+    // Sort alerts by urgency (days remaining)
+    alerts.sort((a, b) => a.daysRemaining - b.daysRemaining);
+
     const dashboardData: DashboardData = {
       totalProfessionals,
       totalVacationDays,
       totalRevenueImpact,
       vacationsByMonth: Object.values(vacationsByMonth),
       professionalImpacts,
+      alerts: alerts.slice(0, 10), // Top 10 alerts
     };
 
     return NextResponse.json(dashboardData);

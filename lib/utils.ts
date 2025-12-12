@@ -78,8 +78,11 @@ export function convertISOToBR(isoDate: string): string {
   return '';
 }
 
-export function cn(...classes: (string | undefined | null | false)[]): string {
-  return classes.filter(Boolean).join(' ');
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 
 // Given acquisition period, compute concessivo period (período concessivo - the 12-month period 

@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 const config: Config = {
   content: [
@@ -9,11 +10,13 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['PT Sans', 'sans-serif'],
+        sans: ["var(--font-sans)", "sans-serif"],
       },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        gray: colors.zinc,
+        blue: colors.indigo,
       },
     },
   },

@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Navbar } from '@/components/Navbar';
-import { Card } from '@/components/Card';
-import { Button } from '@/components/Button';
-import { Input } from '@/components/Input';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Navbar } from '@/components/layout/Navbar';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Professional } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, AlertCircle, Search } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { handleDemoError } from '@/lib/handle-demo-error';
+import { createProfessionalAction, updateProfessionalAction, deleteProfessionalAction } from '@/app/actions/professionals';
 
 export default function ProfessionalsPage() {
   const { data: session } = useSession();
@@ -51,32 +51,20 @@ export default function ProfessionalsPage() {
     setError(null);
 
     try {
-      const url = editingId
-        ? `/api/professionals/${editingId}`
-        : '/api/professionals';
-      
-      const method = editingId ? 'PUT' : 'POST';
+      let result;
+      if (editingId) {
+        result = await updateProfessionalAction(editingId, formData);
+      } else {
+        result = await createProfessionalAction(formData);
+      }
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      const demoError = handleDemoError(response, data);
-
-      if (demoError) {
-        setError(demoError);
+      if (result.error) {
+        setError(result.error);
         return;
       }
 
-      if (response.ok) {
-        await fetchProfessionals();
-        resetForm();
-      } else {
-        setError(data.error || 'Erro ao salvar profissional');
-      }
+      await fetchProfessionals();
+      resetForm();
     } catch (error) {
       console.error('Error saving professional:', error);
       setError('Erro ao salvar profissional');
@@ -101,23 +89,14 @@ export default function ProfessionalsPage() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/professionals/${id}`, {
-        method: 'DELETE',
-      });
+      const result = await deleteProfessionalAction(id);
 
-      const data = await response.json();
-      const demoError = handleDemoError(response, data);
-
-      if (demoError) {
-        setError(demoError);
+      if (result.error) {
+        setError(result.error);
         return;
       }
 
-      if (response.ok) {
-        await fetchProfessionals();
-      } else {
-        setError(data.error || 'Erro ao excluir profissional');
-      }
+      await fetchProfessionals();
     } catch (error) {
       console.error('Error deleting professional:', error);
       setError('Erro ao excluir profissional');
@@ -144,15 +123,6 @@ export default function ProfessionalsPage() {
       );
     });
   }, [professionals, searchQuery]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <LoadingSpinner />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -267,73 +237,97 @@ export default function ProfessionalsPage() {
           </Card>
         )}
 
-        {/* Professionals List */}
-        {professionals.length === 0 ? (
-          <Card>
-            <div className="text-center py-12">
-              <p className="text-gray-600 dark:text-gray-400">
-                Nenhum profissional cadastrado
-              </p>
-            </div>
-          </Card>
-        ) : filteredProfessionals.length === 0 ? (
-          <Card>
-            <div className="text-center py-12">
-              <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">
-                Nenhum profissional encontrado para &quot;{searchQuery}&quot;
-              </p>
-            </div>
-          </Card>
+        {/* Loading State */}
+        {loading ? (
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             {[...Array(6)].map((_, i) => (
+               <Card key={i}>
+                 <div className="space-y-3">
+                   <div>
+                     <Skeleton className="h-6 w-3/4 mb-2" />
+                     <Skeleton className="h-4 w-1/2" />
+                   </div>
+                   <div className="pt-3 border-t dark:border-gray-700">
+                     <Skeleton className="h-4 w-1/3 mb-1" />
+                     <Skeleton className="h-6 w-1/2" />
+                   </div>
+                   <div className="flex gap-2 pt-2">
+                     <Skeleton className="h-9 flex-1" />
+                     <Skeleton className="h-9 flex-1" />
+                   </div>
+                 </div>
+               </Card>
+             ))}
+           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProfessionals.map((professional) => (
-              <Card key={professional.id}>
-                <div className="space-y-3">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                      {professional.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Gestor: {professional.clientManager}
-                    </p>
-                  </div>
+          /* Professionals List */
+          professionals.length === 0 ? (
+            <Card>
+              <div className="text-center py-12">
+                <p className="text-gray-600 dark:text-gray-400">
+                  Nenhum profissional cadastrado
+                </p>
+              </div>
+            </Card>
+          ) : filteredProfessionals.length === 0 ? (
+            <Card>
+              <div className="text-center py-12">
+                <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">
+                  Nenhum profissional encontrado para &quot;{searchQuery}&quot;
+                </p>
+              </div>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProfessionals.map((professional) => (
+                <Card key={professional.id}>
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                        {professional.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Gestor: {professional.clientManager}
+                      </p>
+                    </div>
 
-                  <div className="pt-3 border-t dark:border-gray-700">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                      Faturamento Mensal
-                    </p>
-                    <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                      {formatCurrency(professional.monthlyRevenue)}
-                    </p>
-                  </div>
+                    <div className="pt-3 border-t dark:border-gray-700">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Faturamento Mensal
+                      </p>
+                      <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                        {formatCurrency(professional.monthlyRevenue)}
+                      </p>
+                    </div>
 
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => handleEdit(professional)}
-                      disabled={isDemo}
-                      className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                      <span className="ml-2 font-medium">Editar</span>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      onClick={() => handleDelete(professional.id)}
-                      disabled={isDemo}
-                      className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span className="ml-2 font-medium">Excluir</span>
-                    </Button>
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleEdit(professional)}
+                        disabled={isDemo}
+                        className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        <span className="ml-2 font-medium">Editar</span>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(professional.id)}
+                        disabled={isDemo}
+                        className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span className="ml-2 font-medium">Excluir</span>
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          )
         )}
       </div>
     </div>

@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Input } from '@/components/Input';
-import { Button } from '@/components/Button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 
