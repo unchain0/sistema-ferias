@@ -57,6 +57,7 @@ export function SingleDatePicker({
             onSelect={onDateChange}
             locale={ptBR}
             disabled={disabled}
+            required={false}
           />
         </PopoverContent>
       </Popover>
