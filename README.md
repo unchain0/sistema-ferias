@@ -41,7 +41,7 @@ Configure as variáveis de ambiente
 Crie um arquivo `.env.local` na raiz do projeto:
 
 ```env
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:5000
 NEXTAUTH_SECRET=your-secret-key-here
 ```
 
