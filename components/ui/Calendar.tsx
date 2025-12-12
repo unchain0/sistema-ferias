@@ -35,7 +35,6 @@ function Calendar({
         head_cell:
           "text-gray-500 rounded-md w-9 font-normal text-[0.8rem] dark:text-gray-400",
         row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-gray-100/50 [&:has([aria-selected])]:bg-gray-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 dark:[&:has([aria-selected].day-outside)]:bg-gray-800/50 dark:[&:has([aria-selected])]:bg-gray-800",
         day: cn(
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
@@ -55,13 +54,8 @@ function Calendar({
         weekdays: "flex",
         weekday: "text-gray-500 rounded-md w-9 font-normal text-[0.8rem] dark:text-gray-400",
         week: "flex w-full mt-2",
-        // In v9 'day' is the cell (td)
-        day: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-gray-100/50 [&:has([aria-selected])]:bg-gray-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 dark:[&:has([aria-selected].day-outside)]:bg-gray-800/50 dark:[&:has([aria-selected])]:bg-gray-800",
-        // In v9 'day_button' is the button
-        day_button: cn(
-          buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-        ),
+        // In v9 'day' is actually the button and 'cell' is the cell
+        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-gray-100/50 [&:has([aria-selected])]:bg-gray-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 dark:[&:has([aria-selected].day-outside)]:bg-gray-800/50 dark:[&:has([aria-selected])]:bg-gray-800",
         range_start: "day-range-start",
         range_end: "day-range-end",
         selected:
