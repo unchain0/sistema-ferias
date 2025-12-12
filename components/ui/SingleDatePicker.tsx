@@ -53,7 +53,7 @@ export function SingleDatePicker({
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
-            selected={date}
+            selected={date || undefined}
             onSelect={onDateChange}
             locale={ptBR}
             disabled={disabled}
