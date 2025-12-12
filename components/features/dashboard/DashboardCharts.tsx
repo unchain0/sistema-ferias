@@ -92,87 +92,91 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
   const gridStroke = isDark ? '#27272a' : '#f4f4f5'; // Zinc 800 / Zinc 100
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+      <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm h-full flex flex-col">
         <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Férias por Período</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={processedData}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
-            <XAxis
-              dataKey="month"
-              stroke={axisStroke}
-              tick={axisTick}
-              tickLine={false}
-              axisLine={false}
-              style={{ fontSize: '12px', fontWeight: 500 }}
-              dy={10}
-            />
-            <YAxis
-              stroke={axisStroke}
-              tick={axisTick}
-              tickLine={false}
-              axisLine={false}
-              style={{ fontSize: '12px' }}
-              dx={-10}
-            />
-            <Tooltip
-              formatter={(v: number) => [`${v}`, 'Dias']}
-              contentStyle={tooltipStyles}
-              cursor={{ fill: isDark ? '#27272a' : '#f4f4f5', opacity: 0.5 }}
-              labelStyle={{ color: tooltipStyles.color, fontWeight: 600, marginBottom: '0.25rem' }}
-              itemStyle={{ color: tooltipStyles.color }}
-            />
-            <Bar
-              dataKey="count"
-              fill="#4f46e5"
-              name="Dias de Férias"
-              radius={[4, 4, 0, 0]}
-              isAnimationActive={shouldAnimate}
-              animationDuration={1000}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="flex-1 min-h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={processedData}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
+              <XAxis
+                dataKey="month"
+                stroke={axisStroke}
+                tick={axisTick}
+                tickLine={false}
+                axisLine={false}
+                style={{ fontSize: '12px', fontWeight: 500 }}
+                dy={10}
+              />
+              <YAxis
+                stroke={axisStroke}
+                tick={axisTick}
+                tickLine={false}
+                axisLine={false}
+                style={{ fontSize: '12px' }}
+                dx={-10}
+              />
+              <Tooltip
+                formatter={(v: number) => [`${v}`, 'Dias']}
+                contentStyle={tooltipStyles}
+                cursor={{ fill: isDark ? '#27272a' : '#f4f4f5', opacity: 0.5 }}
+                labelStyle={{ color: tooltipStyles.color, fontWeight: 600, marginBottom: '0.25rem' }}
+                itemStyle={{ color: tooltipStyles.color }}
+              />
+              <Bar
+                dataKey="count"
+                fill="#4f46e5"
+                name="Dias de Férias"
+                radius={[4, 4, 0, 0]}
+                isAnimationActive={shouldAnimate}
+                animationDuration={1000}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm h-full">
+      <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm h-full flex flex-col">
         <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Impacto Financeiro</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={processedData}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
-            <XAxis
-              dataKey="month"
-              stroke={axisStroke}
-              tick={axisTick}
-              tickLine={false}
-              axisLine={false}
-              style={{ fontSize: '12px', fontWeight: 500 }}
-              dy={10}
-            />
-            <YAxis
-              stroke={axisStroke}
-              tick={axisTick}
-              tickLine={false}
-              axisLine={false}
-              style={{ fontSize: '12px' }}
-              dx={-10}
-            />
-            <Tooltip
-              formatter={(v: number) => [formatCurrency(v), 'Impacto']}
-              contentStyle={tooltipStyles}
-              cursor={{ fill: isDark ? '#27272a' : '#f4f4f5', opacity: 0.5 }}
-              labelStyle={{ color: tooltipStyles.color, fontWeight: 600, marginBottom: '0.25rem' }}
-              itemStyle={{ color: tooltipStyles.color }}
-            />
-            <Bar
-              dataKey="impact"
-              fill="#e11d48"
-              name="Impacto (R$)"
-              radius={[4, 4, 0, 0]}
-              isAnimationActive={shouldAnimate}
-              animationDuration={1000}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="flex-1 min-h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={processedData}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
+              <XAxis
+                dataKey="month"
+                stroke={axisStroke}
+                tick={axisTick}
+                tickLine={false}
+                axisLine={false}
+                style={{ fontSize: '12px', fontWeight: 500 }}
+                dy={10}
+              />
+              <YAxis
+                stroke={axisStroke}
+                tick={axisTick}
+                tickLine={false}
+                axisLine={false}
+                style={{ fontSize: '12px' }}
+                dx={-10}
+              />
+              <Tooltip
+                formatter={(v: number) => [formatCurrency(v), 'Impacto']}
+                contentStyle={tooltipStyles}
+                cursor={{ fill: isDark ? '#27272a' : '#f4f4f5', opacity: 0.5 }}
+                labelStyle={{ color: tooltipStyles.color, fontWeight: 600, marginBottom: '0.25rem' }}
+                itemStyle={{ color: tooltipStyles.color }}
+              />
+              <Bar
+                dataKey="impact"
+                fill="#e11d48"
+                name="Impacto (R$)"
+                radius={[4, 4, 0, 0]}
+                isAnimationActive={shouldAnimate}
+                animationDuration={1000}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );
