@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Professional } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, AlertCircle, Search } from 'lucide-react';
@@ -262,13 +263,11 @@ export default function ProfessionalsPage() {
         ) : (
           /* Professionals List */
           professionals.length === 0 ? (
-            <Card>
-              <div className="text-center py-12">
-                <p className="text-gray-600 dark:text-gray-400">
-                  Nenhum profissional cadastrado
-                </p>
-              </div>
-            </Card>
+            <EmptyState
+              icon="users"
+              title="Nenhum profissional cadastrado"
+              description="Adicione profissionais para gerenciar seus faturamentos e períodos de férias"
+            />
           ) : filteredProfessionals.length === 0 ? (
             <Card>
               <div className="text-center py-12">

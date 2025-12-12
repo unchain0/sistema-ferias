@@ -5,6 +5,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { CalendarDateRangePicker } from '@/components/ui/CalendarDateRangePicker';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { DashboardData } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import dynamic from 'next/dynamic';
@@ -169,14 +170,32 @@ export default function DashboardPage() {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             {/* Charts Section - Takes up 2/3 width on large screens */}
-            <div className="xl:col-span-2 space-y-6">
+            <div className="xl:col-span-2 h-full min-h-[400px] space-y-6">
                 {loading && !data ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <Skeleton className="h-[360px] w-full" />
-                    <Skeleton className="h-[360px] w-full" />
+                    <Skeleton className="h-[400px] w-full" />
+                    <Skeleton className="h-[400px] w-full" />
                 </div>
                 ) : (
-                data && deferredChartData.length > 0 && (
+                !loading && data && data.totalProfessionals === 0 ? (
+                  <EmptyState
+                    icon="users"
+                    title="Nenhum profissional cadastrado"
+                    description="Cadastre profissionais para visualizar métricas financeiras e impactos de férias"
+                  />
+                ) : !loading && data && deferredChartData.length === 0 ? (
+                  <EmptyState
+                    icon="calendar"
+                    title="Nenhuma férias registrada"
+                    description="Cadastre períodos de férias para visualizar métricas financeiras e impactos"
+                  />
+                ) : !loading && !data ? (
+                  <Card className="w-full h-full flex items-center justify-center">
+                    <div className="text-center py-12">
+                      <p className="text-red-500">Erro ao carregar dados do dashboard.</p>
+                    </div>
+                  </Card>
+                ) : data && deferredChartData.length > 0 && (
                     <DashboardCharts data={deferredChartData} shouldAnimate={shouldAnimate} formatCurrency={formatCurrency} />
                 )
                 )}
@@ -191,27 +210,6 @@ export default function DashboardPage() {
                 )}
             </div>
         </div>
-
-        {/* Empty State */}
-        {!loading && data && data.totalProfessionals === 0 && (
-          <Card className="mt-6">
-            <div className="text-center py-12">
-              <DollarSign className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Nenhum dado disponível
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Comece cadastrando profissionais e períodos de férias
-              </p>
-            </div>
-          </Card>
-        )}
-        
-        {!loading && !data && (
-           <div className="text-center py-12">
-             <p className="text-red-500">Erro ao carregar dados do dashboard.</p>
-           </div>
-        )}
       </div>
     </div>
   );

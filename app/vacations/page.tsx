@@ -6,6 +6,8 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { SingleDatePicker } from '@/components/ui/SingleDatePicker';
 import { Professional, VacationPeriod } from '@/types';
 import { formatCurrency, computeConcessivePeriod, formatDateToPtBR, formatDateForInput } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, Calendar, AlertCircle, Search } from 'lucide-react';
@@ -25,10 +27,10 @@ export default function VacationsPage() {
   
   const [formData, setFormData] = useState({
     professionalId: '',
-    acquisitionStartDate: '',
-    acquisitionEndDate: '',
-    usageStartDate: '',
-    usageEndDate: '',
+    acquisitionStartDate: null as Date | null,
+    acquisitionEndDate: null as Date | null,
+    usageStartDate: null as Date | null,
+    usageEndDate: null as Date | null,
   });
 
   useEffect(() => {
@@ -59,12 +61,31 @@ export default function VacationsPage() {
     e.preventDefault();
     setError(null);
 
+    // Validação dos campos obrigatórios
+    if (!formData.professionalId) {
+      setError('Por favor, selecione um profissional.');
+      return;
+    }
+    if (!formData.acquisitionStartDate || !formData.acquisitionEndDate || !formData.usageStartDate || !formData.usageEndDate) {
+      setError('Por favor, preencha todas as datas.');
+      return;
+    }
+
+    // Converter datas para string no formato adequado
+    const formattedData = {
+      professionalId: formData.professionalId,
+      acquisitionStartDate: formData.acquisitionStartDate ? formatDateForInput(formData.acquisitionStartDate) : '',
+      acquisitionEndDate: formData.acquisitionEndDate ? formatDateForInput(formData.acquisitionEndDate) : '',
+      usageStartDate: formData.usageStartDate ? formatDateForInput(formData.usageStartDate) : '',
+      usageEndDate: formData.usageEndDate ? formatDateForInput(formData.usageEndDate) : '',
+    };
+
     try {
       let result;
       if (editingId) {
-        result = await updateVacation(editingId, formData);
+        result = await updateVacation(editingId, formattedData);
       } else {
-        result = await createVacation(formData);
+        result = await createVacation(formattedData);
       }
 
       if (result.error) {
@@ -83,10 +104,10 @@ export default function VacationsPage() {
   const handleEdit = (vacation: VacationPeriod) => {
     setFormData({
       professionalId: vacation.professionalId,
-      acquisitionStartDate: formatDateForInput(vacation.acquisitionStartDate),
-      acquisitionEndDate: formatDateForInput(vacation.acquisitionEndDate),
-      usageStartDate: formatDateForInput(vacation.usageStartDate),
-      usageEndDate: formatDateForInput(vacation.usageEndDate),
+      acquisitionStartDate: vacation.acquisitionStartDate ? new Date(vacation.acquisitionStartDate) : null,
+      acquisitionEndDate: vacation.acquisitionEndDate ? new Date(vacation.acquisitionEndDate) : null,
+      usageStartDate: vacation.usageStartDate ? new Date(vacation.usageStartDate) : null,
+      usageEndDate: vacation.usageEndDate ? new Date(vacation.usageEndDate) : null,
     });
     setEditingId(vacation.id);
     setShowForm(true);
@@ -117,10 +138,10 @@ export default function VacationsPage() {
   const resetForm = () => {
     setFormData({
       professionalId: '',
-      acquisitionStartDate: '',
-      acquisitionEndDate: '',
-      usageStartDate: '',
-      usageEndDate: '',
+      acquisitionStartDate: null,
+      acquisitionEndDate: null,
+      usageStartDate: null,
+      usageEndDate: null,
     });
     setEditingId(null);
     setShowForm(false);
@@ -202,17 +223,11 @@ export default function VacationsPage() {
 
         {/* Empty state when no professionals */}
         {professionals.length === 0 && !loading && (
-          <Card>
-            <div className="text-center py-12">
-              <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Nenhum profissional cadastrado
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Cadastre profissionais antes de adicionar períodos de férias
-              </p>
-            </div>
-          </Card>
+          <EmptyState
+            icon="calendar"
+            title="Nenhum profissional cadastrado"
+            description="Cadastre profissionais para poder gerenciar seus períodos de férias"
+          />
         )}
 
         {/* Form */}
@@ -251,25 +266,36 @@ export default function VacationsPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Início Período Aquisitivo"
-                  type="date"
-                  value={formData.acquisitionStartDate}
-                  onChange={(e) => setFormData({ ...formData, acquisitionStartDate: e.target.value })}
-                  required
-                />
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                    Início Período Aquisitivo
+                  </label>
+                  <SingleDatePicker
+                    date={formData.acquisitionStartDate}
+                    onDateChange={(date) => setFormData({ ...formData, acquisitionStartDate: date })}
+                    placeholder="Selecione a data"
+                    disabled={false}
+                  />
+                </div>
 
-                <Input
-                  label="Fim Período Aquisitivo"
-                  type="date"
-                  value={formData.acquisitionEndDate}
-                  onChange={(e) => setFormData({ ...formData, acquisitionEndDate: e.target.value })}
-                  required
-                />
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                    Fim Período Aquisitivo
+                  </label>
+                  <SingleDatePicker
+                    date={formData.acquisitionEndDate}
+                    onDateChange={(date) => setFormData({ ...formData, acquisitionEndDate: date })}
+                    placeholder="Selecione a data"
+                    disabled={false}
+                  />
+                </div>
               </div>
 
               {(formData.acquisitionStartDate && formData.acquisitionEndDate) && (() => {
-                const concessivePeriod = computeConcessivePeriod(formData.acquisitionStartDate, formData.acquisitionEndDate);
+                const concessivePeriod = computeConcessivePeriod(
+                  formData.acquisitionStartDate.toISOString().split('T')[0],
+                  formData.acquisitionEndDate.toISOString().split('T')[0]
+                );
                 return (
                   <div className="text-sm text-gray-700 dark:text-gray-300">
                     <span className="font-semibold">Período Concessivo: </span>
@@ -281,21 +307,29 @@ export default function VacationsPage() {
               })()}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Início Período de Gozo"
-                  type="date"
-                  value={formData.usageStartDate}
-                  onChange={(e) => setFormData({ ...formData, usageStartDate: e.target.value })}
-                  required
-                />
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                    Início Período de Gozo
+                  </label>
+                  <SingleDatePicker
+                    date={formData.usageStartDate}
+                    onDateChange={(date) => setFormData({ ...formData, usageStartDate: date })}
+                    placeholder="Selecione a data"
+                    disabled={false}
+                  />
+                </div>
 
-                <Input
-                  label="Fim Período de Gozo"
-                  type="date"
-                  value={formData.usageEndDate}
-                  onChange={(e) => setFormData({ ...formData, usageEndDate: e.target.value })}
-                  required
-                />
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                    Fim Período de Gozo
+                  </label>
+                  <SingleDatePicker
+                    date={formData.usageEndDate}
+                    onDateChange={(date) => setFormData({ ...formData, usageEndDate: date })}
+                    placeholder="Selecione a data"
+                    disabled={false}
+                  />
+                </div>
               </div>
 
               <div className="flex space-x-3">
@@ -336,13 +370,11 @@ export default function VacationsPage() {
 
         {/* Vacations List */}
         {!loading && professionals.length > 0 && vacations.length === 0 && !showForm && (
-          <Card>
-            <div className="text-center py-12">
-              <p className="text-gray-600 dark:text-gray-400">
-                Nenhum período de férias cadastrado
-              </p>
-            </div>
-          </Card>
+          <EmptyState
+            icon="calendar"
+            title="Nenhum período de férias registrado"
+            description="Adicione períodos de férias para gerenciar os períodos aquisitivos e de gozo"
+          />
         )}
 
         {!loading && vacations.length > 0 && filteredVacations.length === 0 && (
