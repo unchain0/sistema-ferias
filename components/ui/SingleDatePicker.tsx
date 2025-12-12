@@ -16,8 +16,8 @@ import {
 
 interface SingleDatePickerProps {
   className?: string;
-  date?: Date;
-  onDateChange: (date: Date | undefined) => void;
+  date?: Date | null;
+  onDateChange: (date: Date | null) => void;
   placeholder?: string;
   disabled?: boolean;
 }
