@@ -272,7 +272,7 @@ export default function VacationsPage() {
                   </label>
                   <SingleDatePicker
                     date={formData.acquisitionStartDate}
-                    onDateChange={(date) => setFormData({ ...formData, acquisitionStartDate: date })}
+                    onDateChange={(date) => setFormData({ ...formData, acquisitionStartDate: date || null })}
                     placeholder="Selecione a data"
                     disabled={false}
                   />
@@ -284,7 +284,7 @@ export default function VacationsPage() {
                   </label>
                   <SingleDatePicker
                     date={formData.acquisitionEndDate}
-                    onDateChange={(date) => setFormData({ ...formData, acquisitionEndDate: date })}
+                    onDateChange={(date) => setFormData({ ...formData, acquisitionEndDate: date || null })}
                     placeholder="Selecione a data"
                     disabled={false}
                   />
@@ -313,7 +313,7 @@ export default function VacationsPage() {
                   </label>
                   <SingleDatePicker
                     date={formData.usageStartDate}
-                    onDateChange={(date) => setFormData({ ...formData, usageStartDate: date })}
+                    onDateChange={(date) => setFormData({ ...formData, usageStartDate: date || null })}
                     placeholder="Selecione a data"
                     disabled={false}
                   />
@@ -325,7 +325,7 @@ export default function VacationsPage() {
                   </label>
                   <SingleDatePicker
                     date={formData.usageEndDate}
-                    onDateChange={(date) => setFormData({ ...formData, usageEndDate: date })}
+                    onDateChange={(date) => setFormData({ ...formData, usageEndDate: date || null })}
                     placeholder="Selecione a data"
                     disabled={false}
                   />
