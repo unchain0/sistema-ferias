@@ -29,14 +29,14 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        toast.error('❌ Email ou senha incorretos');
+        toast.error('Email ou senha incorretos');
       } else {
-        toast.success('✅ Login realizado com sucesso!');
+        toast.success('Login realizado com sucesso!');
         router.push('/dashboard');
         router.refresh();
       }
     } catch {
-      toast.error('❌ Erro ao fazer login');
+      toast.error('Erro ao fazer login');
     } finally {
       setLoading(false);
     }
@@ -53,14 +53,14 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        toast.error('❌ Erro ao acessar demonstração');
+        toast.error('Erro ao acessar demonstração');
       } else {
-        toast.success('✅ Acesso demo liberado!');
+        toast.success('Acesso demo liberado!');
         router.push('/dashboard');
         router.refresh();
       }
     } catch {
-      toast.error('❌ Erro ao acessar demonstração');
+      toast.error('Erro ao acessar demonstração');
     } finally {
       setDemoLoading(false);
     }

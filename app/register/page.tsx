@@ -33,25 +33,25 @@ export default function RegisterPage() {
 
     // Validação básica do formulário
     if (!name || !email || !password || !confirmPassword) {
-      toast.error('❌ Todos os campos são obrigatórios');
+      toast.error('Todos os campos são obrigatórios');
       return;
     }
 
     // Validação de email
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.error('❌ Por favor, insira um email válido');
+      toast.error('Por favor, insira um email válido');
       return;
     }
 
     // Validação de senha
     if (password !== confirmPassword) {
-      toast.error('❌ As senhas não coincidem');
+      toast.error('As senhas não coincidem');
       return;
     }
 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
-      toast.error(`❌ ${passwordValidation.message}`);
+      toast.error(passwordValidation.message || 'Senha inválida');
       return;
     }
 
@@ -67,13 +67,13 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(`❌ ${data.error || 'Erro ao criar conta'}`);
+        toast.error(data.error || 'Erro ao criar conta');
       } else {
-        toast.success('✅ Conta criada com sucesso!');
+        toast.success('Conta criada com sucesso!');
         router.push('/login');
       }
     } catch {
-      toast.error('❌ Erro ao criar conta');
+      toast.error('Erro ao criar conta');
     } finally {
       setLoading(false);
     }
