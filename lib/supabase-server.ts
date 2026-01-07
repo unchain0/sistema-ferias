@@ -11,7 +11,7 @@ function requireEnv(name: string): string {
   return v;
 }
 
-export function createSupabaseForClaims(claims: Record<string, any>) {
+export function createSupabaseForClaims(claims: Record<string, string | number | boolean>) {
   const supabaseUrl = requireEnv('NEXT_PUBLIC_SUPABASE_URL');
   const anonKey = requireEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY');
   const jwtSecret = requireEnv('SUPABASE_JWT_SECRET');

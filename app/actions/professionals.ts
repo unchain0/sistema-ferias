@@ -4,10 +4,16 @@ import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/lib/auth-config';
-import { createProfessional, deleteProfessional, updateProfessional } from '@/lib/db';
 import { isDemoUser } from '@/lib/demo-protection';
+import { professionalRepository } from '@/lib/di';
 
-export async function createProfessionalAction(formData: any) {
+interface ProfessionalFormData {
+  name: string;
+  clientManager: string;
+  monthlyRevenue: string;
+}
+
+export async function createProfessionalAction(formData: ProfessionalFormData) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -25,7 +31,7 @@ export async function createProfessionalAction(formData: any) {
   }
 
   try {
-    await createProfessional({
+    await professionalRepository.createProfessional({
       userId: session.user.id,
       name,
       clientManager,
@@ -41,7 +47,10 @@ export async function createProfessionalAction(formData: any) {
   }
 }
 
-export async function updateProfessionalAction(id: string, formData: any) {
+export async function updateProfessionalAction(
+  id: string,
+  formData: Partial<ProfessionalFormData>,
+) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -55,7 +64,7 @@ export async function updateProfessionalAction(id: string, formData: any) {
   const { name, clientManager, monthlyRevenue } = formData;
 
   try {
-    await updateProfessional(id, session.user.id, {
+    await professionalRepository.updateProfessional(id, session.user.id, {
       name,
       clientManager,
       monthlyRevenue: monthlyRevenue ? parseFloat(monthlyRevenue) : undefined,
@@ -82,7 +91,7 @@ export async function deleteProfessionalAction(id: string) {
   }
 
   try {
-    await deleteProfessional(id, session.user.id);
+    await professionalRepository.deleteProfessional(id, session.user.id);
     revalidatePath('/professionals');
     revalidatePath('/dashboard');
     return { success: true };

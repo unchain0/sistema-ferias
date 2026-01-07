@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/lib/auth-config';
-import { createVacationPeriod, getProfessionalById, getVacationPeriods } from '@/lib/db';
 import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
+import { professionalRepository, vacationRepository } from '@/lib/di';
 import { calculateRevenueDeduction, calculateVacationDays } from '@/lib/utils';
 import { VacationPeriod } from '@/types';
 
@@ -41,13 +41,13 @@ export async function GET(request: Request) {
   ];
   const validatedOrderField = validOrderFields.includes(orderField) ? orderField : 'createdAt';
 
-  const all = await getVacationPeriods(session.user.id);
+  const all = await vacationRepository.getVacationPeriods(session.user.id);
 
   // Stable sort to avoid shifting order between responses
   const sorted = [...all].sort((a, b) => {
     const dir = orderDir?.toLowerCase() === 'asc' ? 1 : -1;
-    const aVal = (a as any)[validatedOrderField as keyof VacationPeriod] ?? '';
-    const bVal = (b as any)[validatedOrderField as keyof VacationPeriod] ?? '';
+    const aVal = a[validatedOrderField as keyof VacationPeriod] ?? '';
+    const bVal = b[validatedOrderField as keyof VacationPeriod] ?? '';
     if (aVal < bVal) return -1 * dir;
     if (aVal > bVal) return 1 * dir;
     // tie-breaker by id for determinism
@@ -96,7 +96,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Todos os campos são obrigatórios' }, { status: 400 });
     }
 
-    const professional = await getProfessionalById(professionalId, session.user.id);
+    const professional = await professionalRepository.getProfessionalById(
+      professionalId,
+      session.user.id,
+    );
 
     if (!professional) {
       return NextResponse.json({ error: 'Profissional não encontrado' }, { status: 404 });
@@ -105,7 +108,7 @@ export async function POST(request: Request) {
     const totalDays = calculateVacationDays(usageStartDate, usageEndDate);
     const revenueDeduction = calculateRevenueDeduction(professional.monthlyRevenue, totalDays);
 
-    const created = await createVacationPeriod({
+    const created = await vacationRepository.createVacationPeriod({
       professionalId,
       userId: session.user.id,
       acquisitionStartDate,

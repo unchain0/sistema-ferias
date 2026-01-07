@@ -1,7 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-import { authenticateUser } from './auth';
+import { authService } from './di';
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -17,7 +17,7 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await authenticateUser(credentials.email, credentials.password);
+        const user = await authService.authenticateUser(credentials.email, credentials.password);
 
         if (!user) {
           return null;

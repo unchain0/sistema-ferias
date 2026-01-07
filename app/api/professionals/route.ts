@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/lib/auth-config';
-import { createProfessional, getProfessionals } from '@/lib/db';
 import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
+import { professionalRepository } from '@/lib/di';
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   const limit = limitParam ? Math.min(Math.max(parseInt(limitParam, 10) || 50, 1), 200) : null;
   const offset = offsetParam ? Math.max(parseInt(offsetParam, 10) || 0, 0) : null;
 
-  const all = await getProfessionals(session.user.id);
+  const all = await professionalRepository.getProfessionals(session.user.id);
 
   let professionals = all;
   if (limit !== null && offset !== null) {
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Todos os campos são obrigatórios' }, { status: 400 });
     }
 
-    const created = await createProfessional({
+    const created = await professionalRepository.createProfessional({
       userId: session.user.id,
       name,
       clientManager,

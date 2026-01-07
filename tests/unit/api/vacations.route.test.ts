@@ -13,8 +13,10 @@ describe('Vacations API routes', () => {
       getServerSession: vi.fn(async () => null),
     }));
 
-    vi.doMock('@/lib/db', () => ({
-      getVacationPeriods: vi.fn(),
+    vi.doMock('@/lib/di', () => ({
+      vacationRepository: {
+        getVacationPeriods: vi.fn(),
+      },
     }));
 
     const { GET } = await import('@/app/api/vacations/route');
@@ -27,33 +29,38 @@ describe('Vacations API routes', () => {
       getServerSession: vi.fn(async () => ({ user: { id: 'u1', email: 'u1@test.com' } })),
     }));
 
-    vi.doMock('@/lib/db', () => ({
-      getVacationPeriods: vi.fn(async () => [
-        {
-          id: 'v1',
-          professionalId: 'p1',
-          userId: 'u1',
-          acquisitionStartDate: '2024-01-01',
-          acquisitionEndDate: '2024-12-31',
-          usageStartDate: '2026-01-01',
-          usageEndDate: '2026-01-05',
-          totalDays: 5,
-          revenueDeduction: 100,
-          createdAt: '2026-01-01',
-        },
-        {
-          id: 'v2',
-          professionalId: 'p1',
-          userId: 'u1',
-          acquisitionStartDate: '2024-01-01',
-          acquisitionEndDate: '2024-12-31',
-          usageStartDate: '2026-02-01',
-          usageEndDate: '2026-02-05',
-          totalDays: 5,
-          revenueDeduction: 100,
-          createdAt: '2026-02-01',
-        },
-      ]),
+    vi.doMock('@/lib/di', () => ({
+      vacationRepository: {
+        getVacationPeriods: vi.fn(async () => [
+          {
+            id: 'v1',
+            professionalId: 'p1',
+            userId: 'u1',
+            acquisitionStartDate: '2024-01-01',
+            acquisitionEndDate: '2024-12-31',
+            usageStartDate: '2026-01-01',
+            usageEndDate: '2026-01-05',
+            totalDays: 5,
+            revenueDeduction: 100,
+            createdAt: '2026-01-01',
+          },
+          {
+            id: 'v2',
+            professionalId: 'p1',
+            userId: 'u1',
+            acquisitionStartDate: '2024-01-01',
+            acquisitionEndDate: '2024-12-31',
+            usageStartDate: '2026-02-01',
+            usageEndDate: '2026-02-05',
+            totalDays: 5,
+            revenueDeduction: 100,
+            createdAt: '2026-02-01',
+          },
+        ]),
+      },
+      professionalRepository: {
+        getProfessionalById: vi.fn(),
+      },
     }));
 
     const { GET } = await import('@/app/api/vacations/route');
@@ -79,10 +86,14 @@ describe('Vacations API routes', () => {
       createDemoProtectionResponse: vi.fn(),
     }));
 
-    vi.doMock('@/lib/db', () => ({
-      getVacationPeriods: vi.fn(),
-      getProfessionalById: vi.fn(async () => null),
-      createVacationPeriod: vi.fn(),
+    vi.doMock('@/lib/di', () => ({
+      vacationRepository: {
+        getVacationPeriods: vi.fn(),
+        createVacationPeriod: vi.fn(),
+      },
+      professionalRepository: {
+        getProfessionalById: vi.fn(async () => null),
+      },
     }));
 
     const { POST } = await import('@/app/api/vacations/route');

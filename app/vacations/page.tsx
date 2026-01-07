@@ -59,15 +59,7 @@ export default function VacationsPage() {
     usageEndDate: null as Date | null,
   });
 
-  useEffect(() => {
-    if (page === 0) {
-      fetchData();
-    } else {
-      loadMoreVacations();
-    }
-  }, [page]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [vacationsRes, professionalsRes] = await Promise.all([
@@ -87,9 +79,9 @@ export default function VacationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadMoreVacations = async () => {
+  const loadMoreVacations = useCallback(async () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
     try {
@@ -106,9 +98,17 @@ export default function VacationsPage() {
     } finally {
       setLoadingMore(false);
     }
-  };
+  }, [loadingMore, hasMore, page]);
 
-  const fetchAllForSearch = async () => {
+  useEffect(() => {
+    if (page === 0) {
+      fetchData();
+    } else {
+      loadMoreVacations();
+    }
+  }, [page, fetchData, loadMoreVacations]);
+
+  const fetchAllForSearch = useCallback(async () => {
     try {
       const response = await fetch('/api/vacations?order=createdAt:desc');
       if (response.ok) {
@@ -119,7 +119,7 @@ export default function VacationsPage() {
     } catch (error) {
       console.error('Error fetching all vacations for search:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (searchQuery !== '') {
@@ -127,7 +127,7 @@ export default function VacationsPage() {
     } else if (page === 0) {
       fetchData();
     }
-  }, [searchQuery]);
+  }, [searchQuery, page, fetchAllForSearch, fetchData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

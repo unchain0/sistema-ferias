@@ -86,9 +86,13 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
       mql.addEventListener('change', apply);
       return () => mql.removeEventListener('change', apply);
     } else {
-      (mql as any).addListener(apply);
+      const legacyMql = mql as MediaQueryList & {
+        addListener: (cb: (e: MediaQueryListEvent) => void) => void;
+        removeListener: (cb: (e: MediaQueryListEvent) => void) => void;
+      };
+      legacyMql.addListener(apply);
       return () => {
-        (mql as any).removeListener(apply);
+        legacyMql.removeListener(apply);
       };
     }
   }, []);

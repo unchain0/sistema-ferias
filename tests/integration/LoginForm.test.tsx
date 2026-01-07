@@ -9,7 +9,7 @@ const mockPush = vi.fn();
 const mockRefresh = vi.fn();
 
 vi.mock('next-auth/react', () => ({
-  signIn: (...args: any[]) => mockSignIn(...args),
+  signIn: (...args: unknown[]) => mockSignIn(...args),
 }));
 
 vi.mock('next/navigation', () => ({

@@ -56,8 +56,8 @@ export default function DashboardPage() {
         const dashboardData = await response.json();
         setData(dashboardData);
       }
-    } catch (error: any) {
-      if (error?.name !== 'AbortError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name !== 'AbortError') {
         console.error('Error fetching dashboard:', error);
       }
     } finally {

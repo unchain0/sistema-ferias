@@ -11,12 +11,12 @@ export async function getUsers(): Promise<User[]> {
   const { data, error } = await supabaseAdmin.from('users').select('*');
 
   if (error) throw error;
-  return (data || []).map((u: any) => ({
-    id: u.id,
-    email: u.email,
-    name: u.name,
-    password: u.password,
-    createdAt: u.created_at,
+  return (data || []).map((u: Record<string, unknown>) => ({
+    id: u.id as string,
+    email: u.email as string,
+    name: u.name as string,
+    password: u.password as string,
+    createdAt: u.created_at as string,
   }));
 }
 
@@ -79,14 +79,16 @@ export async function getProfessionals(userId: string): Promise<Professional[]> 
     .select('*')
     .eq('user_id', userId);
   if (error) throw error;
-  return (data || []).map((p: any) => ({
-    id: p.id,
-    userId: p.user_id,
-    name: p.name,
-    clientManager: p.client_manager,
+  return (data || []).map((p: Record<string, unknown>) => ({
+    id: p.id as string,
+    userId: p.user_id as string,
+    name: p.name as string,
+    clientManager: p.client_manager as string,
     monthlyRevenue:
-      typeof p.monthly_revenue === 'string' ? parseFloat(p.monthly_revenue) : p.monthly_revenue,
-    createdAt: p.created_at,
+      typeof p.monthly_revenue === 'string'
+        ? parseFloat(p.monthly_revenue)
+        : (p.monthly_revenue as number),
+    createdAt: p.created_at as string,
   }));
 }
 
@@ -150,7 +152,7 @@ export async function updateProfessional(
   userId: string,
   updates: Partial<Professional>,
 ): Promise<Professional | null> {
-  const updateData: any = {};
+  const updateData: Record<string, unknown> = {};
   if (updates.name) updateData.name = updates.name;
   if (updates.clientManager) updateData.client_manager = updates.clientManager;
   if (updates.monthlyRevenue !== undefined) updateData.monthly_revenue = updates.monthlyRevenue;
@@ -204,20 +206,20 @@ export async function getVacationPeriods(userId: string): Promise<VacationPeriod
     .select('*')
     .eq('user_id', userId);
   if (error) throw error;
-  return (data || []).map((v: any) => ({
-    id: v.id,
-    professionalId: v.professional_id,
-    userId: v.user_id,
-    acquisitionStartDate: v.acquisition_start_date,
-    acquisitionEndDate: v.acquisition_end_date,
-    usageStartDate: v.usage_start_date,
-    usageEndDate: v.usage_end_date,
-    totalDays: v.total_days,
+  return (data || []).map((v: Record<string, unknown>) => ({
+    id: v.id as string,
+    professionalId: v.professional_id as string,
+    userId: v.user_id as string,
+    acquisitionStartDate: v.acquisition_start_date as string,
+    acquisitionEndDate: v.acquisition_end_date as string,
+    usageStartDate: v.usage_start_date as string,
+    usageEndDate: v.usage_end_date as string,
+    totalDays: v.total_days as number,
     revenueDeduction:
       typeof v.revenue_deduction === 'string'
         ? parseFloat(v.revenue_deduction)
-        : v.revenue_deduction,
-    createdAt: v.created_at,
+        : (v.revenue_deduction as number),
+    createdAt: v.created_at as string,
   }));
 }
 
@@ -233,20 +235,20 @@ export async function getVacationsByProfessional(
 
   if (error) throw error;
 
-  return (data || []).map((v: any) => ({
-    id: v.id,
-    professionalId: v.professional_id,
-    userId: v.user_id,
-    acquisitionStartDate: v.acquisition_start_date,
-    acquisitionEndDate: v.acquisition_end_date,
-    usageStartDate: v.usage_start_date,
-    usageEndDate: v.usage_end_date,
-    totalDays: v.total_days,
+  return (data || []).map((v: Record<string, unknown>) => ({
+    id: v.id as string,
+    professionalId: v.professional_id as string,
+    userId: v.user_id as string,
+    acquisitionStartDate: v.acquisition_start_date as string,
+    acquisitionEndDate: v.acquisition_end_date as string,
+    usageStartDate: v.usage_start_date as string,
+    usageEndDate: v.usage_end_date as string,
+    totalDays: v.total_days as number,
     revenueDeduction:
       typeof v.revenue_deduction === 'string'
         ? parseFloat(v.revenue_deduction)
-        : v.revenue_deduction,
-    createdAt: v.created_at,
+        : (v.revenue_deduction as number),
+    createdAt: v.created_at as string,
   }));
 }
 
@@ -292,7 +294,7 @@ export async function updateVacationPeriod(
   userId: string,
   updates: Partial<VacationPeriod>,
 ): Promise<VacationPeriod | null> {
-  const updateData: any = {};
+  const updateData: Record<string, unknown> = {};
   if (updates.acquisitionStartDate)
     updateData.acquisition_start_date = updates.acquisitionStartDate;
   if (updates.acquisitionEndDate) updateData.acquisition_end_date = updates.acquisitionEndDate;

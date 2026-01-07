@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { registerUser } from '@/lib/auth';
+import { authService } from '@/lib/di';
 import { emailSchema, nameSchema, passwordSchema, sanitizeString } from '@/lib/input-validation';
 import { createRateLimitResponse, getClientIdentifier, rateLimit } from '@/lib/rate-limit';
 
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
     const sanitizedName = sanitizeString(name);
 
-    const user = await registerUser(email, password, sanitizedName);
+    const user = await authService.registerUser(email, password, sanitizedName);
 
     if (!user) {
       return NextResponse.json({ error: 'Email já cadastrado' }, { status: 400 });

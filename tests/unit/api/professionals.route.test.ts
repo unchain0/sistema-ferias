@@ -13,9 +13,11 @@ describe('Professionals API routes', () => {
       getServerSession: vi.fn(async () => null),
     }));
 
-    vi.doMock('@/lib/db', () => ({
-      getProfessionals: vi.fn(),
-      createProfessional: vi.fn(),
+    vi.doMock('@/lib/di', () => ({
+      professionalRepository: {
+        getProfessionals: vi.fn(),
+        createProfessional: vi.fn(),
+      },
     }));
 
     const { GET } = await import('@/app/api/professionals/route');
@@ -68,9 +70,11 @@ describe('Professionals API routes', () => {
       createdAt: '2026-01-01',
     }));
 
-    vi.doMock('@/lib/db', () => ({
-      getProfessionals: vi.fn(),
-      createProfessional,
+    vi.doMock('@/lib/di', () => ({
+      professionalRepository: {
+        getProfessionals: vi.fn(),
+        createProfessional,
+      },
     }));
 
     const { POST } = await import('@/app/api/professionals/route');

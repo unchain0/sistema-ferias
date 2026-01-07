@@ -4,16 +4,19 @@ import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/lib/auth-config';
-import {
-  createVacationPeriod,
-  deleteVacationPeriod,
-  getProfessionalById,
-  updateVacationPeriod,
-} from '@/lib/db';
 import { isDemoUser } from '@/lib/demo-protection';
+import { professionalRepository, vacationRepository } from '@/lib/di';
 import { calculateRevenueDeduction, calculateVacationDays } from '@/lib/utils';
 
-export async function createVacation(formData: any) {
+interface VacationFormData {
+  professionalId: string;
+  acquisitionStartDate: string;
+  acquisitionEndDate: string;
+  usageStartDate: string;
+  usageEndDate: string;
+}
+
+export async function createVacation(formData: VacationFormData) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -38,7 +41,10 @@ export async function createVacation(formData: any) {
   }
 
   try {
-    const professional = await getProfessionalById(professionalId, session.user.id);
+    const professional = await professionalRepository.getProfessionalById(
+      professionalId,
+      session.user.id,
+    );
 
     if (!professional) {
       return { error: 'Profissional não encontrado' };
@@ -47,7 +53,7 @@ export async function createVacation(formData: any) {
     const totalDays = calculateVacationDays(usageStartDate, usageEndDate);
     const revenueDeduction = calculateRevenueDeduction(professional.monthlyRevenue, totalDays);
 
-    await createVacationPeriod({
+    await vacationRepository.createVacationPeriod({
       professionalId,
       userId: session.user.id,
       acquisitionStartDate,
@@ -67,7 +73,7 @@ export async function createVacation(formData: any) {
   }
 }
 
-export async function updateVacation(id: string, formData: any) {
+export async function updateVacation(id: string, formData: Partial<VacationFormData>) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -79,37 +85,26 @@ export async function updateVacation(id: string, formData: any) {
   }
 
   try {
-    // If we are updating dates, we need to recalculate totals
-    // This is a simplified version assuming we always send all fields or handle partials carefully.
-    // The current frontend sends all fields on edit.
-
     const {
-      professionalId, // Should verify this matches existing if we use it for calculations
+      professionalId,
       usageStartDate,
       usageEndDate,
       acquisitionStartDate,
       acquisitionEndDate,
     } = formData;
 
-    const updates: any = {
+    const updates: Partial<VacationFormData & { totalDays: number; revenueDeduction: number }> = {
       acquisitionStartDate,
       acquisitionEndDate,
       usageStartDate,
       usageEndDate,
     };
 
-    if (usageStartDate && usageEndDate) {
-      // Need professional revenue to recalculate deduction
-      // Assuming professionalId is valid or we fetch the existing vacation to get professionalId
-      // Ideally we should fetch the existing vacation first.
-    }
-
-    // For now, let's just stick to the critical create path or keep existing API for complex logic if needed?
-    // The user asked for "migrate to Server Actions". I should make a best effort.
-
-    // Simplification: We recalculate everything based on inputs.
     if (usageStartDate && usageEndDate && professionalId) {
-      const professional = await getProfessionalById(professionalId, session.user.id);
+      const professional = await professionalRepository.getProfessionalById(
+        professionalId,
+        session.user.id,
+      );
       if (professional) {
         const totalDays = calculateVacationDays(usageStartDate, usageEndDate);
         const revenueDeduction = calculateRevenueDeduction(professional.monthlyRevenue, totalDays);
@@ -118,7 +113,7 @@ export async function updateVacation(id: string, formData: any) {
       }
     }
 
-    await updateVacationPeriod(id, session.user.id, updates);
+    await vacationRepository.updateVacationPeriod(id, session.user.id, updates);
 
     revalidatePath('/vacations');
     revalidatePath('/dashboard');
@@ -141,7 +136,7 @@ export async function deleteVacation(id: string) {
   }
 
   try {
-    await deleteVacationPeriod(id, session.user.id);
+    await vacationRepository.deleteVacationPeriod(id, session.user.id);
     revalidatePath('/vacations');
     revalidatePath('/dashboard');
     return { success: true };

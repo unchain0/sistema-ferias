@@ -55,15 +55,7 @@ export default function ProfessionalsPage() {
     monthlyRevenue: '',
   });
 
-  useEffect(() => {
-    if (page === 0) {
-      fetchProfessionals();
-    } else {
-      loadMoreProfessionals();
-    }
-  }, [page]);
-
-  const fetchProfessionals = async () => {
+  const fetchProfessionals = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/professionals?limit=${PAGE_SIZE}&offset=0`);
@@ -77,9 +69,9 @@ export default function ProfessionalsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadMoreProfessionals = async () => {
+  const loadMoreProfessionals = useCallback(async () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
     try {
@@ -96,9 +88,17 @@ export default function ProfessionalsPage() {
     } finally {
       setLoadingMore(false);
     }
-  };
+  }, [loadingMore, hasMore, page]);
 
-  const fetchAllForSearch = async () => {
+  useEffect(() => {
+    if (page === 0) {
+      fetchProfessionals();
+    } else {
+      loadMoreProfessionals();
+    }
+  }, [page, fetchProfessionals, loadMoreProfessionals]);
+
+  const fetchAllForSearch = useCallback(async () => {
     // If searching, we fetch all to allow client-side filtering as per existing logic
     // or we could implement server-side search. For now, let's stick to client-side
     // but fetch all if a search is active.
@@ -112,7 +112,7 @@ export default function ProfessionalsPage() {
     } catch (error) {
       console.error('Error fetching all professionals for search:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (searchQuery !== '') {
@@ -120,7 +120,7 @@ export default function ProfessionalsPage() {
     } else if (page === 0) {
       fetchProfessionals();
     }
-  }, [searchQuery]);
+  }, [searchQuery, page, fetchAllForSearch, fetchProfessionals]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

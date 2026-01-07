@@ -15,8 +15,10 @@ describe('POST /api/auth/register', () => {
       createRateLimitResponse: vi.fn(),
     }));
 
-    vi.doMock('@/lib/auth', () => ({
-      registerUser: vi.fn(),
+    vi.doMock('@/lib/di', () => ({
+      authService: {
+        registerUser: vi.fn(),
+      },
     }));
 
     const { POST } = await import('@/app/api/auth/register/route');
@@ -37,15 +39,17 @@ describe('POST /api/auth/register', () => {
       createRateLimitResponse: vi.fn(),
     }));
 
-    vi.doMock('@/lib/auth', () => ({
-      registerUser: vi.fn(),
+    vi.doMock('@/lib/di', () => ({
+      authService: {
+        registerUser: vi.fn(),
+      },
     }));
 
     const { POST } = await import('@/app/api/auth/register/route');
     const res = await POST(
       jsonRequest('http://localhost/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ email: 'bad', password: '123456', name: 'User' }),
+        body: JSON.stringify({ email: 'bad', password: 'Aa!23456', name: 'User' }),
       }),
     );
 
@@ -82,7 +86,7 @@ describe('POST /api/auth/register', () => {
     const res = await POST(
       jsonRequest('http://localhost/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ email: 'a@a.com', password: '123456', name: 'A' }),
+        body: JSON.stringify({ email: 'a@a.com', password: 'Aa!23456', name: 'A' }),
       }),
     );
 
@@ -98,8 +102,10 @@ describe('POST /api/auth/register', () => {
       createRateLimitResponse: vi.fn(),
     }));
 
-    vi.doMock('@/lib/auth', () => ({
-      registerUser,
+    vi.doMock('@/lib/di', () => ({
+      authService: {
+        registerUser,
+      },
     }));
 
     const { POST } = await import('@/app/api/auth/register/route');
@@ -107,12 +113,12 @@ describe('POST /api/auth/register', () => {
     const res = await POST(
       jsonRequest('http://localhost/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ email: 'a@a.com', password: '123456', name: '  <b>U</b>  ' }),
+        body: JSON.stringify({ email: 'a@a.com', password: 'Aa!23456', name: '  <b>U</b>  ' }),
       }),
     );
 
     expect(res.status).toBe(201);
-    expect(registerUser).toHaveBeenCalledWith('a@a.com', '123456', 'bU/b');
+    expect(registerUser).toHaveBeenCalledWith('a@a.com', 'Aa!23456', 'bU/b');
   });
 
   it('returns 400 when email already registered', async () => {
@@ -122,15 +128,17 @@ describe('POST /api/auth/register', () => {
       createRateLimitResponse: vi.fn(),
     }));
 
-    vi.doMock('@/lib/auth', () => ({
-      registerUser: vi.fn(async () => null),
+    vi.doMock('@/lib/di', () => ({
+      authService: {
+        registerUser: vi.fn(async () => null),
+      },
     }));
 
     const { POST } = await import('@/app/api/auth/register/route');
     const res = await POST(
       jsonRequest('http://localhost/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ email: 'a@a.com', password: '123456', name: 'User' }),
+        body: JSON.stringify({ email: 'a@a.com', password: 'Aa!23456', name: 'User' }),
       }),
     );
 
@@ -145,17 +153,19 @@ describe('POST /api/auth/register', () => {
       createRateLimitResponse: vi.fn(),
     }));
 
-    vi.doMock('@/lib/auth', () => ({
-      registerUser: vi.fn(async () => {
-        throw new Error('boom');
-      }),
+    vi.doMock('@/lib/di', () => ({
+      authService: {
+        registerUser: vi.fn(async () => {
+          throw new Error('boom');
+        }),
+      },
     }));
 
     const { POST } = await import('@/app/api/auth/register/route');
     const res = await POST(
       jsonRequest('http://localhost/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ email: 'a@a.com', password: '123456', name: 'User' }),
+        body: JSON.stringify({ email: 'a@a.com', password: 'Aa!23456', name: 'User' }),
       }),
     );
 
