@@ -11,26 +11,15 @@ const LoginForm = NextDynamic(() =>
 
 export default function LoginPage() {
   return (
-    <div className="page-container-auth">
-      {/* Background illustration - positioned absolutely */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <Image
-          src="/vacation-illustration.png"
-          alt=""
-          width={800}
-          height={600}
-          className="absolute bottom-0 right-0 w-[600px] h-auto opacity-30 dark:opacity-20 select-none"
-          priority
-        />
-        <Image
-          src="/vacation-illustration.png"
-          alt=""
-          width={800}
-          height={600}
-          className="absolute top-0 left-0 w-[500px] h-auto opacity-20 dark:opacity-10 select-none rotate-180 scale-x-[-1]"
-          priority
-        />
-      </div>
+    <div className="page-container-auth relative">
+      {/* Background illustration - covers full screen */}
+      <Image
+        src="/vacation-illustration.png"
+        alt=""
+        fill
+        className="object-cover opacity-40 dark:opacity-30 select-none pointer-events-none"
+        priority
+      />
 
       <Card className="w-full max-w-md relative z-10">
         <div className="flex flex-col items-center mb-6">
