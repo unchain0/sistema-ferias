@@ -35,10 +35,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Controlled range for the picker (default: last 30 days)
+  // Controlled range for the picker (default: last year)
   const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
     const today = new Date();
-    return { from: subDays(today, 30), to: today };
+    return { from: subDays(today, 365), to: today };
   });
 
   const abortRef = useRef<AbortController | null>(null);
