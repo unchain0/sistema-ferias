@@ -67,14 +67,26 @@ export const vacationSchema = z.object({
   usageEndDate: dateStringSchema,
 });
 
-// Vacation validation for updates
-export const vacationUpdateSchema = z.object({
-  professionalId: z.string().uuid(),
-  acquisitionStartDate: dateStringSchema,
-  acquisitionEndDate: dateStringSchema,
-  usageStartDate: dateStringSchema,
-  usageEndDate: dateStringSchema,
-});
+// Vacation validation for updates (partial, allows undefined fields)
+export const vacationUpdateSchema = z
+  .object({
+    professionalId: z.string().uuid().optional(),
+    acquisitionStartDate: dateStringSchema.optional(),
+    acquisitionEndDate: dateStringSchema.optional(),
+    usageStartDate: dateStringSchema.optional(),
+    usageEndDate: dateStringSchema.optional(),
+  })
+  .refine(
+    (data) =>
+      data.professionalId !== undefined ||
+      data.acquisitionStartDate !== undefined ||
+      data.acquisitionEndDate !== undefined ||
+      data.usageStartDate !== undefined ||
+      data.usageEndDate !== undefined,
+    {
+      message: 'Pelo menos um campo deve ser fornecido para atualização',
+    },
+  );
 
 // Generic validation helper
 export function validateInput<T>(
@@ -99,20 +111,25 @@ export function validateInput<T>(
 }
 
 // Prevent timing attacks on string comparison using Node.js crypto
+// Uses fixed-size buffers to eliminate timing variance from length differences
+const SECURE_COMPARE_BUFFER_SIZE = 256;
+
 export function secureCompare(a: string, b: string): boolean {
-  const bufA = Buffer.from(a, 'utf8');
-  const bufB = Buffer.from(b, 'utf8');
+  // Always use fixed-size buffers to prevent timing leaks from allocation/copy operations
+  const bufA = Buffer.alloc(SECURE_COMPARE_BUFFER_SIZE);
+  const bufB = Buffer.alloc(SECURE_COMPARE_BUFFER_SIZE);
 
-  // Pad shorter buffer to prevent timing leak from length comparison
-  if (bufA.length !== bufB.length) {
-    const maxLen = Math.max(bufA.length, bufB.length);
-    const paddedA = Buffer.alloc(maxLen);
-    const paddedB = Buffer.alloc(maxLen);
-    bufA.copy(paddedA);
-    bufB.copy(paddedB);
-    timingSafeEqual(paddedA, paddedB);
-    return false;
-  }
+  // Copy strings into fixed buffers (truncated if longer than buffer size)
+  const bytesA = Buffer.from(a, 'utf8');
+  const bytesB = Buffer.from(b, 'utf8');
+  bytesA.copy(bufA, 0, 0, Math.min(bytesA.length, SECURE_COMPARE_BUFFER_SIZE));
+  bytesB.copy(bufB, 0, 0, Math.min(bytesB.length, SECURE_COMPARE_BUFFER_SIZE));
 
-  return timingSafeEqual(bufA, bufB);
+  // Constant-time comparison of fixed-size buffers
+  const buffersEqual = timingSafeEqual(bufA, bufB);
+
+  // Also check lengths match (already constant time since we always do the comparison above)
+  const lengthsMatch = bytesA.length === bytesB.length;
+
+  return buffersEqual && lengthsMatch;
 }

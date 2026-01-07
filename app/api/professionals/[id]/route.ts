@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/lib/auth-config';
-import { deleteProfessional, deleteVacationsByProfessional, updateProfessional } from '@/lib/db';
+import { deleteProfessional, updateProfessional } from '@/lib/db';
 import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
 import { professionalUpdateSchema, uuidSchema } from '@/lib/input-validation';
 
@@ -79,9 +79,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
     }
 
-    // Delete associated vacations first (cascade delete)
-    await deleteVacationsByProfessional(id, session.user.id);
-
+    // Database has ON DELETE CASCADE configured for vacation_periods.professional_id
+    // so deleting the professional will automatically delete associated vacations atomically
     const success = await deleteProfessional(id, session.user.id);
 
     if (!success) {

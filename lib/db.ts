@@ -153,8 +153,8 @@ export async function updateProfessional(
   updates: Partial<Professional>,
 ): Promise<Professional | null> {
   const updateData: Record<string, unknown> = {};
-  if (updates.name) updateData.name = updates.name;
-  if (updates.clientManager) updateData.client_manager = updates.clientManager;
+  if (updates.name !== undefined) updateData.name = updates.name;
+  if (updates.clientManager !== undefined) updateData.client_manager = updates.clientManager;
   if (updates.monthlyRevenue !== undefined) updateData.monthly_revenue = updates.monthlyRevenue;
 
   const { data, error } = await supabaseAdmin
@@ -267,6 +267,21 @@ export async function getVacationsByProfessional(
   return mapVacationRows(data || []);
 }
 
+export async function getVacationPeriodById(
+  id: string,
+  userId: string,
+): Promise<VacationPeriod | null> {
+  const { data, error } = await supabaseAdmin
+    .from('vacation_periods')
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', userId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') throw error;
+  return data ? mapVacationRow(data) : null;
+}
+
 export async function createVacationPeriod(
   vacation: Omit<VacationPeriod, 'id' | 'createdAt'>,
 ): Promise<VacationPeriod> {
@@ -296,11 +311,13 @@ export async function updateVacationPeriod(
   updates: Partial<VacationPeriod>,
 ): Promise<VacationPeriod | null> {
   const updateData: Record<string, unknown> = {};
-  if (updates.acquisitionStartDate)
+  if (updates.professionalId !== undefined) updateData.professional_id = updates.professionalId;
+  if (updates.acquisitionStartDate !== undefined)
     updateData.acquisition_start_date = updates.acquisitionStartDate;
-  if (updates.acquisitionEndDate) updateData.acquisition_end_date = updates.acquisitionEndDate;
-  if (updates.usageStartDate) updateData.usage_start_date = updates.usageStartDate;
-  if (updates.usageEndDate) updateData.usage_end_date = updates.usageEndDate;
+  if (updates.acquisitionEndDate !== undefined)
+    updateData.acquisition_end_date = updates.acquisitionEndDate;
+  if (updates.usageStartDate !== undefined) updateData.usage_start_date = updates.usageStartDate;
+  if (updates.usageEndDate !== undefined) updateData.usage_end_date = updates.usageEndDate;
   if (updates.totalDays !== undefined) updateData.total_days = updates.totalDays;
   if (updates.revenueDeduction !== undefined)
     updateData.revenue_deduction = updates.revenueDeduction;
