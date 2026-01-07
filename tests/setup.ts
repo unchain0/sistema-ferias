@@ -1,6 +1,22 @@
 import '@testing-library/jest-dom';
 
-import { vi } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
+
+// Store original console methods
+const originalConsoleError = console.error;
+const originalConsoleLog = console.log;
+
+// Silence console.error and console.log during tests to reduce noise
+// These are expected outputs from error handling tests
+beforeEach(() => {
+  console.error = vi.fn();
+  console.log = vi.fn();
+});
+
+afterEach(() => {
+  console.error = originalConsoleError;
+  console.log = originalConsoleLog;
+});
 
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation(() => ({

@@ -55,55 +55,40 @@ export default function ProfessionalsPage() {
     monthlyRevenue: '',
   });
 
-  const fetchProfessionals = useCallback(async () => {
-    setLoading(true);
+  const fetchProfessionals = useCallback(async (pageNum: number, append: boolean = false) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
-      const response = await fetch(`/api/professionals?limit=${PAGE_SIZE}&offset=0`);
+      const offset = pageNum * PAGE_SIZE;
+      const response = await fetch(`/api/professionals?limit=${PAGE_SIZE}&offset=${offset}`);
       if (response.ok) {
         const data = await response.json();
-        setProfessionals(data);
+        if (append) {
+          setProfessionals((prev) => [...prev, ...data]);
+        } else {
+          setProfessionals(data);
+        }
         setHasMore(data.length === PAGE_SIZE);
       }
     } catch (error) {
       console.error('Error fetching professionals:', error);
     } finally {
-      setLoading(false);
+      if (append) {
+        setLoadingMore(false);
+      } else {
+        setLoading(false);
+      }
     }
   }, []);
 
-  const loadMoreProfessionals = useCallback(async () => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
-    try {
-      const response = await fetch(
-        `/api/professionals?limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}`,
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setProfessionals((prev) => [...prev, ...data]);
-        setHasMore(data.length === PAGE_SIZE);
-      }
-    } catch (error) {
-      console.error('Error loading more professionals:', error);
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [loadingMore, hasMore, page]);
-
-  useEffect(() => {
-    if (page === 0) {
-      fetchProfessionals();
-    } else {
-      loadMoreProfessionals();
-    }
-  }, [page, fetchProfessionals, loadMoreProfessionals]);
-
   const fetchAllForSearch = useCallback(async () => {
-    // If searching, we fetch all to allow client-side filtering as per existing logic
-    // or we could implement server-side search. For now, let's stick to client-side
-    // but fetch all if a search is active.
+    setLoading(true);
     try {
-      const response = await fetch('/api/professionals');
+      const response = await fetch('/api/professionals?limit=200');
       if (response.ok) {
         const data = await response.json();
         setProfessionals(data);
@@ -111,16 +96,36 @@ export default function ProfessionalsPage() {
       }
     } catch (error) {
       console.error('Error fetching all professionals for search:', error);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
+  // Handle pagination: when page changes, fetch the appropriate data
+  useEffect(() => {
+    // Skip if searching (search has its own data fetching)
+    if (searchQuery !== '') {
+      return;
+    }
+
+    if (page === 0) {
+      // Initial load or reset
+      fetchProfessionals(0, false);
+    } else {
+      // Load more pages (append to existing data)
+      fetchProfessionals(page, true);
+    }
+  }, [page, searchQuery, fetchProfessionals]);
+
+  // Handle search: when search query changes
   useEffect(() => {
     if (searchQuery !== '') {
       fetchAllForSearch();
-    } else if (page === 0) {
-      fetchProfessionals();
+    } else {
+      // When clearing search, reset to first page
+      setPage(0);
     }
-  }, [searchQuery, page, fetchAllForSearch, fetchProfessionals]);
+  }, [searchQuery, fetchAllForSearch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,7 +145,7 @@ export default function ProfessionalsPage() {
       }
 
       setPage(0);
-      await fetchProfessionals();
+      await fetchProfessionals(0, false);
       resetForm();
     } catch (error) {
       console.error('Error saving professional:', error);
@@ -174,7 +179,7 @@ export default function ProfessionalsPage() {
       }
 
       setPage(0);
-      await fetchProfessionals();
+      await fetchProfessionals(0, false);
     } catch (error) {
       console.error('Error deleting professional:', error);
       setError('Erro ao excluir profissional');

@@ -95,58 +95,57 @@ export default function VacationsPage() {
     [professionalNameMap],
   );
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [vacationsRes, professionalsRes] = await Promise.all([
-        fetch(`/api/vacations?order=createdAt:desc&limit=${PAGE_SIZE}&offset=0`),
-        fetch('/api/professionals'),
-      ]);
-
-      if (vacationsRes.ok && professionalsRes.ok) {
-        const vacationsData = await vacationsRes.json();
-        const professionalsData = await professionalsRes.json();
-        setVacations(vacationsData);
-        setProfessionals(professionalsData);
-        setHasMore(vacationsData.length === PAGE_SIZE);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
+  // Fetch vacations with pagination
+  const fetchVacations = useCallback(async (pageNum: number, append: boolean = false) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
     }
-  }, []);
 
-  const loadMoreVacations = useCallback(async () => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
     try {
+      const offset = pageNum * PAGE_SIZE;
       const response = await fetch(
-        `/api/vacations?order=createdAt:desc&limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}`,
+        `/api/vacations?order=createdAt:desc&limit=${PAGE_SIZE}&offset=${offset}`,
       );
       if (response.ok) {
         const data = await response.json();
-        setVacations((prev) => [...prev, ...data]);
+        if (append) {
+          setVacations((prev) => [...prev, ...data]);
+        } else {
+          setVacations(data);
+        }
         setHasMore(data.length === PAGE_SIZE);
       }
     } catch (error) {
-      console.error('Error loading more vacations:', error);
+      console.error('Error fetching vacations:', error);
     } finally {
-      setLoadingMore(false);
+      if (append) {
+        setLoadingMore(false);
+      } else {
+        setLoading(false);
+      }
     }
-  }, [loadingMore, hasMore, page]);
+  }, []);
 
-  useEffect(() => {
-    if (page === 0) {
-      fetchData();
-    } else {
-      loadMoreVacations();
-    }
-  }, [page, fetchData, loadMoreVacations]);
-
-  const fetchAllForSearch = useCallback(async () => {
+  // Fetch professionals once on mount (needed for the form dropdown)
+  const fetchProfessionals = useCallback(async () => {
     try {
-      const response = await fetch('/api/vacations?order=createdAt:desc');
+      const response = await fetch('/api/professionals');
+      if (response.ok) {
+        const data = await response.json();
+        setProfessionals(data);
+      }
+    } catch (error) {
+      console.error('Error fetching professionals:', error);
+    }
+  }, []);
+
+  // Fetch all vacations for search (client-side filtering)
+  const fetchAllForSearch = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/vacations?order=createdAt:desc&limit=200');
       if (response.ok) {
         const data = await response.json();
         setVacations(data);
@@ -154,17 +153,41 @@ export default function VacationsPage() {
       }
     } catch (error) {
       console.error('Error fetching all vacations for search:', error);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  // Use debounced search query for triggering search
+  // Initial load: fetch professionals once
+  useEffect(() => {
+    fetchProfessionals();
+  }, [fetchProfessionals]);
+
+  // Handle pagination: when page changes, fetch the appropriate data
+  useEffect(() => {
+    // Skip if searching (search has its own data fetching)
+    if (debouncedSearchQuery !== '') {
+      return;
+    }
+
+    if (page === 0) {
+      // Initial load or reset
+      fetchVacations(0, false);
+    } else {
+      // Load more pages (append to existing data)
+      fetchVacations(page, true);
+    }
+  }, [page, debouncedSearchQuery, fetchVacations]);
+
+  // Handle search: when search query changes
   useEffect(() => {
     if (debouncedSearchQuery !== '') {
       fetchAllForSearch();
-    } else if (page === 0) {
-      fetchData();
+    } else {
+      // When clearing search, reset to first page
+      setPage(0);
     }
-  }, [debouncedSearchQuery, page, fetchAllForSearch, fetchData]);
+  }, [debouncedSearchQuery, fetchAllForSearch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,7 +241,7 @@ export default function VacationsPage() {
       }
 
       setPage(0);
-      await fetchData();
+      await fetchVacations(0, false);
       resetForm();
     } catch (error) {
       console.error('Error saving vacation:', error);
@@ -260,7 +283,7 @@ export default function VacationsPage() {
       }
 
       setPage(0);
-      await fetchData();
+      await fetchVacations(0, false);
     } catch (error) {
       console.error('Error deleting vacation:', error);
       setError('Erro ao excluir período de férias');
