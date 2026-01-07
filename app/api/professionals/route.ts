@@ -2,6 +2,12 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/lib/auth-config';
+import {
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE,
+  PROFESSIONAL_ORDER_FIELDS,
+} from '@/lib/constants';
 import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
 import { professionalRepository } from '@/lib/di';
 import { professionalSchema } from '@/lib/input-validation';
@@ -13,25 +19,45 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
+  // Parse pagination and ordering params with sensible defaults
   const { searchParams } = new URL(request.url);
   const limitParam = searchParams.get('limit');
   const offsetParam = searchParams.get('offset');
+  const orderParam = searchParams.get('order') || 'createdAt:desc';
 
-  const limit = limitParam ? Math.min(Math.max(parseInt(limitParam, 10) || 50, 1), 200) : null;
-  const offset = offsetParam ? Math.max(parseInt(offsetParam, 10) || 0, 0) : null;
+  const limit = Math.min(
+    Math.max(
+      parseInt(limitParam || String(DEFAULT_PAGE_SIZE), 10) || DEFAULT_PAGE_SIZE,
+      MIN_PAGE_SIZE,
+    ),
+    MAX_PAGE_SIZE,
+  );
+  const offset = Math.max(parseInt(offsetParam || '0', 10) || 0, 0);
 
-  const all = await professionalRepository.getProfessionals(session.user.id);
+  const [orderField, orderDir] = orderParam.split(':');
 
-  let professionals = all;
-  if (limit !== null && offset !== null) {
-    professionals = all.slice(offset, offset + limit);
-  }
+  // Validate orderField using constants
+  const validatedOrderField = PROFESSIONAL_ORDER_FIELDS.includes(
+    orderField as (typeof PROFESSIONAL_ORDER_FIELDS)[number],
+  )
+    ? orderField
+    : 'createdAt';
+
+  // Use database-level pagination for better performance
+  const result = await professionalRepository.getProfessionalsPaginated(session.user.id, {
+    orderBy: validatedOrderField,
+    orderDir: (orderDir?.toLowerCase() as 'asc' | 'desc') || 'desc',
+    limit,
+    offset,
+  });
 
   const headers = new Headers();
-  headers.set('X-Total-Count', String(all.length));
+  headers.set('X-Total-Count', String(result.total));
+  // Private caching for logged-in user with must-revalidate to ensure data consistency
   headers.set('Cache-Control', 'private, max-age=5, must-revalidate');
+  headers.set('Vary', 'Cookie');
 
-  return NextResponse.json(professionals, { headers });
+  return NextResponse.json(result.data, { headers });
 }
 
 export async function POST(request: Request) {

@@ -1,4 +1,7 @@
+import { timingSafeEqual } from 'crypto';
 import { z } from 'zod';
+
+import { VALIDATION_LIMITS } from '@/lib/constants';
 
 // Sanitize string inputs to prevent XSS
 export function sanitizeString(input: string): string {
@@ -7,32 +10,70 @@ export function sanitizeString(input: string): string {
   return input
     .trim()
     .replace(/[<>]/g, '') // Remove < and > to prevent HTML injection
-    .substring(0, 500); // Limit length
+    .substring(0, VALIDATION_LIMITS.STRING_MAX);
 }
 
-// Email validation
-export const emailSchema = z.string().email().max(255);
+// UUID validation for route parameters
+export const uuidSchema = z.string().uuid('ID inválido');
 
-// Password validation (72 chars = max para bcrypt no pgcrypto)
-export const passwordSchema = z.string().min(6).max(72);
+// Email validation
+export const emailSchema = z.string().email().max(VALIDATION_LIMITS.EMAIL_MAX);
+
+// Password validation
+export const passwordSchema = z
+  .string()
+  .min(VALIDATION_LIMITS.PASSWORD_MIN)
+  .max(VALIDATION_LIMITS.PASSWORD_MAX);
 
 // Name validation
-export const nameSchema = z.string().min(2).max(100);
+export const nameSchema = z
+  .string()
+  .min(VALIDATION_LIMITS.NAME_MIN)
+  .max(VALIDATION_LIMITS.NAME_MAX);
 
-// Professional validation
+// Professional validation for creation
 export const professionalSchema = z.object({
-  name: z.string().min(2).max(100),
-  clientManager: z.string().min(2).max(100),
-  monthlyRevenue: z.number().positive().max(1000000),
+  name: z.string().min(VALIDATION_LIMITS.NAME_MIN).max(VALIDATION_LIMITS.NAME_MAX),
+  clientManager: z.string().min(VALIDATION_LIMITS.NAME_MIN).max(VALIDATION_LIMITS.NAME_MAX),
+  monthlyRevenue: z.number().positive().max(VALIDATION_LIMITS.MONTHLY_REVENUE_MAX),
 });
 
-// Vacation validation
+// Professional validation for updates (partial, allows undefined fields)
+export const professionalUpdateSchema = z
+  .object({
+    name: z.string().min(VALIDATION_LIMITS.NAME_MIN).max(VALIDATION_LIMITS.NAME_MAX).optional(),
+    clientManager: z
+      .string()
+      .min(VALIDATION_LIMITS.NAME_MIN)
+      .max(VALIDATION_LIMITS.NAME_MAX)
+      .optional(),
+    monthlyRevenue: z.number().positive().max(VALIDATION_LIMITS.MONTHLY_REVENUE_MAX).optional(),
+  })
+  .refine((data) => data.name || data.clientManager || data.monthlyRevenue !== undefined, {
+    message: 'Pelo menos um campo deve ser fornecido para atualização',
+  });
+
+// Date string validation helper
+const dateStringSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de data inválido (esperado: YYYY-MM-DD)');
+
+// Vacation validation for creation
 export const vacationSchema = z.object({
   professionalId: z.string().uuid(),
-  acquisitionStartDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  acquisitionEndDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  usageStartDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  usageEndDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  acquisitionStartDate: dateStringSchema,
+  acquisitionEndDate: dateStringSchema,
+  usageStartDate: dateStringSchema,
+  usageEndDate: dateStringSchema,
+});
+
+// Vacation validation for updates
+export const vacationUpdateSchema = z.object({
+  professionalId: z.string().uuid(),
+  acquisitionStartDate: dateStringSchema,
+  acquisitionEndDate: dateStringSchema,
+  usageStartDate: dateStringSchema,
+  usageEndDate: dateStringSchema,
 });
 
 // Generic validation helper
@@ -57,16 +98,21 @@ export function validateInput<T>(
   }
 }
 
-// Prevent timing attacks on string comparison
+// Prevent timing attacks on string comparison using Node.js crypto
 export function secureCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) {
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+
+  // Pad shorter buffer to prevent timing leak from length comparison
+  if (bufA.length !== bufB.length) {
+    const maxLen = Math.max(bufA.length, bufB.length);
+    const paddedA = Buffer.alloc(maxLen);
+    const paddedB = Buffer.alloc(maxLen);
+    bufA.copy(paddedA);
+    bufB.copy(paddedB);
+    timingSafeEqual(paddedA, paddedB);
     return false;
   }
 
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-
-  return result === 0;
+  return timingSafeEqual(bufA, bufB);
 }

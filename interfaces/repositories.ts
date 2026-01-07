@@ -25,7 +25,21 @@ export interface IUserRepository {
 }
 
 export interface IProfessionalRepository {
+  /**
+   * Get all professionals for a user
+   * @deprecated Use getProfessionalsPaginated for better performance with large datasets
+   */
   getProfessionals(userId: string): Promise<Professional[]>;
+
+  /**
+   * Get professionals with pagination and ordering at database level
+   * More efficient for large datasets as sorting/pagination happens in the database
+   */
+  getProfessionalsPaginated(
+    userId: string,
+    options?: PaginationOptions,
+  ): Promise<PaginatedResult<Professional>>;
+
   getProfessionalById(id: string, userId: string): Promise<Professional | null>;
   createProfessional(professional: Omit<Professional, 'id' | 'createdAt'>): Promise<Professional>;
   updateProfessional(

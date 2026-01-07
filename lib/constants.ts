@@ -55,3 +55,40 @@ export const VACATION_ORDER_FIELDS = [
 ] as const;
 
 export type VacationOrderField = (typeof VACATION_ORDER_FIELDS)[number];
+
+// Valid order fields for professionals
+export const PROFESSIONAL_ORDER_FIELDS = [
+  'id',
+  'name',
+  'clientManager',
+  'monthlyRevenue',
+  'createdAt',
+  'updatedAt',
+] as const;
+
+export type ProfessionalOrderField = (typeof PROFESSIONAL_ORDER_FIELDS)[number];
+
+// Column name mapping from camelCase to snake_case for database queries
+export const VACATION_COLUMN_MAP: Record<string, string> = {
+  id: 'id',
+  professionalId: 'professional_id',
+  userId: 'user_id',
+  acquisitionStartDate: 'acquisition_start_date',
+  acquisitionEndDate: 'acquisition_end_date',
+  usageStartDate: 'usage_start_date',
+  usageEndDate: 'usage_end_date',
+  totalDays: 'total_days',
+  revenueDeduction: 'revenue_deduction',
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
+};
+
+export const PROFESSIONAL_COLUMN_MAP: Record<string, string> = {
+  id: 'id',
+  userId: 'user_id',
+  name: 'name',
+  clientManager: 'client_manager',
+  monthlyRevenue: 'monthly_revenue',
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
+};

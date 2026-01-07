@@ -25,18 +25,10 @@ export async function GET(request: Request) {
     return NextResponse.json(dashboardData);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    // Log details server-side only, never expose to client
     console.error('Dashboard error:', { message, details: error });
 
-    if (message.startsWith('Missing env ')) {
-      return NextResponse.json(
-        {
-          error: 'Configuração do servidor incompleta',
-          hint: message,
-        },
-        { status: 500 },
-      );
-    }
-
+    // Return generic error message to client - never expose internal details
     return NextResponse.json({ error: 'Erro ao carregar dados do dashboard' }, { status: 500 });
   }
 }

@@ -1,10 +1,9 @@
 import { compare, hash } from 'bcryptjs';
 
+import { VALIDATION_LIMITS } from '@/lib/constants';
 import { User } from '@/types';
 
 import { createUser, getUserByEmail } from './db';
-
-const MAX_PASSWORD_LENGTH = 72; // Limite do bcrypt no pgcrypto
 
 export async function hashPassword(password: string): Promise<string> {
   try {
@@ -15,13 +14,13 @@ export async function hashPassword(password: string): Promise<string> {
     // O bcrypt tem um limite de 72 bytes (não caracteres)
     // Verifica o tamanho em bytes e trunca se necessário
     let passwordToHash = password;
-    if (Buffer.byteLength(password, 'utf8') > 72) {
+    if (Buffer.byteLength(password, 'utf8') > VALIDATION_LIMITS.PASSWORD_MAX) {
       // Trunca para 72 bytes, respeitando limites de caracteres UTF-8
       let byteLength = 0;
       let charIndex = 0;
-      while (charIndex < password.length && byteLength < 72) {
+      while (charIndex < password.length && byteLength < VALIDATION_LIMITS.PASSWORD_MAX) {
         const charBytes = Buffer.byteLength(password[charIndex], 'utf8');
-        if (byteLength + charBytes > 72) break;
+        if (byteLength + charBytes > VALIDATION_LIMITS.PASSWORD_MAX) break;
         byteLength += charBytes;
         charIndex++;
       }
@@ -55,7 +54,7 @@ export async function verifyPassword(password: string, hashedPassword: string): 
     }
 
     // Verifica o comprimento máximo
-    if (password.length > MAX_PASSWORD_LENGTH) {
+    if (password.length > VALIDATION_LIMITS.PASSWORD_MAX) {
       console.error('Password exceeds maximum length');
       return false;
     }
@@ -95,7 +94,7 @@ export async function authenticateUser(email: string, password: string): Promise
     }
 
     // Verifica se a senha está dentro do limite
-    if (password.length > MAX_PASSWORD_LENGTH) {
+    if (password.length > VALIDATION_LIMITS.PASSWORD_MAX) {
       console.error('Password exceeds maximum length');
       return null;
     }
@@ -142,8 +141,8 @@ export async function registerUser(
     // Validação básica
     if (
       typeof password !== 'string' ||
-      password.length < 6 ||
-      password.length > MAX_PASSWORD_LENGTH
+      password.length < VALIDATION_LIMITS.PASSWORD_MIN ||
+      password.length > VALIDATION_LIMITS.PASSWORD_MAX
     ) {
       console.error('Invalid password length:', password?.length);
       return null;

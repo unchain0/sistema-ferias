@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { deleteVacationPeriod, getProfessionalById, updateVacationPeriod } from '@/lib/db';
 import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
+import { uuidSchema, vacationUpdateSchema } from '@/lib/input-validation';
 import { calculateRevenueDeduction, calculateVacationDays } from '@/lib/utils';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -19,14 +20,29 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
   try {
     const { id } = await params;
+
+    // Validate ID parameter
+    const idValidation = uuidSchema.safeParse(id);
+    if (!idValidation.success) {
+      return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
+    }
+
     const data = await request.json();
+
+    // Validate input using Zod schema
+    const validation = vacationUpdateSchema.safeParse(data);
+    if (!validation.success) {
+      const errorMessage = validation.error.errors.map((e) => e.message).join(', ');
+      return NextResponse.json({ error: errorMessage || 'Dados inválidos' }, { status: 400 });
+    }
+
     const {
       professionalId,
       acquisitionStartDate,
       acquisitionEndDate,
       usageStartDate,
       usageEndDate,
-    } = data;
+    } = validation.data;
 
     const professional = await getProfessionalById(professionalId, session.user.id);
 
@@ -72,6 +88,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
   try {
     const { id } = await params;
+
+    // Validate ID parameter
+    const idValidation = uuidSchema.safeParse(id);
+    if (!idValidation.success) {
+      return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
+    }
+
     const success = await deleteVacationPeriod(id, session.user.id);
 
     if (!success) {

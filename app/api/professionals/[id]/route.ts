@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/lib/auth-config';
-import { deleteProfessional, updateProfessional } from '@/lib/db';
+import { deleteProfessional, deleteVacationsByProfessional, updateProfessional } from '@/lib/db';
 import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
+import { professionalUpdateSchema, uuidSchema } from '@/lib/input-validation';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -18,12 +19,32 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
   try {
     const { id } = await params;
+
+    // Validate ID parameter
+    const idValidation = uuidSchema.safeParse(id);
+    if (!idValidation.success) {
+      return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
+    }
+
     const data = await request.json();
-    const updates = {
-      name: data.name,
-      clientManager: data.clientManager,
-      monthlyRevenue: parseFloat(data.monthlyRevenue),
+
+    // Pre-process monthlyRevenue if it's a string
+    const processedData = {
+      ...data,
+      monthlyRevenue:
+        typeof data.monthlyRevenue === 'string'
+          ? parseFloat(data.monthlyRevenue)
+          : data.monthlyRevenue,
     };
+
+    // Validate input using Zod schema
+    const validation = professionalUpdateSchema.safeParse(processedData);
+    if (!validation.success) {
+      const errorMessage = validation.error.errors.map((e) => e.message).join(', ');
+      return NextResponse.json({ error: errorMessage || 'Dados inválidos' }, { status: 400 });
+    }
+
+    const updates = validation.data;
 
     const professional = await updateProfessional(id, session.user.id, updates);
 
@@ -51,6 +72,16 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
   try {
     const { id } = await params;
+
+    // Validate ID parameter
+    const idValidation = uuidSchema.safeParse(id);
+    if (!idValidation.success) {
+      return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
+    }
+
+    // Delete associated vacations first (cascade delete)
+    await deleteVacationsByProfessional(id, session.user.id);
+
     const success = await deleteProfessional(id, session.user.id);
 
     if (!success) {

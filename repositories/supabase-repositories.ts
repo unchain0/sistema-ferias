@@ -7,6 +7,7 @@ import {
   PaginatedResult,
   PaginationOptions,
 } from '@/interfaces/repositories';
+import { PROFESSIONAL_COLUMN_MAP, VACATION_COLUMN_MAP } from '@/lib/constants';
 import {
   mapProfessionalRow,
   mapProfessionalRows,
@@ -16,21 +17,6 @@ import {
 } from '@/lib/db-mappers';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { Professional, User, VacationPeriod } from '@/types';
-
-// Column name mapping from camelCase to snake_case for vacations
-const VACATION_COLUMN_MAP: Record<string, string> = {
-  id: 'id',
-  professionalId: 'professional_id',
-  userId: 'user_id',
-  acquisitionStartDate: 'acquisition_start_date',
-  acquisitionEndDate: 'acquisition_end_date',
-  usageStartDate: 'usage_start_date',
-  usageEndDate: 'usage_end_date',
-  totalDays: 'total_days',
-  revenueDeduction: 'revenue_deduction',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
-};
 
 export class SupabaseUserRepository implements IUserRepository {
   private get supabase() {
@@ -70,6 +56,10 @@ export class SupabaseProfessionalRepository implements IProfessionalRepository {
     return getSupabaseAdmin();
   }
 
+  /**
+   * Get all professionals for a user (legacy method)
+   * @deprecated Use getProfessionalsPaginated for better performance
+   */
   async getProfessionals(userId: string): Promise<Professional[]> {
     const { data, error } = await this.supabase
       .from('professionals')
@@ -77,6 +67,52 @@ export class SupabaseProfessionalRepository implements IProfessionalRepository {
       .eq('user_id', userId);
     if (error) throw error;
     return mapProfessionalRows(data || []);
+  }
+
+  /**
+   * Get professionals with database-level pagination and ordering
+   * More efficient for large datasets as sorting/pagination happens in the database
+   */
+  async getProfessionalsPaginated(
+    userId: string,
+    options?: PaginationOptions,
+  ): Promise<PaginatedResult<Professional>> {
+    // First get total count
+    const { count: totalCount, error: countError } = await this.supabase
+      .from('professionals')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (countError) throw countError;
+
+    // Build query with ordering
+    let query = this.supabase.from('professionals').select('*').eq('user_id', userId);
+
+    // Apply ordering at database level
+    if (options?.orderBy) {
+      const dbColumn = PROFESSIONAL_COLUMN_MAP[options.orderBy] || 'created_at';
+      query = query.order(dbColumn, { ascending: options.orderDir === 'asc' });
+      // Add secondary sort by id for deterministic ordering
+      if (dbColumn !== 'id') {
+        query = query.order('id', { ascending: options.orderDir === 'asc' });
+      }
+    } else {
+      // Default ordering
+      query = query.order('created_at', { ascending: false }).order('id', { ascending: false });
+    }
+
+    // Apply pagination at database level
+    if (options?.limit !== undefined && options?.offset !== undefined) {
+      query = query.range(options.offset, options.offset + options.limit - 1);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return {
+      data: mapProfessionalRows(data || []),
+      total: totalCount || 0,
+    };
   }
 
   async getProfessionalById(id: string, userId: string): Promise<Professional | null> {

@@ -7,10 +7,27 @@ interface RateLimitStore {
   };
 }
 
-const rateLimitStore: RateLimitStore = {};
+// Use global to persist across hot reloads in development
+const globalForRateLimit = globalThis as unknown as {
+  rateLimitStore: RateLimitStore | undefined;
+  rateLimitCleanupInterval: ReturnType<typeof setInterval> | undefined;
+};
+
+// Initialize or reuse existing store
+const rateLimitStore: RateLimitStore = globalForRateLimit.rateLimitStore ?? {};
+
+// Store reference in global for persistence
+if (process.env.NODE_ENV !== 'production') {
+  globalForRateLimit.rateLimitStore = rateLimitStore;
+}
 
 // Cleanup old entries every 5 minutes
-setInterval(
+// Clear existing interval before creating new one (prevents memory leak in dev)
+if (globalForRateLimit.rateLimitCleanupInterval) {
+  clearInterval(globalForRateLimit.rateLimitCleanupInterval);
+}
+
+const cleanupInterval = setInterval(
   () => {
     const now = Date.now();
     Object.keys(rateLimitStore).forEach((key) => {
@@ -21,6 +38,14 @@ setInterval(
   },
   5 * 60 * 1000,
 );
+
+// Store interval reference for cleanup on hot reload
+if (process.env.NODE_ENV !== 'production') {
+  globalForRateLimit.rateLimitCleanupInterval = cleanupInterval;
+}
+
+// Ensure interval doesn't prevent process exit
+cleanupInterval.unref?.();
 
 export interface RateLimitConfig {
   interval: number; // in milliseconds
