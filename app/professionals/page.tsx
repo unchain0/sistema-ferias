@@ -1,8 +1,8 @@
 'use client';
 
-import { AlertCircle, Edit2, Plus, Search, Trash2, X } from 'lucide-react';
+import { AlertCircle, Edit2, Loader2, Plus, Search, Trash2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   createProfessionalAction,
@@ -23,10 +23,31 @@ export default function ProfessionalsPage() {
   const isDemo = session?.user?.email === 'demo@sistema-ferias.com';
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 12;
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (loading || loadingMore) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore && searchQuery === '') {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, loadingMore, hasMore, searchQuery],
+  );
+
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -35,15 +56,21 @@ export default function ProfessionalsPage() {
   });
 
   useEffect(() => {
-    fetchProfessionals();
-  }, []);
+    if (page === 0) {
+      fetchProfessionals();
+    } else {
+      loadMoreProfessionals();
+    }
+  }, [page]);
 
   const fetchProfessionals = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('/api/professionals');
+      const response = await fetch(`/api/professionals?limit=${PAGE_SIZE}&offset=0`);
       if (response.ok) {
         const data = await response.json();
         setProfessionals(data);
+        setHasMore(data.length === PAGE_SIZE);
       }
     } catch (error) {
       console.error('Error fetching professionals:', error);
@@ -51,6 +78,49 @@ export default function ProfessionalsPage() {
       setLoading(false);
     }
   };
+
+  const loadMoreProfessionals = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const response = await fetch(
+        `/api/professionals?limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setProfessionals((prev) => [...prev, ...data]);
+        setHasMore(data.length === PAGE_SIZE);
+      }
+    } catch (error) {
+      console.error('Error loading more professionals:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const fetchAllForSearch = async () => {
+    // If searching, we fetch all to allow client-side filtering as per existing logic
+    // or we could implement server-side search. For now, let's stick to client-side
+    // but fetch all if a search is active.
+    try {
+      const response = await fetch('/api/professionals');
+      if (response.ok) {
+        const data = await response.json();
+        setProfessionals(data);
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('Error fetching all professionals for search:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (searchQuery !== '') {
+      fetchAllForSearch();
+    } else if (page === 0) {
+      fetchProfessionals();
+    }
+  }, [searchQuery]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +139,7 @@ export default function ProfessionalsPage() {
         return;
       }
 
+      setPage(0);
       await fetchProfessionals();
       resetForm();
     } catch (error) {
@@ -102,6 +173,7 @@ export default function ProfessionalsPage() {
         return;
       }
 
+      setPage(0);
       await fetchProfessionals();
     } catch (error) {
       console.error('Error deleting professional:', error);
@@ -279,52 +351,63 @@ export default function ProfessionalsPage() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProfessionals.map((professional) => (
-              <Card key={professional.id}>
-                <div className="space-y-3">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                      {professional.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Gestor: {professional.clientManager}
-                    </p>
-                  </div>
+            {filteredProfessionals.map((professional, index) => (
+              <div
+                key={professional.id}
+                ref={index === filteredProfessionals.length - 1 ? lastElementRef : null}
+              >
+                <Card>
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                        {professional.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Gestor: {professional.clientManager}
+                      </p>
+                    </div>
 
-                  <div className="pt-3 border-t dark:border-gray-700">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                      Faturamento Mensal
-                    </p>
-                    <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                      {formatCurrency(professional.monthlyRevenue)}
-                    </p>
-                  </div>
+                    <div className="pt-3 border-t dark:border-gray-700">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Faturamento Mensal
+                      </p>
+                      <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                        {formatCurrency(professional.monthlyRevenue)}
+                      </p>
+                    </div>
 
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => handleEdit(professional)}
-                      disabled={isDemo}
-                      className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                      <span className="ml-2 font-medium">Editar</span>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(professional.id)}
-                      disabled={isDemo}
-                      className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span className="ml-2 font-medium">Excluir</span>
-                    </Button>
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleEdit(professional)}
+                        disabled={isDemo}
+                        className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        <span className="ml-2 font-medium">Editar</span>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(professional.id)}
+                        disabled={isDemo}
+                        className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span className="ml-2 font-medium">Excluir</span>
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </div>
             ))}
+          </div>
+        )}
+
+        {loadingMore && (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
           </div>
         )}
       </div>

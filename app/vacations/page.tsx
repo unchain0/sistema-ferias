@@ -1,8 +1,8 @@
 'use client';
 
-import { AlertCircle, Edit2, Plus, Search, Trash2, X } from 'lucide-react';
+import { AlertCircle, Edit2, Loader2, Plus, Search, Trash2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { createVacation, deleteVacation, updateVacation } from '@/app/actions/vacations';
 import { Navbar } from '@/components/layout/Navbar';
@@ -25,10 +25,31 @@ export default function VacationsPage() {
   const [vacations, setVacations] = useState<VacationPeriod[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 10;
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (loading || loadingMore) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore && searchQuery === '') {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, loadingMore, hasMore, searchQuery],
+  );
+
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const [formData, setFormData] = useState({
     professionalId: '',
@@ -39,13 +60,18 @@ export default function VacationsPage() {
   });
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (page === 0) {
+      fetchData();
+    } else {
+      loadMoreVacations();
+    }
+  }, [page]);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const [vacationsRes, professionalsRes] = await Promise.all([
-        fetch('/api/vacations?order=createdAt:desc&limit=50'),
+        fetch(`/api/vacations?order=createdAt:desc&limit=${PAGE_SIZE}&offset=0`),
         fetch('/api/professionals'),
       ]);
 
@@ -54,6 +80,7 @@ export default function VacationsPage() {
         const professionalsData = await professionalsRes.json();
         setVacations(vacationsData);
         setProfessionals(professionalsData);
+        setHasMore(vacationsData.length === PAGE_SIZE);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -61,6 +88,46 @@ export default function VacationsPage() {
       setLoading(false);
     }
   };
+
+  const loadMoreVacations = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const response = await fetch(
+        `/api/vacations?order=createdAt:desc&limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setVacations((prev) => [...prev, ...data]);
+        setHasMore(data.length === PAGE_SIZE);
+      }
+    } catch (error) {
+      console.error('Error loading more vacations:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const fetchAllForSearch = async () => {
+    try {
+      const response = await fetch('/api/vacations?order=createdAt:desc');
+      if (response.ok) {
+        const data = await response.json();
+        setVacations(data);
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('Error fetching all vacations for search:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (searchQuery !== '') {
+      fetchAllForSearch();
+    } else if (page === 0) {
+      fetchData();
+    }
+  }, [searchQuery]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,6 +174,7 @@ export default function VacationsPage() {
         return;
       }
 
+      setPage(0);
       await fetchData();
       resetForm();
     } catch (error) {
@@ -146,6 +214,7 @@ export default function VacationsPage() {
         return;
       }
 
+      setPage(0);
       await fetchData();
     } catch (error) {
       console.error('Error deleting vacation:', error);
@@ -415,99 +484,110 @@ export default function VacationsPage() {
 
         {!loading && filteredVacations.length > 0 && (
           <div className="space-y-4">
-            {filteredVacations.map((vacation) => (
-              <Card key={vacation.id}>
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-                  <div className="flex-1 space-y-3">
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                        {getProfessionalName(vacation.professionalId)}
-                      </h3>
+            {filteredVacations.map((vacation, index) => (
+              <div
+                key={vacation.id}
+                ref={index === filteredVacations.length - 1 ? lastElementRef : null}
+              >
+                <Card>
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                          {getProfessionalName(vacation.professionalId)}
+                        </h3>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                            Período Aquisitivo
+                          </p>
+                          <p className="text-sm text-gray-900 dark:text-white">
+                            {formatDateToPtBR(vacation.acquisitionStartDate)} até{' '}
+                            {formatDateToPtBR(vacation.acquisitionEndDate)}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                            Período de Gozo
+                          </p>
+                          <p className="text-sm text-gray-900 dark:text-white">
+                            {formatDateToPtBR(vacation.usageStartDate)} até{' '}
+                            {formatDateToPtBR(vacation.usageEndDate)}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                            Período Concessivo
+                          </p>
+                          <p className="text-sm text-gray-900 dark:text-white">
+                            {(() => {
+                              const concessivePeriod = computeConcessivePeriod(
+                                vacation.acquisitionStartDate,
+                                vacation.acquisitionEndDate,
+                              );
+                              return `${formatDateToPtBR(concessivePeriod.start)} até ${formatDateToPtBR(concessivePeriod.end)}`;
+                            })()}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                            Total de Dias:
+                          </span>
+                          <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                            {vacation.totalDays} dias
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                            Abatimento:
+                          </span>
+                          <span className="text-lg font-bold text-red-600 dark:text-red-400">
+                            {formatCurrency(vacation.revenueDeduction)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                          Período Aquisitivo
-                        </p>
-                        <p className="text-sm text-gray-900 dark:text-white">
-                          {formatDateToPtBR(vacation.acquisitionStartDate)} até{' '}
-                          {formatDateToPtBR(vacation.acquisitionEndDate)}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                          Período de Gozo
-                        </p>
-                        <p className="text-sm text-gray-900 dark:text-white">
-                          {formatDateToPtBR(vacation.usageStartDate)} até{' '}
-                          {formatDateToPtBR(vacation.usageEndDate)}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                          Período Concessivo
-                        </p>
-                        <p className="text-sm text-gray-900 dark:text-white">
-                          {(() => {
-                            const concessivePeriod = computeConcessivePeriod(
-                              vacation.acquisitionStartDate,
-                              vacation.acquisitionEndDate,
-                            );
-                            return `${formatDateToPtBR(concessivePeriod.start)} até ${formatDateToPtBR(concessivePeriod.end)}`;
-                          })()}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                          Total de Dias:
-                        </span>
-                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                          {vacation.totalDays} dias
-                        </span>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                          Abatimento:
-                        </span>
-                        <span className="text-lg font-bold text-red-600 dark:text-red-400">
-                          {formatCurrency(vacation.revenueDeduction)}
-                        </span>
-                      </div>
+                    <div className="flex md:flex-col gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleEdit(vacation)}
+                        disabled={isDemo}
+                        className="flex-1 md:flex-none md:w-28 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        <span className="ml-2 font-medium">Editar</span>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(vacation.id)}
+                        disabled={isDemo}
+                        className="flex-1 md:flex-none md:w-28 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span className="ml-2 font-medium">Excluir</span>
+                      </Button>
                     </div>
                   </div>
-
-                  <div className="flex md:flex-col gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => handleEdit(vacation)}
-                      disabled={isDemo}
-                      className="flex-1 md:flex-none md:w-28 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                      <span className="ml-2 font-medium">Editar</span>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(vacation.id)}
-                      disabled={isDemo}
-                      className="flex-1 md:flex-none md:w-28 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span className="ml-2 font-medium">Excluir</span>
-                    </Button>
-                  </div>
-                </div>
-              </Card>
+                </Card>
+              </div>
             ))}
+          </div>
+        )}
+
+        {loadingMore && (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
           </div>
         )}
       </div>

@@ -5,15 +5,32 @@ import { authOptions } from '@/lib/auth-config';
 import { createProfessional, getProfessionals } from '@/lib/db';
 import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
-  const professionals = await getProfessionals(session.user.id);
-  return NextResponse.json(professionals);
+  const { searchParams } = new URL(request.url);
+  const limitParam = searchParams.get('limit');
+  const offsetParam = searchParams.get('offset');
+
+  const limit = limitParam ? Math.min(Math.max(parseInt(limitParam, 10) || 50, 1), 200) : null;
+  const offset = offsetParam ? Math.max(parseInt(offsetParam, 10) || 0, 0) : null;
+
+  const all = await getProfessionals(session.user.id);
+
+  let professionals = all;
+  if (limit !== null && offset !== null) {
+    professionals = all.slice(offset, offset + limit);
+  }
+
+  const headers = new Headers();
+  headers.set('X-Total-Count', String(all.length));
+  headers.set('Cache-Control', 'private, max-age=5, must-revalidate');
+
+  return NextResponse.json(professionals, { headers });
 }
 
 export async function POST(request: Request) {

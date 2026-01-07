@@ -19,7 +19,7 @@ describe('Professionals API routes', () => {
     }));
 
     const { GET } = await import('@/app/api/professionals/route');
-    const res = await GET();
+    const res = await GET(new Request('http://localhost/api/professionals'));
     expect(res.status).toBe(401);
   });
 
