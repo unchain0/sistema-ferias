@@ -250,29 +250,25 @@ export default function VacationsPage() {
   }, [vacations, searchQuery, professionals]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="page-container">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+      <div className="page-content">
+        <div className="page-header">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Períodos de Férias
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Gerencie os períodos aquisitivos e de gozo de férias
-            </p>
+            <h1 className="heading-page">Períodos de Férias</h1>
+            <p className="text-description">Gerencie os períodos aquisitivos e de gozo de férias</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="relative w-full sm:max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <div className="header-actions">
+            <div className="search-container">
+              <Search className="search-icon" />
               <input
                 type="text"
                 placeholder="Buscar por nome do profissional..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
+                className="input-search"
               />
             </div>
 
@@ -280,7 +276,7 @@ export default function VacationsPage() {
               <Button
                 onClick={() => setShowForm(true)}
                 disabled={isDemo || loading}
-                className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
+                className="btn-action"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 <span className="font-semibold">Novo Período</span>
@@ -291,18 +287,13 @@ export default function VacationsPage() {
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 flex items-start space-x-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="mb-6 alert-warning">
+            <AlertCircle className="alert-warning-icon" />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">
-                Atenção
-              </p>
-              <p className="text-sm text-amber-700 dark:text-amber-400">{error}</p>
+              <p className="alert-warning-title">Atenção</p>
+              <p className="alert-warning-text">{error}</p>
             </div>
-            <button
-              onClick={() => setError(null)}
-              className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200"
-            >
+            <button onClick={() => setError(null)} className="alert-warning-close">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -320,27 +311,22 @@ export default function VacationsPage() {
         {/* Form */}
         {showForm && professionals.length > 0 && !isDemo && (
           <Card className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            <div className="card-header">
+              <h2 className="heading-section">
                 {editingId ? 'Editar Período de Férias' : 'Novo Período de Férias'}
               </h2>
-              <button
-                onClick={resetForm}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
+              <button onClick={resetForm} className="btn-close">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="form-group">
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-                  Profissional
-                </label>
+                <label className="form-label">Profissional</label>
                 <select
                   value={formData.professionalId}
                   onChange={(e) => setFormData({ ...formData, professionalId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  className="select-base"
                   required
                 >
                   <option value="">Selecione um profissional</option>
@@ -354,9 +340,7 @@ export default function VacationsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-                    Início Período Aquisitivo
-                  </label>
+                  <label className="form-label">Início Período Aquisitivo</label>
                   <SingleDatePicker
                     date={formData.acquisitionStartDate}
                     onDateChange={(date) =>
@@ -368,9 +352,7 @@ export default function VacationsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-                    Fim Período Aquisitivo
-                  </label>
+                  <label className="form-label">Fim Período Aquisitivo</label>
                   <SingleDatePicker
                     date={formData.acquisitionEndDate}
                     onDateChange={(date) =>
@@ -390,7 +372,7 @@ export default function VacationsPage() {
                     formData.acquisitionEndDate.toISOString().split('T')[0],
                   );
                   return (
-                    <div className="text-sm text-gray-700 dark:text-gray-300">
+                    <div className="text-muted">
                       <span className="font-semibold">Período Concessivo: </span>
                       {formatDateToPtBR(concessivePeriod.start)} até{' '}
                       {formatDateToPtBR(concessivePeriod.end)}
@@ -400,9 +382,7 @@ export default function VacationsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-                    Início Período de Gozo
-                  </label>
+                  <label className="form-label">Início Período de Gozo</label>
                   <SingleDatePicker
                     date={formData.usageStartDate}
                     onDateChange={(date) =>
@@ -414,9 +394,7 @@ export default function VacationsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-                    Fim Período de Gozo
-                  </label>
+                  <label className="form-label">Fim Período de Gozo</label>
                   <SingleDatePicker
                     date={formData.usageEndDate}
                     onDateChange={(date) =>
@@ -428,7 +406,7 @@ export default function VacationsPage() {
                 </div>
               </div>
 
-              <div className="flex space-x-3">
+              <div className="form-actions">
                 <Button type="submit">{editingId ? 'Atualizar' : 'Criar'}</Button>
                 <Button type="button" variant="secondary" onClick={resetForm}>
                   Cancelar
@@ -440,7 +418,7 @@ export default function VacationsPage() {
 
         {/* Loading Skeletons */}
         {loading && (
-          <div className="space-y-4">
+          <div className="stack-list">
             {[...Array(3)].map((_, i) => (
               <Card key={`skeleton-${i}`}>
                 <div className="space-y-4">
@@ -475,7 +453,7 @@ export default function VacationsPage() {
           <Card>
             <div className="text-center py-12">
               <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-muted">
                 Nenhum período de férias encontrado para &quot;{searchQuery}&quot;
               </p>
             </div>
@@ -483,26 +461,24 @@ export default function VacationsPage() {
         )}
 
         {!loading && filteredVacations.length > 0 && (
-          <div className="space-y-4">
+          <div className="stack-list">
             {filteredVacations.map((vacation, index) => (
               <div
                 key={vacation.id}
                 ref={index === filteredVacations.length - 1 ? lastElementRef : null}
               >
-                <Card>
+                <Card className="card-hover">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
                     <div className="flex-1 space-y-3">
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                        <h3 className="heading-card mb-1">
                           {getProfessionalName(vacation.professionalId)}
                         </h3>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                            Período Aquisitivo
-                          </p>
+                          <p className="text-label mb-1">Período Aquisitivo</p>
                           <p className="text-sm text-gray-900 dark:text-white">
                             {formatDateToPtBR(vacation.acquisitionStartDate)} até{' '}
                             {formatDateToPtBR(vacation.acquisitionEndDate)}
@@ -510,9 +486,7 @@ export default function VacationsPage() {
                         </div>
 
                         <div>
-                          <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                            Período de Gozo
-                          </p>
+                          <p className="text-label mb-1">Período de Gozo</p>
                           <p className="text-sm text-gray-900 dark:text-white">
                             {formatDateToPtBR(vacation.usageStartDate)} até{' '}
                             {formatDateToPtBR(vacation.usageEndDate)}
@@ -520,9 +494,7 @@ export default function VacationsPage() {
                         </div>
 
                         <div>
-                          <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                            Período Concessivo
-                          </p>
+                          <p className="text-label mb-1">Período Concessivo</p>
                           <p className="text-sm text-gray-900 dark:text-white">
                             {(() => {
                               const concessivePeriod = computeConcessivePeriod(
@@ -537,19 +509,13 @@ export default function VacationsPage() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                         <div className="flex items-center space-x-2">
-                          <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                            Total de Dias:
-                          </span>
-                          <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                            {vacation.totalDays} dias
-                          </span>
+                          <span className="text-label">Total de Dias:</span>
+                          <span className="value-number-primary">{vacation.totalDays} dias</span>
                         </div>
 
                         <div className="flex items-center space-x-2">
-                          <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                            Abatimento:
-                          </span>
-                          <span className="text-lg font-bold text-red-600 dark:text-red-400">
+                          <span className="text-label">Abatimento:</span>
+                          <span className="value-currency-negative">
                             {formatCurrency(vacation.revenueDeduction)}
                           </span>
                         </div>
@@ -562,7 +528,7 @@ export default function VacationsPage() {
                         variant="secondary"
                         onClick={() => handleEdit(vacation)}
                         disabled={isDemo}
-                        className="flex-1 md:flex-none md:w-28 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                        className="flex-1 md:flex-none md:w-28 btn-card-action"
                       >
                         <Edit2 className="w-4 h-4" />
                         <span className="ml-2 font-medium">Editar</span>
@@ -572,7 +538,7 @@ export default function VacationsPage() {
                         variant="destructive"
                         onClick={() => handleDelete(vacation.id)}
                         disabled={isDemo}
-                        className="flex-1 md:flex-none md:w-28 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                        className="flex-1 md:flex-none md:w-28 btn-card-action"
                       >
                         <Trash2 className="w-4 h-4" />
                         <span className="ml-2 font-medium">Excluir</span>
@@ -587,7 +553,7 @@ export default function VacationsPage() {
 
         {loadingMore && (
           <div className="flex justify-center py-8">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <Loader2 className="w-8 h-8 loading-spinner" />
           </div>
         )}
       </div>

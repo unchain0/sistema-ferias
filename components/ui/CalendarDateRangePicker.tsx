@@ -23,113 +23,105 @@ interface CalendarDateRangePickerProps {
   className?: string;
   value: DateRange | undefined;
   onChange: (range: DateRange | undefined) => void;
+  disabled?: boolean;
 }
+
+const presets = [
+  { label: 'Últimos 7 dias', getValue: () => ({ from: subDays(new Date(), 7), to: new Date() }) },
+  { label: 'Últimos 30 dias', getValue: () => ({ from: subDays(new Date(), 30), to: new Date() }) },
+  {
+    label: 'Este mês',
+    getValue: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) }),
+  },
+  {
+    label: 'Últimos 3 meses',
+    getValue: () => ({ from: startOfMonth(subMonths(new Date(), 2)), to: endOfMonth(new Date()) }),
+  },
+  {
+    label: 'Este ano',
+    getValue: () => ({ from: startOfYear(new Date()), to: endOfYear(new Date()) }),
+  },
+  {
+    label: 'Último ano',
+    getValue: () => ({ from: subDays(new Date(), 365), to: new Date() }),
+  },
+];
 
 export function CalendarDateRangePicker({
   className,
   value,
   onChange,
+  disabled = false,
 }: CalendarDateRangePickerProps) {
-  const presets: Array<{ label: string; getValue: () => DateRange }> = [
-    {
-      label: 'Hoje',
-      getValue: () => ({ from: new Date(), to: new Date() }),
-    },
-    {
-      label: 'Ontem',
-      getValue: () => {
-        const yesterday = subDays(new Date(), 1);
-        return { from: yesterday, to: yesterday };
-      },
-    },
-    {
-      label: 'Últimos 7 dias',
-      getValue: () => ({ from: subDays(new Date(), 7), to: new Date() }),
-    },
-    {
-      label: 'Últimos 30 dias',
-      getValue: () => ({ from: subDays(new Date(), 30), to: new Date() }),
-    },
-    {
-      label: 'Este Mês',
-      getValue: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) }),
-    },
-    {
-      label: 'Últimos 3 Meses',
-      getValue: () => ({
-        from: startOfMonth(subMonths(new Date(), 2)),
-        to: endOfMonth(new Date()),
-      }),
-    },
-    {
-      label: 'Este ano',
-      getValue: () => ({ from: startOfYear(new Date()), to: endOfYear(new Date()) }),
-    },
-    {
-      label: 'Ano passado',
-      getValue: () => {
-        const lastYear = subMonths(new Date(), 12);
-        return { from: startOfYear(lastYear), to: endOfYear(lastYear) };
-      },
-    },
-  ];
+  const [open, setOpen] = React.useState(false);
 
-  const label = value?.from
-    ? value.to
-      ? `${format(value.from, "dd 'de' MMM, yyyy", { locale: ptBR })} - ${format(value.to, "dd 'de' MMM, yyyy", { locale: ptBR })}`
-      : format(value.from, "dd 'de' MMM, yyyy", { locale: ptBR })
-    : 'Selecione um período';
+  const handlePresetClick = (preset: (typeof presets)[0]) => {
+    onChange(preset.getValue());
+    setOpen(false);
+  };
+
+  const handleCalendarSelect = (range: DateRange | undefined) => {
+    onChange(range);
+    if (range?.from && range?.to) {
+      setTimeout(() => setOpen(false), 150);
+    }
+  };
+
+  const buttonText = React.useMemo(() => {
+    if (!value?.from) return 'Selecione um período';
+    if (!value.to) return format(value.from, "dd 'de' MMM, yyyy", { locale: ptBR });
+    return `${format(value.from, 'dd MMM', { locale: ptBR })} - ${format(value.to, 'dd MMM, yyyy', { locale: ptBR })}`;
+  }, [value]);
 
   return (
-    <div className={cn('grid gap-2', className)}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant={'outline'}
-            className={cn(
-              'w-full justify-start text-left font-normal sm:w-[300px]',
-              !value && 'text-muted-foreground',
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            <span>{label}</span>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <div className="flex flex-col sm:flex-row">
-            <div className="flex flex-col space-y-1 p-3 border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 sm:w-40">
-              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 px-2">
-                Períodos Rápidos
-              </span>
-              {presets.map((preset) => (
-                <Button
-                  key={preset.label}
-                  variant="ghost"
-                  size="sm"
-                  className="justify-start font-normal text-xs h-8"
-                  onClick={() => onChange(preset.getValue())}
-                >
-                  {preset.label}
-                </Button>
-              ))}
-            </div>
-
-            <div className="p-2">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={value?.to}
-                selected={value}
-                onSelect={onChange}
-                numberOfMonths={1}
-                locale={ptBR}
-                className="p-3"
-              />
-            </div>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          disabled={disabled}
+          className={cn(
+            'w-full sm:w-[300px] justify-start text-left font-normal',
+            !value && 'text-muted-foreground',
+            className,
+          )}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {buttonText}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <div className="flex flex-col sm:flex-row">
+          {/* Presets */}
+          <div className="flex flex-col gap-1 p-3 border-b sm:border-b-0 sm:border-r border-gray-200 dark:border-gray-800">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 px-2">
+              Atalhos
+            </p>
+            {presets.map((preset) => (
+              <Button
+                key={preset.label}
+                variant="ghost"
+                size="sm"
+                className="justify-start text-xs h-8"
+                onClick={() => handlePresetClick(preset)}
+              >
+                {preset.label}
+              </Button>
+            ))}
           </div>
-        </PopoverContent>
-      </Popover>
-    </div>
+
+          {/* Calendar */}
+          <div className="relative p-3">
+            <Calendar
+              mode="range"
+              selected={value}
+              onSelect={handleCalendarSelect}
+              numberOfMonths={2}
+              locale={ptBR}
+              defaultMonth={value?.from || new Date()}
+            />
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }

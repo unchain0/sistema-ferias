@@ -80,15 +80,15 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+    <div className="page-container-auth">
       <Card className="w-full max-w-md">
         <div className="flex flex-col items-center mb-6">
           <Calendar className="w-12 h-12 text-blue-600 mb-2" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Criar Conta</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Cadastre-se no Sistema de Férias</p>
+          <p className="text-muted mt-1">Cadastre-se no Sistema de Férias</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="form-group">
           <Input
             label="Nome"
             type="text"
@@ -133,7 +133,7 @@ export default function RegisterPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-muted">
             Já tem uma conta?{' '}
             <Link
               href="/login"

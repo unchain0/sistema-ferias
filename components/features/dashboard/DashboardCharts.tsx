@@ -1,5 +1,6 @@
 'use client';
 
+import { BarChart3, TrendingDown } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -101,8 +102,9 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
     backgroundColor: isDark ? '#18181b' : '#ffffff', // Zinc 900 / White
     color: isDark ? '#fafafa' : '#18181b', // Zinc 50 / Zinc 900
     borderColor: isDark ? '#27272a' : '#e4e4e7', // Zinc 800 / Zinc 200
-    borderRadius: '0.5rem',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    borderRadius: '0.75rem',
+    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+    padding: '12px 16px',
   } as const;
 
   const axisTick = { fill: isDark ? '#a1a1aa' : '#71717a' } as const; // Zinc 400 / Zinc 500
@@ -111,13 +113,29 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-      <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm h-full flex flex-col">
-        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-          Férias por Período
-        </h3>
-        <div className="flex-1 min-h-[300px]">
+      {/* Vacation Days Chart */}
+      <div className="group bg-white dark:bg-gray-950 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-lg hover:shadow-indigo-100/50 dark:hover:shadow-indigo-900/20 transition-all duration-300">
+        {/* Header with gradient accent */}
+        <div className="relative p-6 pb-4">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-blue-500" />
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900/40 dark:to-blue-900/40">
+              <BarChart3 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Férias por Período
+            </h3>
+          </div>
+        </div>
+        <div className="px-6 pb-6 h-[320px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={processedData}>
+            <BarChart data={processedData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <defs>
+                <linearGradient id="barGradientBlue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.8} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
               <XAxis
                 dataKey="month"
@@ -125,7 +143,7 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
                 tick={axisTick}
                 tickLine={false}
                 axisLine={false}
-                style={{ fontSize: '12px', fontWeight: 500 }}
+                style={{ fontSize: '11px', fontWeight: 500 }}
                 dy={10}
               />
               <YAxis
@@ -133,40 +151,57 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
                 tick={axisTick}
                 tickLine={false}
                 axisLine={false}
-                style={{ fontSize: '12px' }}
-                dx={-10}
+                style={{ fontSize: '11px' }}
+                dx={-5}
               />
               <Tooltip
-                formatter={(v: number) => [`${v}`, 'Dias']}
+                formatter={(v: number) => [`${v} dias`, 'Férias']}
                 contentStyle={tooltipStyles}
-                cursor={{ fill: isDark ? '#27272a' : '#f4f4f5', opacity: 0.5 }}
+                cursor={{ fill: isDark ? '#27272a' : '#f4f4f5', opacity: 0.5, radius: 4 }}
                 labelStyle={{
                   color: tooltipStyles.color,
                   fontWeight: 600,
-                  marginBottom: '0.25rem',
+                  marginBottom: '4px',
                 }}
-                itemStyle={{ color: tooltipStyles.color }}
+                itemStyle={{ color: '#6366f1' }}
               />
               <Bar
                 dataKey="count"
-                fill="#4f46e5"
+                fill="url(#barGradientBlue)"
                 name="Dias de Férias"
-                radius={[4, 4, 0, 0]}
+                radius={[6, 6, 0, 0]}
                 isAnimationActive={shouldAnimate}
-                animationDuration={1000}
+                animationDuration={800}
+                animationEasing="ease-out"
               />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm h-full flex flex-col">
-        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-          Impacto Financeiro
-        </h3>
-        <div className="flex-1 min-h-[300px]">
+      {/* Financial Impact Chart */}
+      <div className="group bg-white dark:bg-gray-950 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-lg hover:shadow-rose-100/50 dark:hover:shadow-rose-900/20 transition-all duration-300">
+        {/* Header with gradient accent */}
+        <div className="relative p-6 pb-4">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-pink-500" />
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/40 dark:to-pink-900/40">
+              <TrendingDown className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Impacto Financeiro
+            </h3>
+          </div>
+        </div>
+        <div className="px-6 pb-6 h-[320px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={processedData}>
+            <BarChart data={processedData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <defs>
+                <linearGradient id="barGradientRose" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f43f5e" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#e11d48" stopOpacity={0.8} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
               <XAxis
                 dataKey="month"
@@ -174,7 +209,7 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
                 tick={axisTick}
                 tickLine={false}
                 axisLine={false}
-                style={{ fontSize: '12px', fontWeight: 500 }}
+                style={{ fontSize: '11px', fontWeight: 500 }}
                 dy={10}
               />
               <YAxis
@@ -182,27 +217,29 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
                 tick={axisTick}
                 tickLine={false}
                 axisLine={false}
-                style={{ fontSize: '12px' }}
-                dx={-10}
+                style={{ fontSize: '11px' }}
+                dx={-5}
+                tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
               />
               <Tooltip
                 formatter={(v: number) => [formatCurrency(v), 'Impacto']}
                 contentStyle={tooltipStyles}
-                cursor={{ fill: isDark ? '#27272a' : '#f4f4f5', opacity: 0.5 }}
+                cursor={{ fill: isDark ? '#27272a' : '#f4f4f5', opacity: 0.5, radius: 4 }}
                 labelStyle={{
                   color: tooltipStyles.color,
                   fontWeight: 600,
-                  marginBottom: '0.25rem',
+                  marginBottom: '4px',
                 }}
-                itemStyle={{ color: tooltipStyles.color }}
+                itemStyle={{ color: '#f43f5e' }}
               />
               <Bar
                 dataKey="impact"
-                fill="#e11d48"
+                fill="url(#barGradientRose)"
                 name="Impacto (R$)"
-                radius={[4, 4, 0, 0]}
+                radius={[6, 6, 0, 0]}
                 isAnimationActive={shouldAnimate}
-                animationDuration={1000}
+                animationDuration={800}
+                animationEasing="ease-out"
               />
             </BarChart>
           </ResponsiveContainer>

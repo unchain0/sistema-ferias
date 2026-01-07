@@ -203,36 +203,30 @@ export default function ProfessionalsPage() {
   }, [professionals, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="page-container">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+      <div className="page-content">
+        <div className="page-header">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Profissionais</h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Gerencie os profissionais e seus faturamentos
-            </p>
+            <h1 className="heading-page">Profissionais</h1>
+            <p className="text-description">Gerencie os profissionais e seus faturamentos</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="relative w-full sm:max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <div className="header-actions">
+            <div className="search-container">
+              <Search className="search-icon" />
               <input
                 type="text"
                 placeholder="Buscar por nome ou gestor..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
+                className="input-search"
               />
             </div>
 
             {!showForm && (
-              <Button
-                onClick={() => setShowForm(true)}
-                disabled={isDemo}
-                className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
-              >
+              <Button onClick={() => setShowForm(true)} disabled={isDemo} className="btn-action">
                 <Plus className="w-5 h-5 mr-2" />
                 <span className="font-semibold">Novo Profissional</span>
               </Button>
@@ -242,18 +236,13 @@ export default function ProfessionalsPage() {
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 flex items-start space-x-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="mb-6 alert-warning">
+            <AlertCircle className="alert-warning-icon" />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">
-                Atenção
-              </p>
-              <p className="text-sm text-amber-700 dark:text-amber-400">{error}</p>
+              <p className="alert-warning-title">Atenção</p>
+              <p className="alert-warning-text">{error}</p>
             </div>
-            <button
-              onClick={() => setError(null)}
-              className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200"
-            >
+            <button onClick={() => setError(null)} className="alert-warning-close">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -262,19 +251,16 @@ export default function ProfessionalsPage() {
         {/* Form */}
         {showForm && !isDemo && (
           <Card className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            <div className="card-header">
+              <h2 className="heading-section">
                 {editingId ? 'Editar Profissional' : 'Novo Profissional'}
               </h2>
-              <button
-                onClick={resetForm}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
+              <button onClick={resetForm} className="btn-close">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="form-group">
               <Input
                 label="Nome do Profissional"
                 value={formData.name}
@@ -301,7 +287,7 @@ export default function ProfessionalsPage() {
                 required
               />
 
-              <div className="flex space-x-3">
+              <div className="form-actions">
                 <Button type="submit">{editingId ? 'Atualizar' : 'Criar'}</Button>
                 <Button type="button" variant="secondary" onClick={resetForm}>
                   Cancelar
@@ -313,7 +299,7 @@ export default function ProfessionalsPage() {
 
         {/* Loading State */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid-cards">
             {[...Array(6)].map((_, i) => (
               <Card key={i}>
                 <div className="space-y-3">
@@ -321,7 +307,7 @@ export default function ProfessionalsPage() {
                     <Skeleton className="h-6 w-3/4 mb-2" />
                     <Skeleton className="h-4 w-1/2" />
                   </div>
-                  <div className="pt-3 border-t dark:border-gray-700">
+                  <div className="divider">
                     <Skeleton className="h-4 w-1/3 mb-1" />
                     <Skeleton className="h-6 w-1/2" />
                   </div>
@@ -344,34 +330,28 @@ export default function ProfessionalsPage() {
           <Card>
             <div className="text-center py-12">
               <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-muted">
                 Nenhum profissional encontrado para &quot;{searchQuery}&quot;
               </p>
             </div>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid-cards">
             {filteredProfessionals.map((professional, index) => (
               <div
                 key={professional.id}
                 ref={index === filteredProfessionals.length - 1 ? lastElementRef : null}
               >
-                <Card>
+                <Card className="card-hover">
                   <div className="space-y-3">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                        {professional.name}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Gestor: {professional.clientManager}
-                      </p>
+                      <h3 className="heading-card">{professional.name}</h3>
+                      <p className="text-muted">Gestor: {professional.clientManager}</p>
                     </div>
 
-                    <div className="pt-3 border-t dark:border-gray-700">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                        Faturamento Mensal
-                      </p>
-                      <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                    <div className="divider">
+                      <p className="text-label mb-1">Faturamento Mensal</p>
+                      <p className="value-currency-positive">
                         {formatCurrency(professional.monthlyRevenue)}
                       </p>
                     </div>
@@ -382,7 +362,7 @@ export default function ProfessionalsPage() {
                         variant="secondary"
                         onClick={() => handleEdit(professional)}
                         disabled={isDemo}
-                        className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                        className="btn-card-action"
                       >
                         <Edit2 className="w-4 h-4" />
                         <span className="ml-2 font-medium">Editar</span>
@@ -392,7 +372,7 @@ export default function ProfessionalsPage() {
                         variant="destructive"
                         onClick={() => handleDelete(professional.id)}
                         disabled={isDemo}
-                        className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                        className="btn-card-action"
                       >
                         <Trash2 className="w-4 h-4" />
                         <span className="ml-2 font-medium">Excluir</span>
@@ -407,7 +387,7 @@ export default function ProfessionalsPage() {
 
         {loadingMore && (
           <div className="flex justify-center py-8">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <Loader2 className="w-8 h-8 loading-spinner" />
           </div>
         )}
       </div>

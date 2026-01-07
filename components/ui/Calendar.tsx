@@ -15,53 +15,83 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
       showOutsideDays={showOutsideDays}
       className={cn('p-3', className)}
       classNames={{
-        months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
+        // Layout
+        months: 'flex flex-col sm:flex-row gap-4',
         month: 'space-y-4',
-        caption: 'flex justify-center pt-1 relative items-center',
-        caption_label: 'text-sm font-medium',
-        nav: 'space-x-1 flex items-center',
-        nav_button: cn(
+        month_caption: 'flex justify-center pt-1 items-center h-10',
+        caption_label: 'text-sm font-semibold text-gray-900 dark:text-gray-100',
+
+        // Navigation - positioned at edges of calendar container
+        nav: 'absolute top-4 inset-x-3 flex items-center justify-between pointer-events-none z-10',
+        button_previous: cn(
           buttonVariants({ variant: 'outline' }),
-          'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100',
+          'h-8 w-8 bg-transparent p-0 text-gray-600 dark:text-gray-400 pointer-events-auto',
+          'hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100',
+          'border-gray-200 dark:border-gray-700',
+          'transition-colors',
         ),
-        nav_button_previous: 'absolute left-1',
-        nav_button_next: 'absolute right-1',
-        table: 'w-full border-collapse space-y-1',
-        head_row: 'flex',
-        head_cell: 'text-gray-500 rounded-md w-9 font-normal text-[0.8rem] dark:text-gray-400',
-        row: 'flex w-full mt-2',
-        day: cn(
-          buttonVariants({ variant: 'ghost' }),
-          'h-9 w-9 p-0 font-normal aria-selected:opacity-100',
+        button_next: cn(
+          buttonVariants({ variant: 'outline' }),
+          'h-8 w-8 bg-transparent p-0 text-gray-600 dark:text-gray-400 pointer-events-auto',
+          'hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100',
+          'border-gray-200 dark:border-gray-700',
+          'transition-colors',
         ),
-        day_range_end: 'day-range-end',
-        day_selected:
-          'bg-blue-600 text-gray-50 hover:bg-blue-600 hover:text-gray-50 focus:bg-blue-600 focus:text-gray-50 dark:!bg-gray-50 dark:!text-gray-900 dark:hover:bg-gray-50 dark:hover:text-gray-900 dark:focus:bg-gray-50 dark:focus:text-gray-900',
-        day_today: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white font-semibold',
-        day_outside:
-          'day-outside text-gray-500 opacity-50 aria-selected:bg-gray-100/50 aria-selected:text-gray-500 aria-selected:opacity-30 dark:text-gray-400 dark:aria-selected:bg-gray-800/50 dark:aria-selected:text-gray-400',
-        day_disabled: 'text-gray-500 opacity-50 dark:text-gray-400',
-        day_range_middle:
-          'aria-selected:bg-gray-100 aria-selected:text-gray-900 dark:aria-selected:bg-gray-800 dark:aria-selected:text-gray-50',
-        day_hidden: 'invisible',
-        // Add react-day-picker v9 compatible keys
-        month_grid: 'w-full border-collapse space-y-1',
+
+        // Table structure
+        month_grid: 'w-full border-collapse',
         weekdays: 'flex',
-        weekday: 'text-gray-500 rounded-md w-9 font-normal text-[0.8rem] dark:text-gray-400',
-        week: 'flex w-full mt-2',
-        // In v9 'day' is actually the button and 'cell' is the cell
-        cell: 'h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-gray-100/50 [&:has([aria-selected])]:bg-gray-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 dark:[&:has([aria-selected].day-outside)]:bg-gray-800/50 dark:[&:has([aria-selected])]:bg-gray-800',
-        range_start: 'day-range-start',
-        range_end: 'day-range-end',
-        selected:
-          'bg-blue-600 text-gray-50 hover:bg-blue-600 hover:text-gray-50 focus:bg-blue-600 focus:text-gray-50 dark:!bg-gray-50 dark:!text-gray-900 dark:hover:bg-gray-50 dark:hover:text-gray-900 dark:focus:bg-gray-50 dark:focus:text-gray-900',
+        weekday:
+          'text-gray-500 dark:text-gray-400 rounded-md w-10 font-medium text-[0.75rem] uppercase tracking-wide',
+        week: 'flex w-full mt-1',
+
+        // Day cells
+        day: cn(
+          'relative h-10 w-10 p-0 text-center text-sm font-normal',
+          'focus-within:relative focus-within:z-20',
+          // Range middle background
+          '[&:has([aria-selected])]:bg-blue-50 dark:[&:has([aria-selected])]:bg-blue-950/30',
+          // First day of range
+          '[&:has([aria-selected].day-range-start)]:rounded-l-lg',
+          // Last day of range
+          '[&:has([aria-selected].day-range-end)]:rounded-r-lg',
+          // Outside days in range
+          '[&:has([aria-selected].day-outside)]:bg-blue-50/50 dark:[&:has([aria-selected].day-outside)]:bg-blue-950/20',
+        ),
+        day_button: cn(
+          buttonVariants({ variant: 'ghost' }),
+          'h-10 w-10 p-0 font-normal rounded-lg',
+          'hover:bg-gray-100 dark:hover:bg-gray-800',
+          'focus:bg-gray-100 dark:focus:bg-gray-800',
+          'transition-colors',
+          'aria-selected:opacity-100',
+        ),
+
+        // Range states
+        range_start:
+          'day-range-start rounded-lg !bg-blue-600 !text-white hover:!bg-blue-700 focus:!bg-blue-700 dark:!bg-blue-500 dark:hover:!bg-blue-600',
+        range_end:
+          'day-range-end rounded-lg !bg-blue-600 !text-white hover:!bg-blue-700 focus:!bg-blue-700 dark:!bg-blue-500 dark:hover:!bg-blue-600',
         range_middle:
-          'aria-selected:bg-gray-100 aria-selected:text-gray-900 dark:aria-selected:bg-gray-800 dark:aria-selected:text-gray-50',
-        today: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white font-semibold',
-        outside:
-          'day-outside text-gray-500 opacity-50 aria-selected:bg-gray-100/50 aria-selected:text-gray-500 aria-selected:opacity-30 dark:text-gray-400 dark:aria-selected:bg-gray-800/50 dark:aria-selected:text-gray-400',
-        disabled: 'text-gray-500 opacity-50 dark:text-gray-400',
+          'rounded-none !bg-transparent text-blue-700 dark:text-blue-300 hover:!bg-blue-100 dark:hover:!bg-blue-900/50 hover:text-blue-800 dark:hover:text-blue-200',
+
+        // Selected (single mode)
+        selected:
+          'bg-blue-600 text-white hover:bg-blue-700 focus:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg',
+
+        // Today indicator
+        today:
+          'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold rounded-lg',
+
+        // Outside days (other months)
+        outside: 'day-outside text-gray-400 dark:text-gray-600 opacity-50',
+
+        // Disabled days
+        disabled: 'text-gray-300 dark:text-gray-700 opacity-50 cursor-not-allowed',
+
+        // Hidden days
         hidden: 'invisible',
+
         ...classNames,
       }}
       components={{

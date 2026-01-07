@@ -68,7 +68,7 @@ export function LoginForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="form-group">
         <Input
           label="Email"
           type="email"
@@ -116,13 +116,13 @@ export function LoginForm() {
           {demoLoading ? 'Carregando demonstração...' : 'Acessar Demonstração'}
         </Button>
 
-        <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
+        <p className="text-xs text-center text-muted mt-2">
           Explore o sistema com dados de exemplo (somente visualização)
         </p>
       </div>
 
       <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-muted">
           Não tem uma conta?{' '}
           <Link
             prefetch={false}
