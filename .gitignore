@@ -36,5 +36,10 @@ next-env.d.ts
 
 # data files
 /data
-/playwright-report
-/test-results
+
+# playwright
+/playwright-report/
+/test-results/
+
+# local artifacts
+logs.txt

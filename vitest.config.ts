@@ -10,16 +10,22 @@ export default defineConfig({
     setupFiles: './tests/setup.ts',
     exclude: ['node_modules', 'dist', '.idea', '.git', '.cache', 'tests/e2e'],
     coverage: {
-        provider: 'v8',
-        reporter: ['text', 'json', 'html'],
-        exclude: [
-            'node_modules/',
-            'tests/',
-            '**/*.d.ts',
-            '**/*.config.*',
-            '.next/',
-            'coverage/',
-        ]
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'tests/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '.next/',
+        'coverage/',
+      ],
+      thresholds: {
+        lines: 55,
+        functions: 55,
+        branches: 40,
+        statements: 55,
+      },
     },
   },
 })

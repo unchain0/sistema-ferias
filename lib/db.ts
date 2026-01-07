@@ -1,8 +1,10 @@
 import { User, Professional, VacationPeriod } from '@/types';
 import { supabase } from './supabase';
-import { supabaseAdmin } from './supabase-admin';
+import { getSupabaseAdmin } from './supabase-admin';
 import { createSupabaseForClaims } from './supabase-server';
 import { randomUUID } from 'crypto';
+
+const supabaseAdmin = getSupabaseAdmin();
 
 // Users
 export async function getUsers(): Promise<User[]> {

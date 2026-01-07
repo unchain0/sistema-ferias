@@ -3,741 +3,150 @@ import { hashPassword } from './auth';
 
 export async function createDemoData() {
   const demoUserId = 'demo-user-id';
-  
-  // Demo User
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // 1-12
+
+  // Helper: ISO date without timezone surprises
+  const iso = (y: number, m: number, d: number) =>
+    new Date(Date.UTC(y, m - 1, d)).toISOString();
+
+  // Demo User (always “recent”)
   const demoUser: User = {
     id: demoUserId,
     email: 'demo@sistema-ferias.com',
     name: 'Usuário Demonstração',
     password: await hashPassword('demo123'),
-    createdAt: new Date('2025-01-01').toISOString(),
+    createdAt: iso(currentYear - 1, 1, 10),
   };
 
-  // Demo Professionals - 12 profissionais
-  const demoProfessionals: Professional[] = [
-    {
-      id: 'prof-1',
-      userId: demoUserId,
-      name: 'João Silva',
-      clientManager: 'Maria Santos',
-      monthlyRevenue: 15000,
-      createdAt: new Date('2025-01-15').toISOString(),
-    },
-    {
-      id: 'prof-2',
-      userId: demoUserId,
-      name: 'Ana Costa',
-      clientManager: 'Carlos Oliveira',
-      monthlyRevenue: 18000,
-      createdAt: new Date('2025-01-20').toISOString(),
-    },
-    {
-      id: 'prof-3',
-      userId: demoUserId,
-      name: 'Pedro Almeida',
-      clientManager: 'Juliana Ferreira',
-      monthlyRevenue: 12000,
-      createdAt: new Date('2025-02-01').toISOString(),
-    },
-    {
-      id: 'prof-4',
-      userId: demoUserId,
-      name: 'Carla Mendes',
-      clientManager: 'Roberto Lima',
-      monthlyRevenue: 20000,
-      createdAt: new Date('2025-02-10').toISOString(),
-    },
-    {
-      id: 'prof-5',
-      userId: demoUserId,
-      name: 'Lucas Martins',
-      clientManager: 'Fernanda Souza',
-      monthlyRevenue: 16000,
-      createdAt: new Date('2025-03-01').toISOString(),
-    },
-    {
-      id: 'prof-6',
-      userId: demoUserId,
-      name: 'Beatriz Rodrigues',
-      clientManager: 'André Silva',
-      monthlyRevenue: 14000,
-      createdAt: new Date('2025-03-15').toISOString(),
-    },
-    {
-      id: 'prof-7',
-      userId: demoUserId,
-      name: 'Rafael Santos',
-      clientManager: 'Paula Costa',
-      monthlyRevenue: 17000,
-      createdAt: new Date('2025-04-01').toISOString(),
-    },
-    {
-      id: 'prof-8',
-      userId: demoUserId,
-      name: 'Mariana Oliveira',
-      clientManager: 'Ricardo Mendes',
-      monthlyRevenue: 19000,
-      createdAt: new Date('2025-04-20').toISOString(),
-    },
-    {
-      id: 'prof-9',
-      userId: demoUserId,
-      name: 'Thiago Souza',
-      clientManager: 'Camila Rocha',
-      monthlyRevenue: 15500,
-      createdAt: new Date('2025-05-01').toISOString(),
-    },
-    {
-      id: 'prof-10',
-      userId: demoUserId,
-      name: 'Patricia Lima',
-      clientManager: 'Eduardo Santos',
-      monthlyRevenue: 16500,
-      createdAt: new Date('2025-05-15').toISOString(),
-    },
-    {
-      id: 'prof-11',
-      userId: demoUserId,
-      name: 'Gabriel Ferreira',
-      clientManager: 'Amanda Silva',
-      monthlyRevenue: 13500,
-      createdAt: new Date('2025-06-01').toISOString(),
-    },
-    {
-      id: 'prof-12',
-      userId: demoUserId,
-      name: 'Juliana Matos',
-      clientManager: 'Leonardo Costa',
-      monthlyRevenue: 17500,
-      createdAt: new Date('2025-06-15').toISOString(),
-    },
+  // Demo Professionals (volume razoável e datas recentes)
+  const baseProfessionals: Array<
+    Omit<Professional, 'id' | 'userId' | 'createdAt'>
+  > = [
+    { name: 'João Silva', clientManager: 'Maria Santos', monthlyRevenue: 15000 },
+    { name: 'Ana Costa', clientManager: 'Carlos Oliveira', monthlyRevenue: 18000 },
+    { name: 'Pedro Almeida', clientManager: 'Juliana Ferreira', monthlyRevenue: 12000 },
+    { name: 'Carla Mendes', clientManager: 'Roberto Lima', monthlyRevenue: 20000 },
+    { name: 'Lucas Martins', clientManager: 'Fernanda Souza', monthlyRevenue: 16000 },
+    { name: 'Beatriz Rodrigues', clientManager: 'André Silva', monthlyRevenue: 14000 },
+    { name: 'Rafael Santos', clientManager: 'Paula Costa', monthlyRevenue: 17000 },
+    { name: 'Mariana Oliveira', clientManager: 'Ricardo Mendes', monthlyRevenue: 19000 },
+    { name: 'Thiago Souza', clientManager: 'Camila Rocha', monthlyRevenue: 15500 },
+    { name: 'Patricia Lima', clientManager: 'Eduardo Santos', monthlyRevenue: 16500 },
+    { name: 'Gabriel Ferreira', clientManager: 'Amanda Silva', monthlyRevenue: 13500 },
+    { name: 'Juliana Matos', clientManager: 'Leonardo Costa', monthlyRevenue: 17500 },
+    { name: 'Bruno Nogueira', clientManager: 'Isabela Lima', monthlyRevenue: 21000 },
+    { name: 'Larissa Pires', clientManager: 'Vitor Alves', monthlyRevenue: 14500 },
+    { name: 'Diego Rocha', clientManager: 'Aline Campos', monthlyRevenue: 18500 },
+    { name: 'Renata Barbosa', clientManager: 'Fábio Santos', monthlyRevenue: 16000 },
+    { name: 'Felipe Monteiro', clientManager: 'Carolina Souza', monthlyRevenue: 19500 },
+    { name: 'Camila Azevedo', clientManager: 'Rafaela Duarte', monthlyRevenue: 15500 },
   ];
 
-  // Demo Vacation Periods - 55 períodos com distribuição variada
-  // Janeiro: 3, Fev: 4, Mar: 3, Abr: 5, Mai: 4, Jun: 6, Jul: 8, Ago: 5, Set: 3, Out: 4, Nov: 3, Dez: 7
-  const demoVacations: VacationPeriod[] = [
-    // JANEIRO - 3 férias
-    {
-      id: 'vac-1',
-      professionalId: 'prof-1',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-01-01',
-      acquisitionEndDate: '2023-12-31',
-      usageStartDate: '2025-01-08',
-      usageEndDate: '2025-01-19',
-      totalDays: 12,
-      revenueDeduction: 6000,
-      createdAt: new Date('2025-01-05').toISOString(),
-    },
-    {
-      id: 'vac-2',
-      professionalId: 'prof-6',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-02-01',
-      acquisitionEndDate: '2025-01-31',
-      usageStartDate: '2025-01-22',
-      usageEndDate: '2025-02-04',
-      totalDays: 14,
-      revenueDeduction: 6533.33,
-      createdAt: new Date('2025-01-15').toISOString(),
-    },
-    {
-      id: 'vac-3',
-      professionalId: 'prof-9',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-01-15',
-      acquisitionEndDate: '2025-01-14',
-      usageStartDate: '2025-01-24',
-      usageEndDate: '2025-01-30',
-      totalDays: 7,
-      revenueDeduction: 3616.67,
-      createdAt: new Date('2025-01-18').toISOString(),
-    },
-    // FEVEREIRO - 4 férias
-    {
-      id: 'vac-4',
-      professionalId: 'prof-3',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-03-01',
-      acquisitionEndDate: '2025-02-28',
-      usageStartDate: '2025-02-05',
-      usageEndDate: '2025-02-11',
-      totalDays: 7,
-      revenueDeduction: 2800,
-      createdAt: new Date('2025-01-28').toISOString(),
-    },
-    {
-      id: 'vac-5',
-      professionalId: 'prof-7',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-04-01',
-      acquisitionEndDate: '2025-03-31',
-      usageStartDate: '2025-02-12',
-      usageEndDate: '2025-02-25',
-      totalDays: 14,
-      revenueDeduction: 7933.33,
-      createdAt: new Date('2025-02-05').toISOString(),
-    },
-    {
-      id: 'vac-6',
-      professionalId: 'prof-2',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-02-15',
-      acquisitionEndDate: '2025-02-14',
-      usageStartDate: '2025-02-19',
-      usageEndDate: '2025-02-23',
-      totalDays: 5,
-      revenueDeduction: 3000,
-      createdAt: new Date('2025-02-10').toISOString(),
-    },
-    {
-      id: 'vac-7',
-      professionalId: 'prof-10',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-03-01',
-      acquisitionEndDate: '2025-02-28',
-      usageStartDate: '2025-02-26',
-      usageEndDate: '2025-02-28',
-      totalDays: 3,
-      revenueDeduction: 1650,
-      createdAt: new Date('2025-02-20').toISOString(),
-    },
-    // MARÇO - 3 férias
-    {
-      id: 'vac-8',
-      professionalId: 'prof-4',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-05-01',
-      acquisitionEndDate: '2025-04-30',
-      usageStartDate: '2025-03-01',
-      usageEndDate: '2025-03-15',
-      totalDays: 15,
-      revenueDeduction: 10000,
-      createdAt: new Date('2025-02-20').toISOString(),
-    },
-    {
-      id: 'vac-9',
-      professionalId: 'prof-8',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-06-01',
-      acquisitionEndDate: '2025-05-31',
-      usageStartDate: '2025-03-18',
-      usageEndDate: '2025-03-24',
-      totalDays: 7,
-      revenueDeduction: 4433.33,
-      createdAt: new Date('2025-03-10').toISOString(),
-    },
-    {
-      id: 'vac-10',
-      professionalId: 'prof-11',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-04-01',
-      acquisitionEndDate: '2025-03-31',
-      usageStartDate: '2025-03-25',
-      usageEndDate: '2025-03-31',
-      totalDays: 7,
-      revenueDeduction: 3150,
-      createdAt: new Date('2025-03-15').toISOString(),
-    },
-    // ABRIL - 5 férias
-    {
-      id: 'vac-8',
-      professionalId: 'prof-5',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-07-01',
-      acquisitionEndDate: '2025-06-30',
-      usageStartDate: '2025-04-08',
-      usageEndDate: '2025-04-17',
-      totalDays: 10,
-      revenueDeduction: 5333.33,
-      createdAt: new Date('2025-03-25').toISOString(),
-    },
-    {
-      id: 'vac-11',
-      professionalId: 'prof-1',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-01-01',
-      acquisitionEndDate: '2025-12-31',
-      usageStartDate: '2025-04-15',
-      usageEndDate: '2025-04-19',
-      totalDays: 5,
-      revenueDeduction: 2500,
-      createdAt: new Date('2025-04-05').toISOString(),
-    },
-    {
-      id: 'vac-12',
-      professionalId: 'prof-12',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-07-01',
-      acquisitionEndDate: '2025-06-30',
-      usageStartDate: '2025-04-22',
-      usageEndDate: '2025-04-28',
-      totalDays: 7,
-      revenueDeduction: 4083.33,
-      createdAt: new Date('2025-04-10').toISOString(),
-    },
-    {
-      id: 'vac-13',
-      professionalId: 'prof-9',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-02-01',
-      acquisitionEndDate: '2025-01-31',
-      usageStartDate: '2025-04-29',
-      usageEndDate: '2025-04-30',
-      totalDays: 2,
-      revenueDeduction: 1033.33,
-      createdAt: new Date('2025-04-20').toISOString(),
-    },
-    // MAIO - 4 férias
-    {
-      id: 'vac-10',
-      professionalId: 'prof-6',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-08-01',
-      acquisitionEndDate: '2025-07-31',
-      usageStartDate: '2025-05-01',
-      usageEndDate: '2025-05-10',
-      totalDays: 10,
-      revenueDeduction: 4666.67,
-      createdAt: new Date('2025-04-20').toISOString(),
-    },
-    {
-      id: 'vac-11',
-      professionalId: 'prof-7',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-04-01',
-      acquisitionEndDate: '2025-03-31',
-      usageStartDate: '2025-05-13',
-      usageEndDate: '2025-05-27',
-      totalDays: 15,
-      revenueDeduction: 8500,
-      createdAt: new Date('2025-05-01').toISOString(),
-    },
-    {
-      id: 'vac-14',
-      professionalId: 'prof-3',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-03-01',
-      acquisitionEndDate: '2025-02-28',
-      usageStartDate: '2025-05-20',
-      usageEndDate: '2025-05-24',
-      totalDays: 5,
-      revenueDeduction: 2000,
-      createdAt: new Date('2025-05-10').toISOString(),
-    },
-    {
-      id: 'vac-15',
-      professionalId: 'prof-10',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-09-01',
-      acquisitionEndDate: '2025-08-31',
-      usageStartDate: '2025-05-27',
-      usageEndDate: '2025-05-31',
-      totalDays: 5,
-      revenueDeduction: 2750,
-      createdAt: new Date('2025-05-15').toISOString(),
-    },
-    // JUNHO - 6 férias
-    {
-      id: 'vac-13',
-      professionalId: 'prof-2',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-02-01',
-      acquisitionEndDate: '2025-01-31',
-      usageStartDate: '2025-06-03',
-      usageEndDate: '2025-06-16',
-      totalDays: 14,
-      revenueDeduction: 8400,
-      createdAt: new Date('2025-05-20').toISOString(),
-    },
-    {
-      id: 'vac-16',
-      professionalId: 'prof-8',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-06-01',
-      acquisitionEndDate: '2025-05-31',
-      usageStartDate: '2025-06-10',
-      usageEndDate: '2025-06-14',
-      totalDays: 5,
-      revenueDeduction: 3166.67,
-      createdAt: new Date('2025-06-01').toISOString(),
-    },
-    {
-      id: 'vac-17',
-      professionalId: 'prof-11',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-10-01',
-      acquisitionEndDate: '2025-09-30',
-      usageStartDate: '2025-06-17',
-      usageEndDate: '2025-06-21',
-      totalDays: 5,
-      revenueDeduction: 2250,
-      createdAt: new Date('2025-06-10').toISOString(),
-    },
-    {
-      id: 'vac-18',
-      professionalId: 'prof-4',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-11-01',
-      acquisitionEndDate: '2025-10-31',
-      usageStartDate: '2025-06-24',
-      usageEndDate: '2025-06-30',
-      totalDays: 7,
-      revenueDeduction: 4666.67,
-      createdAt: new Date('2025-06-15').toISOString(),
-    },
-    // JULHO - 8 férias (alta temporada)
-    {
-      id: 'vac-19',
-      professionalId: 'prof-4',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-05-01',
-      acquisitionEndDate: '2025-04-30',
-      usageStartDate: '2025-07-01',
-      usageEndDate: '2025-07-20',
-      totalDays: 20,
-      revenueDeduction: 13333.33,
-      createdAt: new Date('2025-06-20').toISOString(),
-    },
-    {
-      id: 'vac-20',
-      professionalId: 'prof-5',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-07-01',
-      acquisitionEndDate: '2025-06-30',
-      usageStartDate: '2025-07-01',
-      usageEndDate: '2025-07-05',
-      totalDays: 5,
-      revenueDeduction: 2666.67,
-      createdAt: new Date('2025-06-20').toISOString(),
-    },
-    {
-      id: 'vac-21',
-      professionalId: 'prof-6',
-      userId: demoUserId,
-      acquisitionStartDate: '2023-12-01',
-      acquisitionEndDate: '2025-11-30',
-      usageStartDate: '2025-07-08',
-      usageEndDate: '2025-07-14',
-      totalDays: 7,
-      revenueDeduction: 3266.67,
-      createdAt: new Date('2025-06-25').toISOString(),
-    },
-    {
-      id: 'vac-22',
-      professionalId: 'prof-1',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-01-01',
-      acquisitionEndDate: '2025-12-31',
-      usageStartDate: '2025-07-15',
-      usageEndDate: '2025-07-19',
-      totalDays: 5,
-      revenueDeduction: 2500,
-      createdAt: new Date('2025-07-05').toISOString(),
-    },
-    {
-      id: 'vac-23',
-      professionalId: 'prof-12',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-05-01',
-      acquisitionEndDate: '2025-04-30',
-      usageStartDate: '2025-07-22',
-      usageEndDate: '2025-07-26',
-      totalDays: 5,
-      revenueDeduction: 2916.67,
-      createdAt: new Date('2025-07-10').toISOString(),
-    },
-    {
-      id: 'vac-24',
-      professionalId: 'prof-9',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-03-01',
-      acquisitionEndDate: '2025-02-28',
-      usageStartDate: '2025-07-29',
-      usageEndDate: '2025-07-31',
-      totalDays: 3,
-      revenueDeduction: 1550,
-      createdAt: new Date('2025-07-15').toISOString(),
-    },
-    // AGOSTO - 5 férias
-    {
-      id: 'vac-18',
-      professionalId: 'prof-6',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-08-01',
-      acquisitionEndDate: '2025-07-31',
-      usageStartDate: '2025-08-05',
-      usageEndDate: '2025-08-18',
-      totalDays: 14,
-      revenueDeduction: 6533.33,
-      createdAt: new Date('2025-07-25').toISOString(),
-    },
-    {
-      id: 'vac-25',
-      professionalId: 'prof-7',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-04-01',
-      acquisitionEndDate: '2025-03-31',
-      usageStartDate: '2025-08-12',
-      usageEndDate: '2025-08-16',
-      totalDays: 5,
-      revenueDeduction: 2833.33,
-      createdAt: new Date('2025-08-01').toISOString(),
-    },
-    {
-      id: 'vac-26',
-      professionalId: 'prof-2',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-06-01',
-      acquisitionEndDate: '2025-05-31',
-      usageStartDate: '2025-08-19',
-      usageEndDate: '2025-08-23',
-      totalDays: 5,
-      revenueDeduction: 3000,
-      createdAt: new Date('2025-08-10').toISOString(),
-    },
-    {
-      id: 'vac-27',
-      professionalId: 'prof-10',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-07-01',
-      acquisitionEndDate: '2025-06-30',
-      usageStartDate: '2025-08-26',
-      usageEndDate: '2025-08-30',
-      totalDays: 5,
-      revenueDeduction: 2750,
-      createdAt: new Date('2025-08-15').toISOString(),
-    },
-    // SETEMBRO - 3 férias
-    {
-      id: 'vac-28',
-      professionalId: 'prof-3',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-03-01',
-      acquisitionEndDate: '2025-02-28',
-      usageStartDate: '2025-09-02',
-      usageEndDate: '2025-09-15',
-      totalDays: 14,
-      revenueDeduction: 5600,
-      createdAt: new Date('2025-08-20').toISOString(),
-    },
-    {
-      id: 'vac-29',
-      professionalId: 'prof-8',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-06-01',
-      acquisitionEndDate: '2025-05-31',
-      usageStartDate: '2025-09-16',
-      usageEndDate: '2025-09-20',
-      totalDays: 5,
-      revenueDeduction: 3166.67,
-      createdAt: new Date('2025-09-05').toISOString(),
-    },
-    {
-      id: 'vac-30',
-      professionalId: 'prof-11',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-08-01',
-      acquisitionEndDate: '2025-07-31',
-      usageStartDate: '2025-09-23',
-      usageEndDate: '2025-09-27',
-      totalDays: 5,
-      revenueDeduction: 2250,
-      createdAt: new Date('2025-09-10').toISOString(),
-    },
-    // OUTUBRO - 4 férias
-    {
-      id: 'vac-31',
-      professionalId: 'prof-2',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-02-01',
-      acquisitionEndDate: '2025-01-31',
-      usageStartDate: '2025-10-01',
-      usageEndDate: '2025-10-10',
-      totalDays: 10,
-      revenueDeduction: 6000,
-      createdAt: new Date('2025-09-20').toISOString(),
-    },
-    {
-      id: 'vac-32',
-      professionalId: 'prof-4',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-05-01',
-      acquisitionEndDate: '2025-04-30',
-      usageStartDate: '2025-10-14',
-      usageEndDate: '2025-10-18',
-      totalDays: 5,
-      revenueDeduction: 3333.33,
-      createdAt: new Date('2025-10-05').toISOString(),
-    },
-    {
-      id: 'vac-33',
-      professionalId: 'prof-12',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-09-01',
-      acquisitionEndDate: '2025-08-31',
-      usageStartDate: '2025-10-21',
-      usageEndDate: '2025-10-25',
-      totalDays: 5,
-      revenueDeduction: 2916.67,
-      createdAt: new Date('2025-10-10').toISOString(),
-    },
-    // NOVEMBRO - 3 férias
-    {
-      id: 'vac-34',
-      professionalId: 'prof-5',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-07-01',
-      acquisitionEndDate: '2025-06-30',
-      usageStartDate: '2025-11-04',
-      usageEndDate: '2025-11-17',
-      totalDays: 14,
-      revenueDeduction: 7466.67,
-      createdAt: new Date('2025-10-20').toISOString(),
-    },
-    {
-      id: 'vac-35',
-      professionalId: 'prof-1',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-01-01',
-      acquisitionEndDate: '2025-12-31',
-      usageStartDate: '2025-11-20',
-      usageEndDate: '2025-11-22',
-      totalDays: 3,
-      revenueDeduction: 1500,
-      createdAt: new Date('2025-11-10').toISOString(),
-    },
-    {
-      id: 'vac-36',
-      professionalId: 'prof-6',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-10-01',
-      acquisitionEndDate: '2025-09-30',
-      usageStartDate: '2025-11-25',
-      usageEndDate: '2025-11-29',
-      totalDays: 5,
-      revenueDeduction: 2333.33,
-      createdAt: new Date('2025-11-15').toISOString(),
-    },
-    // DEZEMBRO - 7 férias (fim de ano - alta temporada)
-    {
-      id: 'vac-37',
-      professionalId: 'prof-6',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-08-01',
-      acquisitionEndDate: '2025-07-31',
-      usageStartDate: '2025-12-02',
-      usageEndDate: '2025-12-08',
-      totalDays: 7,
-      revenueDeduction: 3266.67,
-      createdAt: new Date('2025-11-20').toISOString(),
-    },
-    {
-      id: 'vac-38',
-      professionalId: 'prof-7',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-04-01',
-      acquisitionEndDate: '2025-03-31',
-      usageStartDate: '2025-12-09',
-      usageEndDate: '2025-12-13',
-      totalDays: 5,
-      revenueDeduction: 2833.33,
-      createdAt: new Date('2025-11-25').toISOString(),
-    },
-    {
-      id: 'vac-39',
-      professionalId: 'prof-3',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-03-01',
-      acquisitionEndDate: '2025-02-28',
-      usageStartDate: '2025-12-16',
-      usageEndDate: '2025-12-20',
-      totalDays: 5,
-      revenueDeduction: 2000,
-      createdAt: new Date('2025-12-01').toISOString(),
-    },
-    {
-      id: 'vac-40',
-      professionalId: 'prof-9',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-11-01',
-      acquisitionEndDate: '2025-10-31',
-      usageStartDate: '2025-12-23',
-      usageEndDate: '2025-12-27',
-      totalDays: 5,
-      revenueDeduction: 2583.33,
-      createdAt: new Date('2025-12-10').toISOString(),
-    },
-    {
-      id: 'vac-41',
-      professionalId: 'prof-2',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-08-01',
-      acquisitionEndDate: '2025-07-31',
-      usageStartDate: '2025-12-26',
-      usageEndDate: '2025-12-31',
-      totalDays: 6,
-      revenueDeduction: 3600,
-      createdAt: new Date('2025-12-15').toISOString(),
-    },
-    {
-      id: 'vac-42',
-      professionalId: 'prof-5',
-      userId: demoUserId,
-      acquisitionStartDate: '2025-09-01',
-      acquisitionEndDate: '2025-08-31',
-      usageStartDate: '2025-12-28',
-      usageEndDate: '2025-12-31',
-      totalDays: 4,
-      revenueDeduction: 2133.33,
-      createdAt: new Date('2025-12-18').toISOString(),
-    },
-  ];
+  const demoProfessionals: Professional[] = baseProfessionals.map((p, i) => {
+    const createdMonth = ((currentMonth + i - 1) % 12) + 1;
+    const createdYear = currentYear - (createdMonth > currentMonth ? 1 : 0);
 
-  const profIds = demoProfessionals.map(p => p.id);
-  const revenueByProf = new Map(demoProfessionals.map(p => [p.id, p.monthlyRevenue]));
-  function pad(n: number) { return n < 10 ? `0${n}` : `${n}`; }
-  function lastDay(y: number, m: number) { return new Date(y, m, 0).getDate(); }
-  function pushVacation(year: number, month: number, day: number, dur: number, profIndex: number, idSuffix: string, acqYear: number) {
-    const profId = profIds[profIndex % profIds.length];
-    const ld = lastDay(year, month);
-    const td = Math.max(1, Math.min(dur, ld - day + 1));
-    const start = `${year}-${pad(month)}-${pad(day)}`;
-    const endDay = day + td - 1;
-    const end = `${year}-${pad(month)}-${pad(endDay)}`;
+    return {
+      id: `prof-${i + 1}`,
+      userId: demoUserId,
+      ...p,
+      createdAt: iso(createdYear, createdMonth, 5),
+    };
+  });
+
+  // Demo Vacation Periods
+  // Gera dados relativos ao ano atual, evitando ficar “antigo”.
+  // Por padrão: 2 períodos por profissional nos últimos ~18 meses.
+  const demoVacations: VacationPeriod[] = [];
+
+  const profIds = demoProfessionals.map((p) => p.id);
+  const revenueByProf = new Map(demoProfessionals.map((p) => [p.id, p.monthlyRevenue]));
+
+  function pad(n: number) {
+    return n < 10 ? `0${n}` : `${n}`;
+  }
+
+  function daysInMonth(y: number, m: number) {
+    return new Date(y, m, 0).getDate();
+  }
+
+  function clamp(n: number, min: number, max: number) {
+    return Math.max(min, Math.min(n, max));
+  }
+
+  function addMonths(y: number, m: number, delta: number) {
+    const total = (y * 12 + (m - 1)) + delta;
+    return { y: Math.floor(total / 12), m: (total % 12) + 1 };
+  }
+
+  function pushVacation(params: {
+    usageYear: number;
+    usageMonth: number;
+    usageDay: number;
+    durationDays: number;
+    professionalIndex: number;
+    seq: number;
+    acquisitionYear: number;
+  }) {
+    const profId = profIds[params.professionalIndex % profIds.length];
+    const monthDays = daysInMonth(params.usageYear, params.usageMonth);
+    const usageDay = clamp(params.usageDay, 1, monthDays);
+    const durationDays = clamp(params.durationDays, 1, monthDays - usageDay + 1);
+
+    const start = `${params.usageYear}-${pad(params.usageMonth)}-${pad(usageDay)}`;
+    const endDay = usageDay + durationDays - 1;
+    const end = `${params.usageYear}-${pad(params.usageMonth)}-${pad(endDay)}`;
+
     const daily = (revenueByProf.get(profId) || 0) / 30;
-    const rev = parseFloat((daily * td).toFixed(2));
+    const revenueDeduction = parseFloat((daily * durationDays).toFixed(2));
+
     demoVacations.push({
-      id: `vac-${year}-${pad(month)}-${idSuffix}`,
+      id: `vac-${params.usageYear}-${pad(params.usageMonth)}-${params.seq}`,
       professionalId: profId,
       userId: demoUserId,
-      acquisitionStartDate: `${acqYear}-01-01`,
-      acquisitionEndDate: `${acqYear}-12-31`,
+      acquisitionStartDate: `${params.acquisitionYear}-01-01`,
+      acquisitionEndDate: `${params.acquisitionYear}-12-31`,
       usageStartDate: start,
       usageEndDate: end,
-      totalDays: td,
-      revenueDeduction: rev,
-      createdAt: new Date(`${year}-${pad(month)}-01`).toISOString(),
+      totalDays: durationDays,
+      revenueDeduction,
+      createdAt: iso(params.usageYear, params.usageMonth, 1),
     });
   }
 
-  const add2025: Array<{ m: number; count: number }> = [
-    { m: 1, count: 2 },
-    { m: 2, count: 1 },
-    { m: 3, count: 2 },
-    { m: 9, count: 2 },
-    { m: 10, count: 1 },
-    { m: 11, count: 2 },
-  ];
-  let idx = 0;
-  for (const { m, count } of add2025) {
-    const starts = [2, 9, 20];
-    const durs = [5, 7, 5];
-    for (let i = 0; i < count; i++) {
-      pushVacation(2025, m, starts[i], durs[i], idx + i, String.fromCharCode(97 + i), 2024);
+  const lookbackMonths = 18;
+  const periodsPerProfessional = 2;
+
+  // Distribui férias ao longo dos últimos meses.
+  // Ex.: profissional i -> meses (-(i%lookback), -(i%lookback)-6) para ter dispersão.
+  let seq = 1;
+  for (let i = 0; i < profIds.length; i++) {
+    for (let p = 0; p < periodsPerProfessional; p++) {
+      const monthOffset = -((i * 2 + p * 6) % lookbackMonths);
+      const { y, m } = addMonths(currentYear, currentMonth, monthOffset);
+
+      // Duracoes variadas e início em dias “seguros”
+      const durationOptions = [5, 7, 10, 14, 15];
+      const durationDays = durationOptions[(i + p) % durationOptions.length];
+      const usageDay = 2 + ((i + p) % 20);
+
+      const acquisitionYear = y - 1;
+      pushVacation({
+        usageYear: y,
+        usageMonth: m,
+        usageDay,
+        durationDays,
+        professionalIndex: i,
+        seq,
+        acquisitionYear,
+      });
+      seq++;
     }
-    idx += count;
   }
+
 
   return {
     user: demoUser,

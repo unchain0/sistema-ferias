@@ -3,7 +3,11 @@ import jwt from 'jsonwebtoken';
 
 function requireEnv(name: string): string {
   const v = process.env[name];
-  if (!v) throw new Error(`Missing env ${name}`);
+  if (!v) {
+    throw new Error(
+      `Missing env ${name}. Add it to .env.local (see .env.example) and restart Next dev server.`
+    );
+  }
   return v;
 }
 

@@ -143,7 +143,19 @@ export async function GET(request: Request) {
 
     return NextResponse.json(dashboardData);
   } catch (error) {
-    console.error('Dashboard error:', error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Dashboard error:', { message, details: error });
+
+    if (message.startsWith('Missing env ')) {
+      return NextResponse.json(
+        {
+          error: 'Configuração do servidor incompleta',
+          hint: message,
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Erro ao carregar dados do dashboard' },
       { status: 500 }

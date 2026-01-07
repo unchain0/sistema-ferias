@@ -45,7 +45,6 @@ export function LoginForm() {
     setDemoLoading(true);
 
     try {
-      await fetch('/api/auth/init-demo', { method: 'POST' });
       const result = await signIn('credentials', {
         email: 'demo@sistema-ferias.com',
         password: 'demo123',
