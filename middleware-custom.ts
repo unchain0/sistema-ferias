@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Simple in-memory rate limiting for middleware
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
@@ -7,15 +7,15 @@ const requestCounts = new Map<string, { count: number; resetTime: number }>();
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim();
   }
-  
+
   if (realIP) {
     return realIP;
   }
-  
+
   return 'unknown';
 }
 
@@ -54,7 +54,7 @@ export function customSecurityMiddleware(request: NextRequest) {
   if (pathname.startsWith('/api/')) {
     // 100 requests per minute per IP
     const allowed = checkRateLimit(`api:${ip}`, 100, 60000);
-    
+
     if (!allowed) {
       return new NextResponse(
         JSON.stringify({ error: 'Muitas requisições. Tente novamente em alguns segundos.' }),
@@ -64,7 +64,7 @@ export function customSecurityMiddleware(request: NextRequest) {
             'Content-Type': 'application/json',
             'Retry-After': '60',
           },
-        }
+        },
       );
     }
   }
@@ -81,16 +81,16 @@ export function customSecurityMiddleware(request: NextRequest) {
     'acunetix',
   ];
 
-  if (suspiciousPatterns.some(pattern => userAgent.toLowerCase().includes(pattern))) {
+  if (suspiciousPatterns.some((pattern) => userAgent.toLowerCase().includes(pattern))) {
     return new NextResponse('Forbidden', { status: 403 });
   }
 
   // Block requests with suspicious query parameters
   const url = request.nextUrl;
   const suspiciousParams = ['<script', 'javascript:', 'onerror=', 'onload=', '../', '..\\'];
-  
+
   for (const param of url.searchParams.values()) {
-    if (suspiciousParams.some(pattern => param.toLowerCase().includes(pattern))) {
+    if (suspiciousParams.some((pattern) => param.toLowerCase().includes(pattern))) {
       return new NextResponse('Bad Request', { status: 400 });
     }
   }

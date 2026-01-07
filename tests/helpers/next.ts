@@ -5,5 +5,5 @@ export function jsonRequest(url: string, init?: RequestInit) {
       'content-type': 'application/json',
       ...(init?.headers || {}),
     },
-  })
+  });
 }

@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Sanitize string inputs to prevent XSS
 export function sanitizeString(input: string): string {
   if (!input) return '';
-  
+
   return input
     .trim()
     .replace(/[<>]/g, '') // Remove < and > to prevent HTML injection
@@ -36,7 +36,10 @@ export const vacationSchema = z.object({
 });
 
 // Generic validation helper
-export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): { success: boolean; data?: T; error?: string } {
+export function validateInput<T>(
+  schema: z.ZodSchema<T>,
+  data: unknown,
+): { success: boolean; data?: T; error?: string } {
   try {
     const validated = schema.parse(data);
     return { success: true, data: validated };
@@ -44,12 +47,12 @@ export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): { succe
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: error.errors.map(e => e.message).join(', ')
+        error: error.errors.map((e) => e.message).join(', '),
       };
     }
     return {
       success: false,
-      error: 'Erro de validação'
+      error: 'Erro de validação',
     };
   }
 }
@@ -59,11 +62,11 @@ export function secureCompare(a: string, b: string): boolean {
   if (a.length !== b.length) {
     return false;
   }
-  
+
   let result = 0;
   for (let i = 0; i < a.length; i++) {
     result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
-  
+
   return result === 0;
 }

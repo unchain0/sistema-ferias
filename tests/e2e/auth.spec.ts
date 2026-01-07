@@ -17,13 +17,15 @@ test('login form validation - missing credentials', async ({ page }) => {
 
   // Check for error messages or validation indicators
   const emailField = page.getByPlaceholder('seu@email.com');
-  const passwordField = page.getByPlaceholder('••••••••');
+  const _passwordField = page.getByPlaceholder('••••••••');
 
   // Email field should be focused first
   await expect(emailField).toBeFocused();
 
   // Should show validation errors
-  await expect(page.locator('text=/email|password/i')).toContainText(/obrigatório|required/i).catch(async () => {});
+  await expect(page.locator('text=/email|password/i'))
+    .toContainText(/obrigatório|required/i)
+    .catch(async () => {});
 });
 
 // Test login form validation - incorrect credentials format
@@ -40,7 +42,9 @@ test('login form validation - incorrect email format', async ({ page }) => {
   await expect(page).toHaveURL(/.*login/);
 
   // Should show email format error
-  await expect(page.locator('text=/formato|format|email inválido/i')).toContainText(/format|email/).catch(async () => {});
+  await expect(page.locator('text=/formato|format|email inválido/i'))
+    .toContainText(/format|email/)
+    .catch(async () => {});
 });
 
 // Test successful login flow
@@ -48,7 +52,9 @@ test('successful login and navigation to dashboard', async ({ page }) => {
   await page.goto('/login');
 
   // Fill in credentials
-  await page.getByPlaceholder('seu@email.com').fill(process.env.TEST_USER_EMAIL || 'demo@sistema-ferias.com');
+  await page
+    .getByPlaceholder('seu@email.com')
+    .fill(process.env.TEST_USER_EMAIL || 'demo@sistema-ferias.com');
   await page.getByPlaceholder('••••••••').fill(process.env.TEST_USER_PASSWORD || 'demo123');
 
   // Click login button
@@ -66,7 +72,9 @@ test('successful login and navigation to dashboard', async ({ page }) => {
 test('logout functionality', async ({ page }) => {
   // First, login to the application
   await page.goto('/login');
-  await page.getByPlaceholder('seu@email.com').fill(process.env.TEST_USER_EMAIL || 'demo@sistema-ferias.com');
+  await page
+    .getByPlaceholder('seu@email.com')
+    .fill(process.env.TEST_USER_EMAIL || 'demo@sistema-ferias.com');
   await page.getByPlaceholder('••••••••').fill(process.env.TEST_USER_PASSWORD || 'demo123');
   await page.getByRole('button', { name: 'Entrar' }).click();
 
@@ -77,7 +85,9 @@ test('logout functionality', async ({ page }) => {
   await page.waitForTimeout(3000);
 
   // Look for the user profile section and then the logout button
-  await expect(page.getByText('demo@sistema-ferias.com')).toBeVisible().catch(() => {});
+  await expect(page.getByText('demo@sistema-ferias.com'))
+    .toBeVisible()
+    .catch(() => {});
   const logoutButton = page.getByRole('button', { name: 'Sair' }).first();
   await expect(logoutButton).toBeVisible();
   await logoutButton.click();
@@ -102,7 +112,9 @@ test('access to protected route without authentication redirects to login', asyn
 test('navigation to different sections after login', async ({ page }) => {
   // Login first
   await page.goto('/login');
-  await page.getByPlaceholder('seu@email.com').fill(process.env.TEST_USER_EMAIL || 'demo@sistema-ferias.com');
+  await page
+    .getByPlaceholder('seu@email.com')
+    .fill(process.env.TEST_USER_EMAIL || 'demo@sistema-ferias.com');
   await page.getByPlaceholder('••••••••').fill(process.env.TEST_USER_PASSWORD || 'demo123');
   await page.getByRole('button', { name: 'Entrar' }).click();
 
@@ -145,8 +157,12 @@ test('login with empty fields shows error messages', async ({ page }) => {
   await page.waitForTimeout(500); // Allow time for validation messages
 
   // Check that validation messages appear for both fields
-  await expect(page.locator('.error-message, [data-error], .field-error').first()).toBeVisible().catch(() => {});
-  await expect(page.locator('.error-message, [data-error], .field-error').nth(1)).toBeVisible().catch(() => {});
+  await expect(page.locator('.error-message, [data-error], .field-error').first())
+    .toBeVisible()
+    .catch(() => {});
+  await expect(page.locator('.error-message, [data-error], .field-error').nth(1))
+    .toBeVisible()
+    .catch(() => {});
 
   // At least check that we're still on the login page
   await expect(page).toHaveURL(/.*login/);
@@ -170,7 +186,9 @@ test('login with invalid credentials shows authentication error', async ({ page 
   await expect(page).toHaveURL(/.*login/);
 
   // Look for error message about wrong credentials
-  await expect(page.locator('text=/usuário|senha incorreta|credenciais|invalid/gi')).toContainText(/credenciais|senha|usuário|login/).catch(async () => {});
+  await expect(page.locator('text=/usuário|senha incorreta|credenciais|invalid/gi'))
+    .toContainText(/credenciais|senha|usuário|login/)
+    .catch(async () => {});
 });
 
 // Test remember me functionality if it exists
@@ -179,7 +197,7 @@ test('remember me functionality', async ({ page }) => {
 
   // Check if remember me checkbox exists
   const rememberMeCheckbox = page.getByLabel(/lembrar|remember/gi);
-  if (await rememberMeCheckbox.count() > 0) {
+  if ((await rememberMeCheckbox.count()) > 0) {
     // Test checking the checkbox
     await rememberMeCheckbox.check();
     await expect(rememberMeCheckbox).toBeChecked();

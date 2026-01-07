@@ -1,31 +1,31 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('GET /api/dashboard', () => {
   beforeEach(() => {
-    vi.resetModules()
-    vi.clearAllMocks()
-  })
+    vi.resetModules();
+    vi.clearAllMocks();
+  });
 
   it('returns 401 when not authenticated', async () => {
     vi.doMock('next-auth', () => ({
       getServerSession: vi.fn(async () => null),
-    }))
+    }));
 
     vi.doMock('@/lib/db', () => ({
       getProfessionals: vi.fn(),
       getVacationPeriods: vi.fn(),
-    }))
+    }));
 
-    const { GET } = await import('@/app/api/dashboard/route')
-    const res = await GET(new Request('http://localhost/api/dashboard'))
+    const { GET } = await import('@/app/api/dashboard/route');
+    const res = await GET(new Request('http://localhost/api/dashboard'));
 
-    expect(res.status).toBe(401)
-  })
+    expect(res.status).toBe(401);
+  });
 
   it('returns aggregated dashboard data', async () => {
     vi.doMock('next-auth', () => ({
       getServerSession: vi.fn(async () => ({ user: { id: 'u1', email: 'u1@test.com' } })),
-    }))
+    }));
 
     vi.doMock('@/lib/db', () => ({
       getProfessionals: vi.fn(async () => [
@@ -52,18 +52,20 @@ describe('GET /api/dashboard', () => {
           createdAt: '2026-01-01',
         },
       ]),
-    }))
+    }));
 
-    const { GET } = await import('@/app/api/dashboard/route')
-    const res = await GET(new Request('http://localhost/api/dashboard?startDate=2026-01-01&endDate=2026-01-31'))
+    const { GET } = await import('@/app/api/dashboard/route');
+    const res = await GET(
+      new Request('http://localhost/api/dashboard?startDate=2026-01-01&endDate=2026-01-31'),
+    );
 
-    expect(res.status).toBe(200)
-    const json = await res.json()
+    expect(res.status).toBe(200);
+    const json = await res.json();
 
-    expect(json.totalProfessionals).toBe(1)
-    expect(json.totalVacationDays).toBe(5)
-    expect(json.totalRevenueImpact).toBe(2500)
-    expect(json.vacationsByMonth).toHaveLength(1)
-    expect(json.professionalImpacts[0].professionalName).toBe('Alice')
-  })
-})
+    expect(json.totalProfessionals).toBe(1);
+    expect(json.totalVacationDays).toBe(5);
+    expect(json.totalRevenueImpact).toBe(2500);
+    expect(json.vacationsByMonth).toHaveLength(1);
+    expect(json.professionalImpacts[0].professionalName).toBe('Alice');
+  });
+});

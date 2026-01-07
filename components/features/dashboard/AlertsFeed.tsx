@@ -1,9 +1,10 @@
 'use client';
 
-import { Alert } from '@/types';
-import { Card } from '@/components/ui/Card';
 import { AlertCircle, CalendarClock, CheckCircle2 } from 'lucide-react';
+
+import { Card } from '@/components/ui/Card';
 import { formatDateToPtBR } from '@/lib/utils';
+import { Alert } from '@/types';
 
 interface AlertsFeedProps {
   alerts: Alert[];
@@ -33,9 +34,13 @@ export function AlertsFeed({ alerts }: AlertsFeedProps) {
                 : 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
             }`}
           >
-            <div className={`p-2 rounded-full ${
-                alert.type === 'expiring_period' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-600' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-600'
-            }`}>
+            <div
+              className={`p-2 rounded-full ${
+                alert.type === 'expiring_period'
+                  ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-600'
+                  : 'bg-blue-100 dark:bg-blue-900/40 text-blue-600'
+              }`}
+            >
               {alert.type === 'expiring_period' ? (
                 <AlertCircle className="w-5 h-5" />
               ) : (
@@ -52,9 +57,7 @@ export function AlertsFeed({ alerts }: AlertsFeedProps) {
               <p className="text-sm font-medium mt-1 text-gray-800 dark:text-gray-200">
                 {alert.details}
               </p>
-              <p className="text-xs text-gray-500 mt-1">
-                Data ref: {formatDateToPtBR(alert.date)}
-              </p>
+              <p className="text-xs text-gray-500 mt-1">Data ref: {formatDateToPtBR(alert.date)}</p>
             </div>
           </div>
         ))}

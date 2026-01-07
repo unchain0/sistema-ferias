@@ -1,11 +1,12 @@
+import { addDays, differenceInDays, format, isValid, parseISO, startOfDay } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth-config';
 import { getProfessionals, getVacationPeriods } from '@/lib/db';
-import { DashboardData, Alert } from '@/types';
-import { format, parseISO, isWithinInterval, differenceInDays, addDays } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { computeConcessivePeriod } from '@/lib/utils';
+import { Alert, DashboardData } from '@/types';
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -25,20 +26,36 @@ export async function GET(request: Request) {
     let vacations = [...allVacations];
 
     // Filter vacations by date range if provided
+    // IMPORTANT: query params are date-only (YYYY-MM-DD) and should be inclusive.
+    // To avoid off-by-one and timezone issues, we treat the end date as exclusive
+    // by adding 1 day and doing overlap checks using [start, endExclusive).
     if (startDate && endDate) {
-      const filterStart = parseISO(startDate);
-      const filterEnd = parseISO(endDate);
+      const parsedStart = parseISO(startDate);
+      const parsedEnd = parseISO(endDate);
 
-      vacations = vacations.filter(vacation => {
-        const vacationStart = parseISO(vacation.usageStartDate);
-        const vacationEnd = parseISO(vacation.usageEndDate);
-
-        // Include vacation if it overlaps with the filter range
-        return (
-          isWithinInterval(vacationStart, { start: filterStart, end: filterEnd }) ||
-          isWithinInterval(vacationEnd, { start: filterStart, end: filterEnd }) ||
-          (vacationStart <= filterStart && vacationEnd >= filterEnd)
+      if (!isValid(parsedStart) || !isValid(parsedEnd)) {
+        return NextResponse.json(
+          { error: 'Parâmetros inválidos: startDate/endDate' },
+          { status: 400 },
         );
+      }
+
+      const filterStart = startOfDay(parsedStart);
+      const filterEndExclusive = addDays(startOfDay(parsedEnd), 1);
+
+      if (filterStart >= filterEndExclusive) {
+        return NextResponse.json(
+          { error: 'Parâmetros inválidos: startDate deve ser <= endDate' },
+          { status: 400 },
+        );
+      }
+
+      vacations = vacations.filter((vacation) => {
+        const vacationStart = startOfDay(parseISO(vacation.usageStartDate));
+        const vacationEndExclusive = addDays(startOfDay(parseISO(vacation.usageEndDate)), 1);
+
+        // Overlap for half-open intervals: [aStart, aEnd) overlaps [bStart, bEnd)
+        return vacationStart < filterEndExclusive && vacationEndExclusive > filterStart;
       });
     }
 
@@ -69,66 +86,66 @@ export async function GET(request: Request) {
       cur.revenueImpact += v.revenueDeduction;
       profAgg.set(v.professionalId, cur);
     }
-    const nameById = new Map(professionals.map(p => [p.id, p.name] as const));
+    const nameById = new Map(professionals.map((p) => [p.id, p.name] as const));
     const professionalImpacts = Array.from(profAgg.entries())
       .map(([id, agg]) => ({ professionalName: nameById.get(id) || 'Desconhecido', ...agg }))
-      .filter(p => p.totalDays > 0);
+      .filter((p) => p.totalDays > 0);
 
     // --- ALERTS LOGIC ---
     const alerts: Alert[] = [];
     const today = new Date();
-    
+
     // We check ALL vacations for alerts, not just the filtered ones
     for (const v of allVacations) {
-        const profName = nameById.get(v.professionalId) || 'Desconhecido';
-        const usageStart = parseISO(v.usageStartDate);
-        
-        // 1. Upcoming Vacations (Next 30 days)
-        const daysToStart = differenceInDays(usageStart, today);
-        if (daysToStart >= 0 && daysToStart <= 30) {
-            alerts.push({
-                id: `upcoming-${v.id}`,
-                type: 'upcoming_vacation',
-                professionalName: profName,
-                date: v.usageStartDate,
-                daysRemaining: daysToStart,
-                details: `Inicia em ${daysToStart === 0 ? 'hoje' : daysToStart + ' dias'}`,
-            });
-        }
+      const profName = nameById.get(v.professionalId) || 'Desconhecido';
+      const usageStart = parseISO(v.usageStartDate);
 
-        // 2. Concessive Limit Risk
-        // If the vacation usage is dangerously close to the concessive period end
-        if (v.acquisitionStartDate && v.acquisitionEndDate) {
-            const concessive = computeConcessivePeriod(v.acquisitionStartDate, v.acquisitionEndDate);
-            const concessiveEnd = parseISO(concessive.end);
-            const usageEnd = parseISO(v.usageEndDate);
-            
-            // Check if usage extends beyond or is close to concessive end
-            // Note: In Brazil, vacation MUST be taken entirely within the concessive period
-            const daysUntilLimit = differenceInDays(concessiveEnd, usageEnd);
-            
-            if (daysUntilLimit < 0) {
-                 alerts.push({
-                    id: `expired-${v.id}`,
-                    type: 'expiring_period',
-                    professionalName: profName,
-                    date: concessive.end,
-                    daysRemaining: daysUntilLimit,
-                    details: `Ultrapassou limite concessivo (${format(concessiveEnd, 'dd/MM/yyyy')})`,
-                });
-            } else if (daysUntilLimit <= 30) {
-                alerts.push({
-                    id: `risk-${v.id}`,
-                    type: 'expiring_period',
-                    professionalName: profName,
-                    date: concessive.end,
-                    daysRemaining: daysUntilLimit,
-                    details: `Perto do limite concessivo (${format(concessiveEnd, 'dd/MM/yyyy')})`,
-                });
-            }
+      // 1. Upcoming Vacations (Next 30 days)
+      const daysToStart = differenceInDays(usageStart, today);
+      if (daysToStart >= 0 && daysToStart <= 30) {
+        alerts.push({
+          id: `upcoming-${v.id}`,
+          type: 'upcoming_vacation',
+          professionalName: profName,
+          date: v.usageStartDate,
+          daysRemaining: daysToStart,
+          details: `Inicia em ${daysToStart === 0 ? 'hoje' : daysToStart + ' dias'}`,
+        });
+      }
+
+      // 2. Concessive Limit Risk
+      // If the vacation usage is dangerously close to the concessive period end
+      if (v.acquisitionStartDate && v.acquisitionEndDate) {
+        const concessive = computeConcessivePeriod(v.acquisitionStartDate, v.acquisitionEndDate);
+        const concessiveEnd = parseISO(concessive.end);
+        const usageEnd = parseISO(v.usageEndDate);
+
+        // Check if usage extends beyond or is close to concessive end
+        // Note: In Brazil, vacation MUST be taken entirely within the concessive period
+        const daysUntilLimit = differenceInDays(concessiveEnd, usageEnd);
+
+        if (daysUntilLimit < 0) {
+          alerts.push({
+            id: `expired-${v.id}`,
+            type: 'expiring_period',
+            professionalName: profName,
+            date: concessive.end,
+            daysRemaining: daysUntilLimit,
+            details: `Ultrapassou limite concessivo (${format(concessiveEnd, 'dd/MM/yyyy')})`,
+          });
+        } else if (daysUntilLimit <= 30) {
+          alerts.push({
+            id: `risk-${v.id}`,
+            type: 'expiring_period',
+            professionalName: profName,
+            date: concessive.end,
+            daysRemaining: daysUntilLimit,
+            details: `Perto do limite concessivo (${format(concessiveEnd, 'dd/MM/yyyy')})`,
+          });
         }
+      }
     }
-    
+
     // Sort alerts by urgency (days remaining)
     alerts.sort((a, b) => a.daysRemaining - b.daysRemaining);
 
@@ -152,13 +169,10 @@ export async function GET(request: Request) {
           error: 'Configuração do servidor incompleta',
           hint: message,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
-    return NextResponse.json(
-      { error: 'Erro ao carregar dados do dashboard' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao carregar dados do dashboard' }, { status: 500 });
   }
 }

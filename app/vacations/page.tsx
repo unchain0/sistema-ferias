@@ -1,18 +1,23 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { AlertCircle, Edit2, Plus, Search, Trash2, X } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { useEffect, useMemo, useState } from 'react';
+
+import { createVacation, deleteVacation, updateVacation } from '@/app/actions/vacations';
 import { Navbar } from '@/components/layout/Navbar';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SingleDatePicker } from '@/components/ui/SingleDatePicker';
+import { Skeleton } from '@/components/ui/Skeleton';
+import {
+  computeConcessivePeriod,
+  formatCurrency,
+  formatDateForInput,
+  formatDateToPtBR,
+} from '@/lib/utils';
 import { Professional, VacationPeriod } from '@/types';
-import { formatCurrency, computeConcessivePeriod, formatDateToPtBR, formatDateForInput } from '@/lib/utils';
-import { Plus, Edit2, Trash2, X, Calendar, AlertCircle, Search } from 'lucide-react';
-import { useSession } from 'next-auth/react';
-import { createVacation, updateVacation, deleteVacation } from '@/app/actions/vacations';
 
 export default function VacationsPage() {
   const { data: session } = useSession();
@@ -24,7 +29,7 @@ export default function VacationsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const [formData, setFormData] = useState({
     professionalId: '',
     acquisitionStartDate: null as Date | null,
@@ -66,7 +71,12 @@ export default function VacationsPage() {
       setError('Por favor, selecione um profissional.');
       return;
     }
-    if (!formData.acquisitionStartDate || !formData.acquisitionEndDate || !formData.usageStartDate || !formData.usageEndDate) {
+    if (
+      !formData.acquisitionStartDate ||
+      !formData.acquisitionEndDate ||
+      !formData.usageStartDate ||
+      !formData.usageEndDate
+    ) {
       setError('Por favor, preencha todas as datas.');
       return;
     }
@@ -74,8 +84,12 @@ export default function VacationsPage() {
     // Converter datas para string no formato adequado
     const formattedData = {
       professionalId: formData.professionalId,
-      acquisitionStartDate: formData.acquisitionStartDate ? formatDateForInput(formData.acquisitionStartDate) : '',
-      acquisitionEndDate: formData.acquisitionEndDate ? formatDateForInput(formData.acquisitionEndDate) : '',
+      acquisitionStartDate: formData.acquisitionStartDate
+        ? formatDateForInput(formData.acquisitionStartDate)
+        : '',
+      acquisitionEndDate: formData.acquisitionEndDate
+        ? formatDateForInput(formData.acquisitionEndDate)
+        : '',
       usageStartDate: formData.usageStartDate ? formatDateForInput(formData.usageStartDate) : '',
       usageEndDate: formData.usageEndDate ? formatDateForInput(formData.usageEndDate) : '',
     };
@@ -104,8 +118,12 @@ export default function VacationsPage() {
   const handleEdit = (vacation: VacationPeriod) => {
     setFormData({
       professionalId: vacation.professionalId,
-      acquisitionStartDate: vacation.acquisitionStartDate ? new Date(vacation.acquisitionStartDate) : null,
-      acquisitionEndDate: vacation.acquisitionEndDate ? new Date(vacation.acquisitionEndDate) : null,
+      acquisitionStartDate: vacation.acquisitionStartDate
+        ? new Date(vacation.acquisitionStartDate)
+        : null,
+      acquisitionEndDate: vacation.acquisitionEndDate
+        ? new Date(vacation.acquisitionEndDate)
+        : null,
       usageStartDate: vacation.usageStartDate ? new Date(vacation.usageStartDate) : null,
       usageEndDate: vacation.usageEndDate ? new Date(vacation.usageEndDate) : null,
     });
@@ -149,14 +167,14 @@ export default function VacationsPage() {
   };
 
   const getProfessionalName = (id: string) => {
-    const professional = professionals.find(p => p.id === id);
+    const professional = professionals.find((p) => p.id === id);
     return professional?.name || 'Desconhecido';
   };
 
   const filteredVacations = useMemo(() => {
     return vacations.filter((vacation) => {
       const query = searchQuery.toLowerCase();
-      const professional = professionals.find(p => p.id === vacation.professionalId);
+      const professional = professionals.find((p) => p.id === vacation.professionalId);
       const professionalName = (professional?.name || 'Desconhecido').toLowerCase();
       return professionalName.includes(query);
     });
@@ -165,7 +183,7 @@ export default function VacationsPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div>
@@ -176,7 +194,7 @@ export default function VacationsPage() {
               Gerencie os períodos aquisitivos e de gozo de férias
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="relative w-full sm:max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -188,9 +206,9 @@ export default function VacationsPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
               />
             </div>
-            
+
             {!showForm && (
-              <Button 
+              <Button
                 onClick={() => setShowForm(true)}
                 disabled={isDemo || loading}
                 className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
@@ -272,7 +290,9 @@ export default function VacationsPage() {
                   </label>
                   <SingleDatePicker
                     date={formData.acquisitionStartDate}
-                    onDateChange={(date) => setFormData({ ...formData, acquisitionStartDate: date || null })}
+                    onDateChange={(date) =>
+                      setFormData({ ...formData, acquisitionStartDate: date || null })
+                    }
                     placeholder="Selecione a data"
                     disabled={false}
                   />
@@ -284,27 +304,30 @@ export default function VacationsPage() {
                   </label>
                   <SingleDatePicker
                     date={formData.acquisitionEndDate}
-                    onDateChange={(date) => setFormData({ ...formData, acquisitionEndDate: date || null })}
+                    onDateChange={(date) =>
+                      setFormData({ ...formData, acquisitionEndDate: date || null })
+                    }
                     placeholder="Selecione a data"
                     disabled={false}
                   />
                 </div>
               </div>
 
-              {(formData.acquisitionStartDate && formData.acquisitionEndDate) && (() => {
-                const concessivePeriod = computeConcessivePeriod(
-                  formData.acquisitionStartDate.toISOString().split('T')[0],
-                  formData.acquisitionEndDate.toISOString().split('T')[0]
-                );
-                return (
-                  <div className="text-sm text-gray-700 dark:text-gray-300">
-                    <span className="font-semibold">Período Concessivo: </span>
-                    {formatDateToPtBR(concessivePeriod.start)}
-                    {" "}até{" "}
-                    {formatDateToPtBR(concessivePeriod.end)}
-                  </div>
-                );
-              })()}
+              {formData.acquisitionStartDate &&
+                formData.acquisitionEndDate &&
+                (() => {
+                  const concessivePeriod = computeConcessivePeriod(
+                    formData.acquisitionStartDate.toISOString().split('T')[0],
+                    formData.acquisitionEndDate.toISOString().split('T')[0],
+                  );
+                  return (
+                    <div className="text-sm text-gray-700 dark:text-gray-300">
+                      <span className="font-semibold">Período Concessivo: </span>
+                      {formatDateToPtBR(concessivePeriod.start)} até{' '}
+                      {formatDateToPtBR(concessivePeriod.end)}
+                    </div>
+                  );
+                })()}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -313,7 +336,9 @@ export default function VacationsPage() {
                   </label>
                   <SingleDatePicker
                     date={formData.usageStartDate}
-                    onDateChange={(date) => setFormData({ ...formData, usageStartDate: date || null })}
+                    onDateChange={(date) =>
+                      setFormData({ ...formData, usageStartDate: date || null })
+                    }
                     placeholder="Selecione a data"
                     disabled={false}
                   />
@@ -325,7 +350,9 @@ export default function VacationsPage() {
                   </label>
                   <SingleDatePicker
                     date={formData.usageEndDate}
-                    onDateChange={(date) => setFormData({ ...formData, usageEndDate: date || null })}
+                    onDateChange={(date) =>
+                      setFormData({ ...formData, usageEndDate: date || null })
+                    }
                     placeholder="Selecione a data"
                     disabled={false}
                   />
@@ -333,9 +360,7 @@ export default function VacationsPage() {
               </div>
 
               <div className="flex space-x-3">
-                <Button type="submit">
-                  {editingId ? 'Atualizar' : 'Criar'}
-                </Button>
+                <Button type="submit">{editingId ? 'Atualizar' : 'Criar'}</Button>
                 <Button type="button" variant="secondary" onClick={resetForm}>
                   Cancelar
                 </Button>
@@ -351,11 +376,11 @@ export default function VacationsPage() {
               <Card key={`skeleton-${i}`}>
                 <div className="space-y-4">
                   <div className="flex flex-col md:flex-row md:justify-between gap-4">
-                     <Skeleton className="h-6 w-1/3" />
-                     <div className="flex gap-2">
-                       <Skeleton className="h-8 w-24" />
-                       <Skeleton className="h-8 w-24" />
-                     </div>
+                    <Skeleton className="h-6 w-1/3" />
+                    <div className="flex gap-2">
+                      <Skeleton className="h-8 w-24" />
+                      <Skeleton className="h-8 w-24" />
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Skeleton className="h-12 w-full" />
@@ -427,7 +452,10 @@ export default function VacationsPage() {
                         </p>
                         <p className="text-sm text-gray-900 dark:text-white">
                           {(() => {
-                            const concessivePeriod = computeConcessivePeriod(vacation.acquisitionStartDate, vacation.acquisitionEndDate);
+                            const concessivePeriod = computeConcessivePeriod(
+                              vacation.acquisitionStartDate,
+                              vacation.acquisitionEndDate,
+                            );
                             return `${formatDateToPtBR(concessivePeriod.start)} até ${formatDateToPtBR(concessivePeriod.end)}`;
                           })()}
                         </p>

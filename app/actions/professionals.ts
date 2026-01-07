@@ -1,10 +1,11 @@
 'use server';
 
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-config';
-import { createProfessional, updateProfessional, deleteProfessional } from '@/lib/db';
-import { isDemoUser } from '@/lib/demo-protection';
 import { revalidatePath } from 'next/cache';
+import { getServerSession } from 'next-auth';
+
+import { authOptions } from '@/lib/auth-config';
+import { createProfessional, deleteProfessional, updateProfessional } from '@/lib/db';
+import { isDemoUser } from '@/lib/demo-protection';
 
 export async function createProfessionalAction(formData: any) {
   const session = await getServerSession(authOptions);

@@ -6,10 +6,10 @@ export function isDemoUser(email?: string | null): boolean {
 
 export function createDemoProtectionResponse() {
   return NextResponse.json(
-    { 
+    {
       error: 'Modo demonstração: Modificações não são permitidas',
-      demo: true 
+      demo: true,
     },
-    { status: 403 }
+    { status: 403 },
   );
 }

@@ -11,8 +11,8 @@ let supabaseKey = '';
 try {
   const envPath = path.join(__dirname, '..', '.env.local');
   const envContent = fs.readFileSync(envPath, 'utf8');
-  
-  envContent.split('\n').forEach(line => {
+
+  envContent.split('\n').forEach((line) => {
     if (line.startsWith('NEXT_PUBLIC_SUPABASE_URL=')) {
       supabaseUrl = line.split('=')[1].trim();
     }
@@ -20,7 +20,7 @@ try {
       supabaseKey = line.split('=')[1].trim();
     }
   });
-} catch (err) {
+} catch {
   // .env.local não existe ou não pode ser lido
 }
 

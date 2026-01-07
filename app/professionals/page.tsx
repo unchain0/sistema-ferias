@@ -1,17 +1,22 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { AlertCircle, Edit2, Plus, Search, Trash2, X } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { useEffect, useMemo, useState } from 'react';
+
+import {
+  createProfessionalAction,
+  deleteProfessionalAction,
+  updateProfessionalAction,
+} from '@/app/actions/professionals';
 import { Navbar } from '@/components/layout/Navbar';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Professional } from '@/types';
 import { formatCurrency } from '@/lib/utils';
-import { Plus, Edit2, Trash2, X, AlertCircle, Search } from 'lucide-react';
-import { useSession } from 'next-auth/react';
-import { createProfessionalAction, updateProfessionalAction, deleteProfessionalAction } from '@/app/actions/professionals';
+import { Professional } from '@/types';
 
 export default function ProfessionalsPage() {
   const { data: session } = useSession();
@@ -22,7 +27,7 @@ export default function ProfessionalsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const [formData, setFormData] = useState({
     name: '',
     clientManager: '',
@@ -128,18 +133,16 @@ export default function ProfessionalsPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Profissionais
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Profissionais</h1>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Gerencie os profissionais e seus faturamentos
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="relative w-full sm:max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -151,9 +154,9 @@ export default function ProfessionalsPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
               />
             </div>
-            
+
             {!showForm && (
-              <Button 
+              <Button
                 onClick={() => setShowForm(true)}
                 disabled={isDemo}
                 className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
@@ -227,9 +230,7 @@ export default function ProfessionalsPage() {
               />
 
               <div className="flex space-x-3">
-                <Button type="submit">
-                  {editingId ? 'Atualizar' : 'Criar'}
-                </Button>
+                <Button type="submit">{editingId ? 'Atualizar' : 'Criar'}</Button>
                 <Button type="button" variant="secondary" onClick={resetForm}>
                   Cancelar
                 </Button>
@@ -240,93 +241,91 @@ export default function ProfessionalsPage() {
 
         {/* Loading State */}
         {loading ? (
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             {[...Array(6)].map((_, i) => (
-               <Card key={i}>
-                 <div className="space-y-3">
-                   <div>
-                     <Skeleton className="h-6 w-3/4 mb-2" />
-                     <Skeleton className="h-4 w-1/2" />
-                   </div>
-                   <div className="pt-3 border-t dark:border-gray-700">
-                     <Skeleton className="h-4 w-1/3 mb-1" />
-                     <Skeleton className="h-6 w-1/2" />
-                   </div>
-                   <div className="flex gap-2 pt-2">
-                     <Skeleton className="h-9 flex-1" />
-                     <Skeleton className="h-9 flex-1" />
-                   </div>
-                 </div>
-               </Card>
-             ))}
-           </div>
-        ) : (
-          /* Professionals List */
-          professionals.length === 0 ? (
-            <EmptyState
-              icon="users"
-              title="Nenhum profissional cadastrado"
-              description="Adicione profissionais para gerenciar seus faturamentos e períodos de férias"
-            />
-          ) : filteredProfessionals.length === 0 ? (
-            <Card>
-              <div className="text-center py-12">
-                <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">
-                  Nenhum profissional encontrado para &quot;{searchQuery}&quot;
-                </p>
-              </div>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProfessionals.map((professional) => (
-                <Card key={professional.id}>
-                  <div className="space-y-3">
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                        {professional.name}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Gestor: {professional.clientManager}
-                      </p>
-                    </div>
-
-                    <div className="pt-3 border-t dark:border-gray-700">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                        Faturamento Mensal
-                      </p>
-                      <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                        {formatCurrency(professional.monthlyRevenue)}
-                      </p>
-                    </div>
-
-                    <div className="flex gap-2 pt-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleEdit(professional)}
-                        disabled={isDemo}
-                        className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                        <span className="ml-2 font-medium">Editar</span>
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDelete(professional.id)}
-                        disabled={isDemo}
-                        className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        <span className="ml-2 font-medium">Excluir</span>
-                      </Button>
-                    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i}>
+                <div className="space-y-3">
+                  <div>
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-1/2" />
                   </div>
-                </Card>
-              ))}
+                  <div className="pt-3 border-t dark:border-gray-700">
+                    <Skeleton className="h-4 w-1/3 mb-1" />
+                    <Skeleton className="h-6 w-1/2" />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Skeleton className="h-9 flex-1" />
+                    <Skeleton className="h-9 flex-1" />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : /* Professionals List */
+        professionals.length === 0 ? (
+          <EmptyState
+            icon="users"
+            title="Nenhum profissional cadastrado"
+            description="Adicione profissionais para gerenciar seus faturamentos e períodos de férias"
+          />
+        ) : filteredProfessionals.length === 0 ? (
+          <Card>
+            <div className="text-center py-12">
+              <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 dark:text-gray-400">
+                Nenhum profissional encontrado para &quot;{searchQuery}&quot;
+              </p>
             </div>
-          )
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProfessionals.map((professional) => (
+              <Card key={professional.id}>
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                      {professional.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Gestor: {professional.clientManager}
+                    </p>
+                  </div>
+
+                  <div className="pt-3 border-t dark:border-gray-700">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      Faturamento Mensal
+                    </p>
+                    <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                      {formatCurrency(professional.monthlyRevenue)}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => handleEdit(professional)}
+                      disabled={isDemo}
+                      className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      <span className="ml-2 font-medium">Editar</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(professional.id)}
+                      disabled={isDemo}
+                      className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span className="ml-2 font-medium">Excluir</span>
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
     </div>

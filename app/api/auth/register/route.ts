@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+
 import { registerUser } from '@/lib/auth';
-import { rateLimit, getClientIdentifier, createRateLimitResponse } from '@/lib/rate-limit';
-import { emailSchema, passwordSchema, nameSchema, sanitizeString } from '@/lib/input-validation';
+import { emailSchema, nameSchema, passwordSchema, sanitizeString } from '@/lib/input-validation';
+import { createRateLimitResponse, getClientIdentifier, rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   // Rate limiting: 5 registrations per 15 minutes per IP
@@ -21,19 +22,13 @@ export async function POST(request: Request) {
 
     // Validate inputs
     if (!email || !password || !name) {
-      return NextResponse.json(
-        { error: 'Todos os campos são obrigatórios' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Todos os campos são obrigatórios' }, { status: 400 });
     }
 
     // Validate email format
     const emailValidation = emailSchema.safeParse(email);
     if (!emailValidation.success) {
-      return NextResponse.json(
-        { error: 'Email inválido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email inválido' }, { status: 400 });
     }
 
     // Validação de comprimento da senha
@@ -41,7 +36,7 @@ export async function POST(request: Request) {
       console.error('Invalid password length:', password?.length);
       return NextResponse.json(
         { error: 'A senha deve ter entre 6 e 72 caracteres' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -51,7 +46,7 @@ export async function POST(request: Request) {
       console.error('Password validation failed:', passwordValidation.error);
       return NextResponse.json(
         { error: 'A senha não atende aos requisitos mínimos de segurança' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -60,7 +55,7 @@ export async function POST(request: Request) {
     if (!nameValidation.success) {
       return NextResponse.json(
         { error: 'Nome deve ter entre 2 e 100 caracteres' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -69,21 +64,15 @@ export async function POST(request: Request) {
     const user = await registerUser(email, password, sanitizedName);
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Email já cadastrado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email já cadastrado' }, { status: 400 });
     }
 
     return NextResponse.json(
       { message: 'Usuário criado com sucesso', userId: user.id },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao criar usuário' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao criar usuário' }, { status: 500 });
   }
 }

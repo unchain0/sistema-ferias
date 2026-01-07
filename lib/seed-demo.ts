@@ -1,4 +1,5 @@
-import { User, Professional, VacationPeriod } from '@/types';
+import { Professional, User, VacationPeriod } from '@/types';
+
 import { hashPassword } from './auth';
 
 export async function createDemoData() {
@@ -9,8 +10,7 @@ export async function createDemoData() {
   const currentMonth = now.getMonth() + 1; // 1-12
 
   // Helper: ISO date without timezone surprises
-  const iso = (y: number, m: number, d: number) =>
-    new Date(Date.UTC(y, m - 1, d)).toISOString();
+  const iso = (y: number, m: number, d: number) => new Date(Date.UTC(y, m - 1, d)).toISOString();
 
   // Demo User (always “recent”)
   const demoUser: User = {
@@ -22,9 +22,7 @@ export async function createDemoData() {
   };
 
   // Demo Professionals (volume razoável e datas recentes)
-  const baseProfessionals: Array<
-    Omit<Professional, 'id' | 'userId' | 'createdAt'>
-  > = [
+  const baseProfessionals: Array<Omit<Professional, 'id' | 'userId' | 'createdAt'>> = [
     { name: 'João Silva', clientManager: 'Maria Santos', monthlyRevenue: 15000 },
     { name: 'Ana Costa', clientManager: 'Carlos Oliveira', monthlyRevenue: 18000 },
     { name: 'Pedro Almeida', clientManager: 'Juliana Ferreira', monthlyRevenue: 12000 },
@@ -78,7 +76,7 @@ export async function createDemoData() {
   }
 
   function addMonths(y: number, m: number, delta: number) {
-    const total = (y * 12 + (m - 1)) + delta;
+    const total = y * 12 + (m - 1) + delta;
     return { y: Math.floor(total / 12), m: (total % 12) + 1 };
   }
 
@@ -146,7 +144,6 @@ export async function createDemoData() {
       seq++;
     }
   }
-
 
   return {
     user: demoUser,

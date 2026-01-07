@@ -3,6 +3,7 @@ trigger: always_on
 ---
 
 Prompt Generation Rules:
+
 - Analyze the component requirements thoroughly
 - Include specific DaisyUI component suggestions
 - Specify desired Tailwind CSS classes for styling
@@ -20,6 +21,7 @@ Prompt Generation Rules:
 - Suggest documentation requirements for the component
 
 General Component Creation Guidelines:
+
 - Prioritize reusability and modularity
 - Ensure consistent naming conventions
 - Follow React best practices and patterns
@@ -29,6 +31,7 @@ General Component Creation Guidelines:
 - Ensure compatibility with different browsers and devices
 
 General Rules:
+
 - Enable strict TypeScript (strict: true in tsconfig.json)
 - Avoid 'any', prefer 'unknown' with runtime checks
 - Explicitly type function inputs and outputs
@@ -38,6 +41,7 @@ General Rules:
 - Configure Biome as a pre-commit hook
 
 Next.js Rules:
+
 - Use dynamic routes with bracket notation ([id].tsx)
 - Validate and sanitize route parameters
 - Prefer flat, descriptive routes
@@ -47,6 +51,7 @@ Next.js Rules:
 - Configure image layout, priority, sizes, and srcSet attributes
 
 TypeScript Rules:
+
 - Enable all strict mode options in tsconfig.json
 - Explicitly type all variables, parameters, and return values
 - Use utility types, mapped types, and conditional types
@@ -56,6 +61,7 @@ TypeScript Rules:
 - Avoid ambiguous union types, use discriminated unions when necessary
 
 TailwindCSS and DaisyUI Rules:
+
 - Use TailwindCSS utility classes for styling
 - Avoid custom CSS unless absolutely necessary
 - Maintain consistent order of utility classes
@@ -65,6 +71,7 @@ TailwindCSS and DaisyUI Rules:
 - Define and use design tokens in tailwind.config.js
 
 Cairo Rules:
+
 - Design modular and maintainable contract structures
 - Optimize for gas efficiency
 - Minimize state changes and storage access
@@ -72,6 +79,7 @@ Cairo Rules:
 - Explain complex logic and implementation choices
 
 Development Process:
+
 - Conduct thorough code reviews via Pull Requests
 - Include clear PR descriptions with context and screenshots
 - Implement comprehensive automated testing (unit, integration, e2e)
@@ -80,6 +88,7 @@ Development Process:
 - Make small, incremental commits for easier review and debugging
 
 Biome Rules:- Use Biome for code formatting and linting
+
 - Configure Biome as a pre-commit hook
 - Follow Biome's recommended rules
 - Customize Biome configuration in biome.json as needed

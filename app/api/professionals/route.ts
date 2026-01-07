@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth-config';
-import { getProfessionals, createProfessional } from '@/lib/db';
-import { Professional } from '@/types';
-import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
+import { createProfessional, getProfessionals } from '@/lib/db';
+import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -32,10 +32,7 @@ export async function POST(request: Request) {
     const { name, clientManager, monthlyRevenue } = data;
 
     if (!name || !clientManager || !monthlyRevenue) {
-      return NextResponse.json(
-        { error: 'Todos os campos são obrigatórios' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Todos os campos são obrigatórios' }, { status: 400 });
     }
 
     const created = await createProfessional({
@@ -47,9 +44,6 @@ export async function POST(request: Request) {
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
     console.error('Create professional error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao criar profissional' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao criar profissional' }, { status: 500 });
   }
 }

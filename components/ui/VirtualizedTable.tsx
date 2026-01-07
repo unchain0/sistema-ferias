@@ -30,8 +30,12 @@ export default function VirtualizedTable({
           return (
             <div className="grid grid-cols-3 px-4 py-3 border-b dark:border-gray-800 text-sm">
               <div className="text-gray-900 dark:text-white">{impact.professionalName}</div>
-              <div className="text-right text-gray-700 dark:text-gray-300">{impact.totalDays} dias</div>
-              <div className="text-right text-gray-700 dark:text-gray-300">{formatCurrency(impact.revenueImpact)}</div>
+              <div className="text-right text-gray-700 dark:text-gray-300">
+                {impact.totalDays} dias
+              </div>
+              <div className="text-right text-gray-700 dark:text-gray-300">
+                {formatCurrency(impact.revenueImpact)}
+              </div>
             </div>
           );
         }}

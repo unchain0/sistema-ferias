@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth-config';
-import { getVacationPeriods, createVacationPeriod, getProfessionalById } from '@/lib/db';
+import { createVacationPeriod, getProfessionalById, getVacationPeriods } from '@/lib/db';
+import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
+import { calculateRevenueDeduction, calculateVacationDays } from '@/lib/utils';
 import { VacationPeriod } from '@/types';
-import { calculateVacationDays, calculateRevenueDeduction } from '@/lib/utils';
-import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -23,10 +24,21 @@ export async function GET(request: Request) {
   const offset = Math.max(parseInt(offsetParam || '0', 10) || 0, 0);
 
   const [orderField, orderDir] = orderParam.split(':');
-  
+
   // Validate orderField to ensure it's a valid key of VacationPeriod
-  const validOrderFields = ['id', 'professionalId', 'userId', 'acquisitionStartDate', 'acquisitionEndDate', 
-                            'usageStartDate', 'usageEndDate', 'totalDays', 'revenueDeduction', 'createdAt', 'updatedAt'];
+  const validOrderFields = [
+    'id',
+    'professionalId',
+    'userId',
+    'acquisitionStartDate',
+    'acquisitionEndDate',
+    'usageStartDate',
+    'usageEndDate',
+    'totalDays',
+    'revenueDeduction',
+    'createdAt',
+    'updatedAt',
+  ];
   const validatedOrderField = validOrderFields.includes(orderField) ? orderField : 'createdAt';
 
   const all = await getVacationPeriods(session.user.id);
@@ -74,20 +86,20 @@ export async function POST(request: Request) {
       usageEndDate,
     } = data;
 
-    if (!professionalId || !acquisitionStartDate || !acquisitionEndDate || !usageStartDate || !usageEndDate) {
-      return NextResponse.json(
-        { error: 'Todos os campos são obrigatórios' },
-        { status: 400 }
-      );
+    if (
+      !professionalId ||
+      !acquisitionStartDate ||
+      !acquisitionEndDate ||
+      !usageStartDate ||
+      !usageEndDate
+    ) {
+      return NextResponse.json({ error: 'Todos os campos são obrigatórios' }, { status: 400 });
     }
 
     const professional = await getProfessionalById(professionalId, session.user.id);
-    
+
     if (!professional) {
-      return NextResponse.json(
-        { error: 'Profissional não encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Profissional não encontrado' }, { status: 404 });
     }
 
     const totalDays = calculateVacationDays(usageStartDate, usageEndDate);
@@ -109,9 +121,6 @@ export async function POST(request: Request) {
     return NextResponse.json(created, { status: 201, headers });
   } catch (error) {
     console.error('Create vacation error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao criar período de férias' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao criar período de férias' }, { status: 500 });
   }
 }

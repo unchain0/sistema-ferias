@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Calendar } from 'lucide-react';
 import Link from 'next/link';
-import { Input } from '@/components/ui/Input';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Calendar } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { Input } from '@/components/ui/Input';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validação básica do formulário
     if (!name || !email || !password || !confirmPassword) {
       toast.error('❌ Todos os campos são obrigatórios');
@@ -71,7 +72,7 @@ export default function RegisterPage() {
         toast.success('✅ Conta criada com sucesso!');
         router.push('/login');
       }
-    } catch (err) {
+    } catch {
       toast.error('❌ Erro ao criar conta');
     } finally {
       setLoading(false);
@@ -83,12 +84,8 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <div className="flex flex-col items-center mb-6">
           <Calendar className="w-12 h-12 text-blue-600 mb-2" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Criar Conta
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Cadastre-se no Sistema de Férias
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Criar Conta</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Cadastre-se no Sistema de Férias</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -130,11 +127,7 @@ export default function RegisterPage() {
             maxLength={72}
           />
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Criando conta...' : 'Criar Conta'}
           </Button>
         </form>

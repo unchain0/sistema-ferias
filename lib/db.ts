@@ -1,17 +1,15 @@
-import { User, Professional, VacationPeriod } from '@/types';
-import { supabase } from './supabase';
-import { getSupabaseAdmin } from './supabase-admin';
-import { createSupabaseForClaims } from './supabase-server';
 import { randomUUID } from 'crypto';
+
+import { Professional, User, VacationPeriod } from '@/types';
+
+import { getSupabaseAdmin } from './supabase-admin';
 
 const supabaseAdmin = getSupabaseAdmin();
 
 // Users
 export async function getUsers(): Promise<User[]> {
-  const { data, error } = await supabaseAdmin
-    .from('users')
-    .select('*');
-  
+  const { data, error } = await supabaseAdmin.from('users').select('*');
+
   if (error) throw error;
   return (data || []).map((u: any) => ({
     id: u.id,
@@ -23,47 +21,45 @@ export async function getUsers(): Promise<User[]> {
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {
-  const { data, error } = await supabaseAdmin
-    .from('users')
-    .select('*')
-    .eq('email', email)
-    .single();
+  const { data, error } = await supabaseAdmin.from('users').select('*').eq('email', email).single();
   if (error && error.code !== 'PGRST116') throw error;
-  return data ? {
-    id: data.id,
-    email: data.email,
-    name: data.name,
-    password: data.password,
-    createdAt: data.created_at,
-  } : null;
+  return data
+    ? {
+        id: data.id,
+        email: data.email,
+        name: data.name,
+        password: data.password,
+        createdAt: data.created_at,
+      }
+    : null;
 }
 
 export async function getUserById(id: string): Promise<User | null> {
-  const { data, error } = await supabaseAdmin
-    .from('users')
-    .select('*')
-    .eq('id', id)
-    .single();
+  const { data, error } = await supabaseAdmin.from('users').select('*').eq('id', id).single();
   if (error && error.code !== 'PGRST116') throw error;
-  return data ? {
-    id: data.id,
-    email: data.email,
-    name: data.name,
-    password: data.password,
-    createdAt: data.created_at,
-  } : null;
+  return data
+    ? {
+        id: data.id,
+        email: data.email,
+        name: data.name,
+        password: data.password,
+        createdAt: data.created_at,
+      }
+    : null;
 }
 
 export async function createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
   const id = randomUUID();
   const { data, error } = await supabaseAdmin
     .from('users')
-    .insert([{
-      id,
-      email: user.email,
-      name: user.name,
-      password: user.password,
-    }])
+    .insert([
+      {
+        id,
+        email: user.email,
+        name: user.name,
+        password: user.password,
+      },
+    ])
     .select()
     .single();
   if (error) throw error;
@@ -88,12 +84,16 @@ export async function getProfessionals(userId: string): Promise<Professional[]> 
     userId: p.user_id,
     name: p.name,
     clientManager: p.client_manager,
-    monthlyRevenue: typeof p.monthly_revenue === 'string' ? parseFloat(p.monthly_revenue) : p.monthly_revenue,
+    monthlyRevenue:
+      typeof p.monthly_revenue === 'string' ? parseFloat(p.monthly_revenue) : p.monthly_revenue,
     createdAt: p.created_at,
   }));
 }
 
-export async function getProfessionalById(id: string, userId: string): Promise<Professional | null> {
+export async function getProfessionalById(
+  id: string,
+  userId: string,
+): Promise<Professional | null> {
   const { data, error } = await supabaseAdmin
     .from('professionals')
     .select('*')
@@ -101,25 +101,34 @@ export async function getProfessionalById(id: string, userId: string): Promise<P
     .eq('user_id', userId)
     .single();
   if (error && error.code !== 'PGRST116') throw error;
-  return data ? {
-    id: data.id,
-    userId: data.user_id,
-    name: data.name,
-    clientManager: data.client_manager,
-    monthlyRevenue: typeof data.monthly_revenue === 'string' ? parseFloat(data.monthly_revenue) : data.monthly_revenue,
-    createdAt: data.created_at,
-  } : null;
+  return data
+    ? {
+        id: data.id,
+        userId: data.user_id,
+        name: data.name,
+        clientManager: data.client_manager,
+        monthlyRevenue:
+          typeof data.monthly_revenue === 'string'
+            ? parseFloat(data.monthly_revenue)
+            : data.monthly_revenue,
+        createdAt: data.created_at,
+      }
+    : null;
 }
 
-export async function createProfessional(professional: Omit<Professional, 'id' | 'createdAt'>): Promise<Professional> {
+export async function createProfessional(
+  professional: Omit<Professional, 'id' | 'createdAt'>,
+): Promise<Professional> {
   const { data, error } = await supabaseAdmin
     .from('professionals')
-    .insert([{
-      user_id: professional.userId,
-      name: professional.name,
-      client_manager: professional.clientManager,
-      monthly_revenue: professional.monthlyRevenue,
-    }])
+    .insert([
+      {
+        user_id: professional.userId,
+        name: professional.name,
+        client_manager: professional.clientManager,
+        monthly_revenue: professional.monthlyRevenue,
+      },
+    ])
     .select()
     .single();
   if (error) throw error;
@@ -128,7 +137,10 @@ export async function createProfessional(professional: Omit<Professional, 'id' |
     userId: data.user_id,
     name: data.name,
     clientManager: data.client_manager,
-    monthlyRevenue: typeof data.monthly_revenue === 'string' ? parseFloat(data.monthly_revenue) : data.monthly_revenue,
+    monthlyRevenue:
+      typeof data.monthly_revenue === 'string'
+        ? parseFloat(data.monthly_revenue)
+        : data.monthly_revenue,
     createdAt: data.created_at,
   };
 }
@@ -136,7 +148,7 @@ export async function createProfessional(professional: Omit<Professional, 'id' |
 export async function updateProfessional(
   id: string,
   userId: string,
-  updates: Partial<Professional>
+  updates: Partial<Professional>,
 ): Promise<Professional | null> {
   const updateData: any = {};
   if (updates.name) updateData.name = updates.name;
@@ -150,18 +162,21 @@ export async function updateProfessional(
     .eq('user_id', userId)
     .select()
     .single();
-  
+
   if (error) {
     if (error.code === 'PGRST116') return null;
     throw error;
   }
-  
+
   return {
     id: data.id,
     userId: data.user_id,
     name: data.name,
     clientManager: data.client_manager,
-    monthlyRevenue: typeof data.monthly_revenue === 'string' ? parseFloat(data.monthly_revenue) : data.monthly_revenue,
+    monthlyRevenue:
+      typeof data.monthly_revenue === 'string'
+        ? parseFloat(data.monthly_revenue)
+        : data.monthly_revenue,
     createdAt: data.created_at,
   };
 }
@@ -172,16 +187,13 @@ export async function deleteProfessional(id: string, userId: string): Promise<bo
     .delete({ count: 'exact' })
     .eq('id', id)
     .eq('user_id', userId);
-  
+
   if (error) throw error;
   return (count || 0) > 0;
 }
 
 export async function deleteAllProfessionals(userId: string): Promise<void> {
-  const { error } = await supabaseAdmin
-    .from('professionals')
-    .delete()
-    .eq('user_id', userId);
+  const { error } = await supabaseAdmin.from('professionals').delete().eq('user_id', userId);
   if (error) throw error;
 }
 
@@ -201,23 +213,26 @@ export async function getVacationPeriods(userId: string): Promise<VacationPeriod
     usageStartDate: v.usage_start_date,
     usageEndDate: v.usage_end_date,
     totalDays: v.total_days,
-    revenueDeduction: typeof v.revenue_deduction === 'string' ? parseFloat(v.revenue_deduction) : v.revenue_deduction,
+    revenueDeduction:
+      typeof v.revenue_deduction === 'string'
+        ? parseFloat(v.revenue_deduction)
+        : v.revenue_deduction,
     createdAt: v.created_at,
   }));
 }
 
 export async function getVacationsByProfessional(
   professionalId: string,
-  userId: string
+  userId: string,
 ): Promise<VacationPeriod[]> {
   const { data, error } = await supabaseAdmin
     .from('vacation_periods')
     .select('*')
     .eq('professional_id', professionalId)
     .eq('user_id', userId);
-  
+
   if (error) throw error;
-  
+
   return (data || []).map((v: any) => ({
     id: v.id,
     professionalId: v.professional_id,
@@ -227,24 +242,31 @@ export async function getVacationsByProfessional(
     usageStartDate: v.usage_start_date,
     usageEndDate: v.usage_end_date,
     totalDays: v.total_days,
-    revenueDeduction: typeof v.revenue_deduction === 'string' ? parseFloat(v.revenue_deduction) : v.revenue_deduction,
+    revenueDeduction:
+      typeof v.revenue_deduction === 'string'
+        ? parseFloat(v.revenue_deduction)
+        : v.revenue_deduction,
     createdAt: v.created_at,
   }));
 }
 
-export async function createVacationPeriod(vacation: Omit<VacationPeriod, 'id' | 'createdAt'>): Promise<VacationPeriod> {
+export async function createVacationPeriod(
+  vacation: Omit<VacationPeriod, 'id' | 'createdAt'>,
+): Promise<VacationPeriod> {
   const { data, error } = await supabaseAdmin
     .from('vacation_periods')
-    .insert([{
-      professional_id: vacation.professionalId,
-      user_id: vacation.userId,
-      acquisition_start_date: vacation.acquisitionStartDate,
-      acquisition_end_date: vacation.acquisitionEndDate,
-      usage_start_date: vacation.usageStartDate,
-      usage_end_date: vacation.usageEndDate,
-      total_days: vacation.totalDays,
-      revenue_deduction: vacation.revenueDeduction,
-    }])
+    .insert([
+      {
+        professional_id: vacation.professionalId,
+        user_id: vacation.userId,
+        acquisition_start_date: vacation.acquisitionStartDate,
+        acquisition_end_date: vacation.acquisitionEndDate,
+        usage_start_date: vacation.usageStartDate,
+        usage_end_date: vacation.usageEndDate,
+        total_days: vacation.totalDays,
+        revenue_deduction: vacation.revenueDeduction,
+      },
+    ])
     .select()
     .single();
   if (error) throw error;
@@ -257,7 +279,10 @@ export async function createVacationPeriod(vacation: Omit<VacationPeriod, 'id' |
     usageStartDate: data.usage_start_date,
     usageEndDate: data.usage_end_date,
     totalDays: data.total_days,
-    revenueDeduction: typeof data.revenue_deduction === 'string' ? parseFloat(data.revenue_deduction) : data.revenue_deduction,
+    revenueDeduction:
+      typeof data.revenue_deduction === 'string'
+        ? parseFloat(data.revenue_deduction)
+        : data.revenue_deduction,
     createdAt: data.created_at,
   };
 }
@@ -265,15 +290,17 @@ export async function createVacationPeriod(vacation: Omit<VacationPeriod, 'id' |
 export async function updateVacationPeriod(
   id: string,
   userId: string,
-  updates: Partial<VacationPeriod>
+  updates: Partial<VacationPeriod>,
 ): Promise<VacationPeriod | null> {
   const updateData: any = {};
-  if (updates.acquisitionStartDate) updateData.acquisition_start_date = updates.acquisitionStartDate;
+  if (updates.acquisitionStartDate)
+    updateData.acquisition_start_date = updates.acquisitionStartDate;
   if (updates.acquisitionEndDate) updateData.acquisition_end_date = updates.acquisitionEndDate;
   if (updates.usageStartDate) updateData.usage_start_date = updates.usageStartDate;
   if (updates.usageEndDate) updateData.usage_end_date = updates.usageEndDate;
   if (updates.totalDays !== undefined) updateData.total_days = updates.totalDays;
-  if (updates.revenueDeduction !== undefined) updateData.revenue_deduction = updates.revenueDeduction;
+  if (updates.revenueDeduction !== undefined)
+    updateData.revenue_deduction = updates.revenueDeduction;
 
   const { data, error } = await supabaseAdmin
     .from('vacation_periods')
@@ -282,12 +309,12 @@ export async function updateVacationPeriod(
     .eq('user_id', userId)
     .select()
     .single();
-  
+
   if (error) {
     if (error.code === 'PGRST116') return null;
     throw error;
   }
-  
+
   return {
     id: data.id,
     professionalId: data.professional_id,
@@ -297,7 +324,10 @@ export async function updateVacationPeriod(
     usageStartDate: data.usage_start_date,
     usageEndDate: data.usage_end_date,
     totalDays: data.total_days,
-    revenueDeduction: typeof data.revenue_deduction === 'string' ? parseFloat(data.revenue_deduction) : data.revenue_deduction,
+    revenueDeduction:
+      typeof data.revenue_deduction === 'string'
+        ? parseFloat(data.revenue_deduction)
+        : data.revenue_deduction,
     createdAt: data.created_at,
   };
 }
@@ -308,16 +338,13 @@ export async function deleteVacationPeriod(id: string, userId: string): Promise<
     .delete({ count: 'exact' })
     .eq('id', id)
     .eq('user_id', userId);
-  
+
   if (error) throw error;
   return (count || 0) > 0;
 }
 
 export async function deleteAllVacationPeriods(userId: string): Promise<void> {
-  const { error } = await supabaseAdmin
-    .from('vacation_periods')
-    .delete()
-    .eq('user_id', userId);
+  const { error } = await supabaseAdmin.from('vacation_periods').delete().eq('user_id', userId);
   if (error) throw error;
 }
 
@@ -329,23 +356,23 @@ export async function initializeSupabaseDemo(demoData: {
 }) {
   // Check if demo user already exists
   const existingUser = await getUserByEmail(demoData.user.email);
-  
+
   if (existingUser) {
     return existingUser;
   }
 
   // Create demo user
   const user = await createUser(demoData.user);
-  
+
   // Create professionals
   for (const prof of demoData.professionals) {
     await createProfessional({ ...prof, userId: user.id });
   }
-  
+
   // Create vacations
   for (const vac of demoData.vacations) {
     await createVacationPeriod({ ...vac, userId: user.id });
   }
-  
+
   return user;
 }

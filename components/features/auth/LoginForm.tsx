@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
 import { Eye } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
+
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 
 export function LoginForm() {
   const router = useRouter();
@@ -123,7 +124,11 @@ export function LoginForm() {
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Não tem uma conta?{' '}
-          <Link prefetch={false} href="/register" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+          <Link
+            prefetch={false}
+            href="/register"
+            className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+          >
             Cadastre-se
           </Link>
         </p>
