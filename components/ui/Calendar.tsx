@@ -1,19 +1,77 @@
 'use client';
 
+import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as React from 'react';
-import { DayPicker } from 'react-day-picker';
+import { DayPicker, type DropdownProps } from 'react-day-picker';
 
 import { buttonVariants } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  /**
+   * Habilita dropdowns para navegação rápida de mês/ano
+   * @default true
+   */
+  showDropdowns?: boolean;
+};
 
-function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
+// Range de anos para o dropdown (10 anos para trás, 5 para frente)
+const currentYear = new Date().getFullYear();
+const START_MONTH = new Date(currentYear - 10, 0);
+const END_MONTH = new Date(currentYear + 5, 11);
+
+// Componente customizado para os dropdowns de mês/ano
+function CustomDropdown(props: DropdownProps) {
+  const { options, value, onChange, 'aria-label': ariaLabel } = props;
+
+  const selectClassName = cn(
+    'appearance-none bg-transparent cursor-pointer',
+    'text-sm font-semibold text-gray-900 dark:text-gray-100',
+    'hover:text-blue-600 dark:hover:text-blue-400',
+    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded',
+    'transition-colors px-1 py-0.5',
+  );
+
+  return (
+    <select
+      value={value?.toString()}
+      onChange={onChange}
+      className={selectClassName}
+      aria-label={ariaLabel}
+    >
+      {options?.map((option) => (
+        <option
+          key={option.value}
+          value={option.value}
+          disabled={option.disabled}
+          className="bg-white dark:bg-gray-900"
+        >
+          {option.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
+  showDropdowns = true,
+  ...props
+}: CalendarProps) {
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn('p-3', className)}
+      locale={ptBR}
+      // Navegação com dropdowns para mês e ano
+      captionLayout={showDropdowns ? 'dropdown' : 'label'}
+      // Esconde as setas de navegação quando usar dropdowns
+      hideNavigation={showDropdowns}
+      startMonth={START_MONTH}
+      endMonth={END_MONTH}
       classNames={{
         // Layout
         months: 'flex flex-col sm:flex-row gap-4',
@@ -21,18 +79,21 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         month_caption: 'flex justify-center pt-1 items-center h-10',
         caption_label: 'text-sm font-semibold text-gray-900 dark:text-gray-100',
 
-        // Navigation - positioned at edges of calendar container
-        nav: 'absolute top-4 inset-x-3 flex items-center justify-between pointer-events-none z-10',
+        // Dropdowns container
+        dropdowns: 'flex items-center gap-1',
+
+        // Navigation (visível apenas quando showDropdowns=false)
+        nav: 'flex items-center gap-1',
         button_previous: cn(
           buttonVariants({ variant: 'outline' }),
-          'h-8 w-8 bg-transparent p-0 text-gray-600 dark:text-gray-400 pointer-events-auto',
+          'h-8 w-8 bg-transparent p-0 text-gray-600 dark:text-gray-400',
           'hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100',
           'border-gray-200 dark:border-gray-700',
           'transition-colors',
         ),
         button_next: cn(
           buttonVariants({ variant: 'outline' }),
-          'h-8 w-8 bg-transparent p-0 text-gray-600 dark:text-gray-400 pointer-events-auto',
+          'h-8 w-8 bg-transparent p-0 text-gray-600 dark:text-gray-400',
           'hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100',
           'border-gray-200 dark:border-gray-700',
           'transition-colors',
@@ -95,10 +156,11 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         ...classNames,
       }}
       components={{
-        Chevron: ({ orientation, ...props }) => {
+        Chevron: ({ orientation, ...chevronProps }) => {
           const Icon = orientation === 'left' ? ChevronLeft : ChevronRight;
-          return <Icon className="h-4 w-4" {...props} />;
+          return <Icon className="h-4 w-4" {...chevronProps} />;
         },
+        Dropdown: CustomDropdown,
       }}
       {...props}
     />
