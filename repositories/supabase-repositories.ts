@@ -39,7 +39,7 @@ export class SupabaseUserRepository implements IUserRepository {
     return data ? mapUserRow(data) : null;
   }
 
-  async createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
+  async createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     const id = randomUUID();
     const { data, error } = await this.supabase
       .from('users')
@@ -127,7 +127,7 @@ export class SupabaseProfessionalRepository implements IProfessionalRepository {
   }
 
   async createProfessional(
-    professional: Omit<Professional, 'id' | 'createdAt'>,
+    professional: Omit<Professional, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Professional> {
     const { data, error } = await this.supabase
       .from('professionals')
@@ -260,7 +260,7 @@ export class SupabaseVacationRepository implements IVacationRepository {
   }
 
   async createVacationPeriod(
-    vacation: Omit<VacationPeriod, 'id' | 'createdAt'>,
+    vacation: Omit<VacationPeriod, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<VacationPeriod> {
     const { data, error } = await this.supabase
       .from('vacation_periods')

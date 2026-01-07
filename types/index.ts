@@ -4,6 +4,7 @@ export interface User {
   name: string;
   password: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Professional {
@@ -13,6 +14,7 @@ export interface Professional {
   clientManager: string;
   monthlyRevenue: number;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface VacationPeriod {
@@ -26,6 +28,7 @@ export interface VacationPeriod {
   totalDays: number;
   revenueDeduction: number;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Alert {

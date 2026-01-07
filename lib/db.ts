@@ -36,7 +36,9 @@ export async function getUserById(id: string): Promise<User | null> {
   return data ? mapUserRow(data) : null;
 }
 
-export async function createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
+export async function createUser(
+  user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>,
+): Promise<User> {
   const id = randomUUID();
   const { data, error } = await supabaseAdmin
     .from('users')
@@ -129,7 +131,7 @@ export async function getProfessionalById(
 }
 
 export async function createProfessional(
-  professional: Omit<Professional, 'id' | 'createdAt'>,
+  professional: Omit<Professional, 'id' | 'createdAt' | 'updatedAt'>,
 ): Promise<Professional> {
   const { data, error } = await supabaseAdmin
     .from('professionals')
@@ -283,7 +285,7 @@ export async function getVacationPeriodById(
 }
 
 export async function createVacationPeriod(
-  vacation: Omit<VacationPeriod, 'id' | 'createdAt'>,
+  vacation: Omit<VacationPeriod, 'id' | 'createdAt' | 'updatedAt'>,
 ): Promise<VacationPeriod> {
   const { data, error } = await supabaseAdmin
     .from('vacation_periods')
@@ -369,9 +371,9 @@ export async function deleteAllVacationPeriods(userId: string): Promise<void> {
 
 // Initialize demo data in Supabase
 export async function initializeSupabaseDemo(demoData: {
-  user: Omit<User, 'id' | 'createdAt'>;
-  professionals: Omit<Professional, 'id' | 'createdAt'>[];
-  vacations: Omit<VacationPeriod, 'id' | 'createdAt'>[];
+  user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
+  professionals: Omit<Professional, 'id' | 'createdAt' | 'updatedAt'>[];
+  vacations: Omit<VacationPeriod, 'id' | 'createdAt' | 'updatedAt'>[];
 }) {
   // Check if demo user already exists
   const existingUser = await getUserByEmail(demoData.user.email);

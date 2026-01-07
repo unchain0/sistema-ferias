@@ -19,39 +19,43 @@ export async function createDemoData() {
     name: 'Usuário Demonstração',
     password: await hashPassword('demo123'),
     createdAt: iso(currentYear - 1, 1, 10),
+    updatedAt: iso(currentYear - 1, 1, 10),
   };
 
   // Demo Professionals (volume razoável e datas recentes)
-  const baseProfessionals: Array<Omit<Professional, 'id' | 'userId' | 'createdAt'>> = [
-    { name: 'João Silva', clientManager: 'Maria Santos', monthlyRevenue: 15000 },
-    { name: 'Ana Costa', clientManager: 'Carlos Oliveira', monthlyRevenue: 18000 },
-    { name: 'Pedro Almeida', clientManager: 'Juliana Ferreira', monthlyRevenue: 12000 },
-    { name: 'Carla Mendes', clientManager: 'Roberto Lima', monthlyRevenue: 20000 },
-    { name: 'Lucas Martins', clientManager: 'Fernanda Souza', monthlyRevenue: 16000 },
-    { name: 'Beatriz Rodrigues', clientManager: 'André Silva', monthlyRevenue: 14000 },
-    { name: 'Rafael Santos', clientManager: 'Paula Costa', monthlyRevenue: 17000 },
-    { name: 'Mariana Oliveira', clientManager: 'Ricardo Mendes', monthlyRevenue: 19000 },
-    { name: 'Thiago Souza', clientManager: 'Camila Rocha', monthlyRevenue: 15500 },
-    { name: 'Patricia Lima', clientManager: 'Eduardo Santos', monthlyRevenue: 16500 },
-    { name: 'Gabriel Ferreira', clientManager: 'Amanda Silva', monthlyRevenue: 13500 },
-    { name: 'Juliana Matos', clientManager: 'Leonardo Costa', monthlyRevenue: 17500 },
-    { name: 'Bruno Nogueira', clientManager: 'Isabela Lima', monthlyRevenue: 21000 },
-    { name: 'Larissa Pires', clientManager: 'Vitor Alves', monthlyRevenue: 14500 },
-    { name: 'Diego Rocha', clientManager: 'Aline Campos', monthlyRevenue: 18500 },
-    { name: 'Renata Barbosa', clientManager: 'Fábio Santos', monthlyRevenue: 16000 },
-    { name: 'Felipe Monteiro', clientManager: 'Carolina Souza', monthlyRevenue: 19500 },
-    { name: 'Camila Azevedo', clientManager: 'Rafaela Duarte', monthlyRevenue: 15500 },
-  ];
+  const baseProfessionals: Array<Omit<Professional, 'id' | 'userId' | 'createdAt' | 'updatedAt'>> =
+    [
+      { name: 'João Silva', clientManager: 'Maria Santos', monthlyRevenue: 15000 },
+      { name: 'Ana Costa', clientManager: 'Carlos Oliveira', monthlyRevenue: 18000 },
+      { name: 'Pedro Almeida', clientManager: 'Juliana Ferreira', monthlyRevenue: 12000 },
+      { name: 'Carla Mendes', clientManager: 'Roberto Lima', monthlyRevenue: 20000 },
+      { name: 'Lucas Martins', clientManager: 'Fernanda Souza', monthlyRevenue: 16000 },
+      { name: 'Beatriz Rodrigues', clientManager: 'André Silva', monthlyRevenue: 14000 },
+      { name: 'Rafael Santos', clientManager: 'Paula Costa', monthlyRevenue: 17000 },
+      { name: 'Mariana Oliveira', clientManager: 'Ricardo Mendes', monthlyRevenue: 19000 },
+      { name: 'Thiago Souza', clientManager: 'Camila Rocha', monthlyRevenue: 15500 },
+      { name: 'Patricia Lima', clientManager: 'Eduardo Santos', monthlyRevenue: 16500 },
+      { name: 'Gabriel Ferreira', clientManager: 'Amanda Silva', monthlyRevenue: 13500 },
+      { name: 'Juliana Matos', clientManager: 'Leonardo Costa', monthlyRevenue: 17500 },
+      { name: 'Bruno Nogueira', clientManager: 'Isabela Lima', monthlyRevenue: 21000 },
+      { name: 'Larissa Pires', clientManager: 'Vitor Alves', monthlyRevenue: 14500 },
+      { name: 'Diego Rocha', clientManager: 'Aline Campos', monthlyRevenue: 18500 },
+      { name: 'Renata Barbosa', clientManager: 'Fábio Santos', monthlyRevenue: 16000 },
+      { name: 'Felipe Monteiro', clientManager: 'Carolina Souza', monthlyRevenue: 19500 },
+      { name: 'Camila Azevedo', clientManager: 'Rafaela Duarte', monthlyRevenue: 15500 },
+    ];
 
   const demoProfessionals: Professional[] = baseProfessionals.map((p, i) => {
     const createdMonth = ((currentMonth + i - 1) % 12) + 1;
     const createdYear = currentYear - (createdMonth > currentMonth ? 1 : 0);
+    const createdDate = iso(createdYear, createdMonth, 5);
 
     return {
       id: `prof-${i + 1}`,
       userId: demoUserId,
       ...p,
-      createdAt: iso(createdYear, createdMonth, 5),
+      createdAt: createdDate,
+      updatedAt: createdDate,
     };
   });
 
@@ -100,6 +104,7 @@ export async function createDemoData() {
 
     const daily = (revenueByProf.get(profId) || 0) / 30;
     const revenueDeduction = parseFloat((daily * durationDays).toFixed(2));
+    const createdDate = iso(params.usageYear, params.usageMonth, 1);
 
     demoVacations.push({
       id: `vac-${params.usageYear}-${pad(params.usageMonth)}-${params.seq}`,
@@ -111,7 +116,8 @@ export async function createDemoData() {
       usageEndDate: end,
       totalDays: durationDays,
       revenueDeduction,
-      createdAt: iso(params.usageYear, params.usageMonth, 1),
+      createdAt: createdDate,
+      updatedAt: createdDate,
     });
   }
 

@@ -21,7 +21,7 @@ export interface PaginatedResult<T> {
 export interface IUserRepository {
   getUserByEmail(email: string): Promise<User | null>;
   getUserById(id: string): Promise<User | null>;
-  createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User>;
+  createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
 }
 
 export interface IProfessionalRepository {
@@ -41,7 +41,9 @@ export interface IProfessionalRepository {
   ): Promise<PaginatedResult<Professional>>;
 
   getProfessionalById(id: string, userId: string): Promise<Professional | null>;
-  createProfessional(professional: Omit<Professional, 'id' | 'createdAt'>): Promise<Professional>;
+  createProfessional(
+    professional: Omit<Professional, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Professional>;
   updateProfessional(
     id: string,
     userId: string,
@@ -67,7 +69,9 @@ export interface IVacationRepository {
   ): Promise<PaginatedResult<VacationPeriod>>;
 
   getVacationsByProfessional(professionalId: string, userId: string): Promise<VacationPeriod[]>;
-  createVacationPeriod(vacation: Omit<VacationPeriod, 'id' | 'createdAt'>): Promise<VacationPeriod>;
+  createVacationPeriod(
+    vacation: Omit<VacationPeriod, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<VacationPeriod>;
   updateVacationPeriod(
     id: string,
     userId: string,

@@ -21,6 +21,7 @@ export function mapUserRow(row: DbRow): User {
     name: row.name as string,
     password: row.password as string,
     createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
   };
 }
 
@@ -38,6 +39,7 @@ export function mapProfessionalRow(row: DbRow): Professional {
         ? parseFloat(row.monthly_revenue)
         : (row.monthly_revenue as number),
     createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
   };
 }
 
@@ -59,6 +61,7 @@ export function mapVacationRow(row: DbRow): VacationPeriod {
         ? parseFloat(row.revenue_deduction)
         : (row.revenue_deduction as number),
     createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
   };
 }
 
