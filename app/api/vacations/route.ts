@@ -2,10 +2,16 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/lib/auth-config';
+import {
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE,
+  VACATION_ORDER_FIELDS,
+} from '@/lib/constants';
 import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
 import { professionalRepository, vacationRepository } from '@/lib/di';
+import { vacationSchema } from '@/lib/input-validation';
 import { calculateRevenueDeduction, calculateVacationDays } from '@/lib/utils';
-import { VacationPeriod } from '@/types';
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -20,49 +26,39 @@ export async function GET(request: Request) {
   const offsetParam = searchParams.get('offset');
   const orderParam = searchParams.get('order') || 'createdAt:desc';
 
-  const limit = Math.min(Math.max(parseInt(limitParam || '50', 10) || 50, 1), 200);
+  const limit = Math.min(
+    Math.max(
+      parseInt(limitParam || String(DEFAULT_PAGE_SIZE), 10) || DEFAULT_PAGE_SIZE,
+      MIN_PAGE_SIZE,
+    ),
+    MAX_PAGE_SIZE,
+  );
   const offset = Math.max(parseInt(offsetParam || '0', 10) || 0, 0);
 
   const [orderField, orderDir] = orderParam.split(':');
 
-  // Validate orderField to ensure it's a valid key of VacationPeriod
-  const validOrderFields = [
-    'id',
-    'professionalId',
-    'userId',
-    'acquisitionStartDate',
-    'acquisitionEndDate',
-    'usageStartDate',
-    'usageEndDate',
-    'totalDays',
-    'revenueDeduction',
-    'createdAt',
-    'updatedAt',
-  ];
-  const validatedOrderField = validOrderFields.includes(orderField) ? orderField : 'createdAt';
+  // Validate orderField using constants
+  const validatedOrderField = VACATION_ORDER_FIELDS.includes(
+    orderField as (typeof VACATION_ORDER_FIELDS)[number],
+  )
+    ? orderField
+    : 'createdAt';
 
-  const all = await vacationRepository.getVacationPeriods(session.user.id);
-
-  // Stable sort to avoid shifting order between responses
-  const sorted = [...all].sort((a, b) => {
-    const dir = orderDir?.toLowerCase() === 'asc' ? 1 : -1;
-    const aVal = a[validatedOrderField as keyof VacationPeriod] ?? '';
-    const bVal = b[validatedOrderField as keyof VacationPeriod] ?? '';
-    if (aVal < bVal) return -1 * dir;
-    if (aVal > bVal) return 1 * dir;
-    // tie-breaker by id for determinism
-    return a.id.localeCompare(b.id) * dir;
+  // Use database-level pagination for better performance
+  const result = await vacationRepository.getVacationPeriodsPaginated(session.user.id, {
+    orderBy: validatedOrderField,
+    orderDir: (orderDir?.toLowerCase() as 'asc' | 'desc') || 'desc',
+    limit,
+    offset,
   });
 
-  const paged = sorted.slice(offset, offset + limit);
-
   const headers = new Headers();
-  headers.set('X-Total-Count', String(all.length));
+  headers.set('X-Total-Count', String(result.total));
   // Private caching for logged-in user with must-revalidate to ensure data consistency
   headers.set('Cache-Control', 'private, max-age=5, must-revalidate');
   headers.set('Vary', 'Cookie');
 
-  return NextResponse.json(paged, { headers });
+  return NextResponse.json(result.data, { headers });
 }
 
 export async function POST(request: Request) {
@@ -78,23 +74,21 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
+
+    // Validate input using Zod schema
+    const validation = vacationSchema.safeParse(data);
+    if (!validation.success) {
+      const errorMessage = validation.error.errors.map((e) => e.message).join(', ');
+      return NextResponse.json({ error: errorMessage || 'Dados inválidos' }, { status: 400 });
+    }
+
     const {
       professionalId,
       acquisitionStartDate,
       acquisitionEndDate,
       usageStartDate,
       usageEndDate,
-    } = data;
-
-    if (
-      !professionalId ||
-      !acquisitionStartDate ||
-      !acquisitionEndDate ||
-      !usageStartDate ||
-      !usageEndDate
-    ) {
-      return NextResponse.json({ error: 'Todos os campos são obrigatórios' }, { status: 400 });
-    }
+    } = validation.data;
 
     const professional = await professionalRepository.getProfessionalById(
       professionalId,

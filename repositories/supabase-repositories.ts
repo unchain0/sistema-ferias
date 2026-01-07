@@ -4,9 +4,33 @@ import {
   IProfessionalRepository,
   IUserRepository,
   IVacationRepository,
+  PaginatedResult,
+  PaginationOptions,
 } from '@/interfaces/repositories';
+import {
+  mapProfessionalRow,
+  mapProfessionalRows,
+  mapUserRow,
+  mapVacationRow,
+  mapVacationRows,
+} from '@/lib/db-mappers';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { Professional, User, VacationPeriod } from '@/types';
+
+// Column name mapping from camelCase to snake_case for vacations
+const VACATION_COLUMN_MAP: Record<string, string> = {
+  id: 'id',
+  professionalId: 'professional_id',
+  userId: 'user_id',
+  acquisitionStartDate: 'acquisition_start_date',
+  acquisitionEndDate: 'acquisition_end_date',
+  usageStartDate: 'usage_start_date',
+  usageEndDate: 'usage_end_date',
+  totalDays: 'total_days',
+  revenueDeduction: 'revenue_deduction',
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
+};
 
 export class SupabaseUserRepository implements IUserRepository {
   private get supabase() {
@@ -20,29 +44,13 @@ export class SupabaseUserRepository implements IUserRepository {
       .eq('email', email)
       .single();
     if (error && error.code !== 'PGRST116') throw error;
-    return data
-      ? {
-          id: data.id,
-          email: data.email,
-          name: data.name,
-          password: data.password,
-          createdAt: data.created_at,
-        }
-      : null;
+    return data ? mapUserRow(data) : null;
   }
 
   async getUserById(id: string): Promise<User | null> {
     const { data, error } = await this.supabase.from('users').select('*').eq('id', id).single();
     if (error && error.code !== 'PGRST116') throw error;
-    return data
-      ? {
-          id: data.id,
-          email: data.email,
-          name: data.name,
-          password: data.password,
-          createdAt: data.created_at,
-        }
-      : null;
+    return data ? mapUserRow(data) : null;
   }
 
   async createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
@@ -53,13 +61,7 @@ export class SupabaseUserRepository implements IUserRepository {
       .select()
       .single();
     if (error) throw error;
-    return {
-      id: data.id,
-      email: data.email,
-      name: data.name,
-      password: data.password,
-      createdAt: data.created_at,
-    };
+    return mapUserRow(data);
   }
 }
 
@@ -74,15 +76,7 @@ export class SupabaseProfessionalRepository implements IProfessionalRepository {
       .select('*')
       .eq('user_id', userId);
     if (error) throw error;
-    return (data || []).map((p) => ({
-      id: p.id,
-      userId: p.user_id,
-      name: p.name,
-      clientManager: p.client_manager,
-      monthlyRevenue:
-        typeof p.monthly_revenue === 'string' ? parseFloat(p.monthly_revenue) : p.monthly_revenue,
-      createdAt: p.created_at,
-    }));
+    return mapProfessionalRows(data || []);
   }
 
   async getProfessionalById(id: string, userId: string): Promise<Professional | null> {
@@ -93,19 +87,7 @@ export class SupabaseProfessionalRepository implements IProfessionalRepository {
       .eq('user_id', userId)
       .single();
     if (error && error.code !== 'PGRST116') throw error;
-    return data
-      ? {
-          id: data.id,
-          userId: data.user_id,
-          name: data.name,
-          clientManager: data.client_manager,
-          monthlyRevenue:
-            typeof data.monthly_revenue === 'string'
-              ? parseFloat(data.monthly_revenue)
-              : data.monthly_revenue,
-          createdAt: data.created_at,
-        }
-      : null;
+    return data ? mapProfessionalRow(data) : null;
   }
 
   async createProfessional(
@@ -124,17 +106,7 @@ export class SupabaseProfessionalRepository implements IProfessionalRepository {
       .select()
       .single();
     if (error) throw error;
-    return {
-      id: data.id,
-      userId: data.user_id,
-      name: data.name,
-      clientManager: data.client_manager,
-      monthlyRevenue:
-        typeof data.monthly_revenue === 'string'
-          ? parseFloat(data.monthly_revenue)
-          : data.monthly_revenue,
-      createdAt: data.created_at,
-    };
+    return mapProfessionalRow(data);
   }
 
   async updateProfessional(
@@ -158,20 +130,12 @@ export class SupabaseProfessionalRepository implements IProfessionalRepository {
       if (error.code === 'PGRST116') return null;
       throw error;
     }
-    return {
-      id: data.id,
-      userId: data.user_id,
-      name: data.name,
-      clientManager: data.client_manager,
-      monthlyRevenue:
-        typeof data.monthly_revenue === 'string'
-          ? parseFloat(data.monthly_revenue)
-          : data.monthly_revenue,
-      createdAt: data.created_at,
-    };
+    return mapProfessionalRow(data);
   }
 
   async deleteProfessional(id: string, userId: string): Promise<boolean> {
+    // Note: Consider implementing cascade delete for associated vacation periods
+    // or handle orphaned vacations in application logic
     const { error, count } = await this.supabase
       .from('professionals')
       .delete({ count: 'exact' })
@@ -187,27 +151,63 @@ export class SupabaseVacationRepository implements IVacationRepository {
     return getSupabaseAdmin();
   }
 
+  /**
+   * Get all vacation periods for a user (legacy method)
+   * @deprecated Use getVacationPeriodsPaginated for better performance
+   */
   async getVacationPeriods(userId: string): Promise<VacationPeriod[]> {
     const { data, error } = await this.supabase
       .from('vacation_periods')
       .select('*')
       .eq('user_id', userId);
     if (error) throw error;
-    return (data || []).map((v) => ({
-      id: v.id,
-      professionalId: v.professional_id,
-      userId: v.user_id,
-      acquisitionStartDate: v.acquisition_start_date,
-      acquisitionEndDate: v.acquisition_end_date,
-      usageStartDate: v.usage_start_date,
-      usageEndDate: v.usage_end_date,
-      totalDays: v.total_days,
-      revenueDeduction:
-        typeof v.revenue_deduction === 'string'
-          ? parseFloat(v.revenue_deduction)
-          : v.revenue_deduction,
-      createdAt: v.created_at,
-    }));
+    return mapVacationRows(data || []);
+  }
+
+  /**
+   * Get vacation periods with database-level pagination and ordering
+   * More efficient for large datasets as sorting/pagination happens in the database
+   */
+  async getVacationPeriodsPaginated(
+    userId: string,
+    options?: PaginationOptions,
+  ): Promise<PaginatedResult<VacationPeriod>> {
+    // First get total count
+    const { count: totalCount, error: countError } = await this.supabase
+      .from('vacation_periods')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (countError) throw countError;
+
+    // Build query with ordering
+    let query = this.supabase.from('vacation_periods').select('*').eq('user_id', userId);
+
+    // Apply ordering at database level
+    if (options?.orderBy) {
+      const dbColumn = VACATION_COLUMN_MAP[options.orderBy] || 'created_at';
+      query = query.order(dbColumn, { ascending: options.orderDir === 'asc' });
+      // Add secondary sort by id for deterministic ordering
+      if (dbColumn !== 'id') {
+        query = query.order('id', { ascending: options.orderDir === 'asc' });
+      }
+    } else {
+      // Default ordering
+      query = query.order('created_at', { ascending: false }).order('id', { ascending: false });
+    }
+
+    // Apply pagination at database level
+    if (options?.limit !== undefined && options?.offset !== undefined) {
+      query = query.range(options.offset, options.offset + options.limit - 1);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return {
+      data: mapVacationRows(data || []),
+      total: totalCount || 0,
+    };
   }
 
   async getVacationsByProfessional(
@@ -220,21 +220,7 @@ export class SupabaseVacationRepository implements IVacationRepository {
       .eq('professional_id', professionalId)
       .eq('user_id', userId);
     if (error) throw error;
-    return (data || []).map((v) => ({
-      id: v.id,
-      professionalId: v.professional_id,
-      userId: v.user_id,
-      acquisitionStartDate: v.acquisition_start_date,
-      acquisitionEndDate: v.acquisition_end_date,
-      usageStartDate: v.usage_start_date,
-      usageEndDate: v.usage_end_date,
-      totalDays: v.total_days,
-      revenueDeduction:
-        typeof v.revenue_deduction === 'string'
-          ? parseFloat(v.revenue_deduction)
-          : v.revenue_deduction,
-      createdAt: v.created_at,
-    }));
+    return mapVacationRows(data || []);
   }
 
   async createVacationPeriod(
@@ -257,21 +243,7 @@ export class SupabaseVacationRepository implements IVacationRepository {
       .select()
       .single();
     if (error) throw error;
-    return {
-      id: data.id,
-      professionalId: data.professional_id,
-      userId: data.user_id,
-      acquisitionStartDate: data.acquisition_start_date,
-      acquisitionEndDate: data.acquisition_end_date,
-      usageStartDate: data.usage_start_date,
-      usageEndDate: data.usage_end_date,
-      totalDays: data.total_days,
-      revenueDeduction:
-        typeof data.revenue_deduction === 'string'
-          ? parseFloat(data.revenue_deduction)
-          : data.revenue_deduction,
-      createdAt: data.created_at,
-    };
+    return mapVacationRow(data);
   }
 
   async updateVacationPeriod(
@@ -300,21 +272,7 @@ export class SupabaseVacationRepository implements IVacationRepository {
       if (error.code === 'PGRST116') return null;
       throw error;
     }
-    return {
-      id: data.id,
-      professionalId: data.professional_id,
-      userId: data.user_id,
-      acquisitionStartDate: data.acquisition_start_date,
-      acquisitionEndDate: data.acquisition_end_date,
-      usageStartDate: data.usage_start_date,
-      usageEndDate: data.usage_end_date,
-      totalDays: data.total_days,
-      revenueDeduction:
-        typeof data.revenue_deduction === 'string'
-          ? parseFloat(data.revenue_deduction)
-          : data.revenue_deduction,
-      createdAt: data.created_at,
-    };
+    return mapVacationRow(data);
   }
 
   async deleteVacationPeriod(id: string, userId: string): Promise<boolean> {

@@ -1,51 +1,53 @@
 import { randomUUID } from 'crypto';
 
+import { PaginatedResult, PaginationOptions } from '@/interfaces/repositories';
+import {
+  mapProfessionalRow,
+  mapProfessionalRows,
+  mapUserRow,
+  mapUserRows,
+  mapVacationRow,
+  mapVacationRows,
+} from '@/lib/db-mappers';
 import { Professional, User, VacationPeriod } from '@/types';
 
 import { getSupabaseAdmin } from './supabase-admin';
 
 const supabaseAdmin = getSupabaseAdmin();
 
+// Column name mapping from camelCase to snake_case
+const VACATION_COLUMN_MAP: Record<string, string> = {
+  id: 'id',
+  professionalId: 'professional_id',
+  userId: 'user_id',
+  acquisitionStartDate: 'acquisition_start_date',
+  acquisitionEndDate: 'acquisition_end_date',
+  usageStartDate: 'usage_start_date',
+  usageEndDate: 'usage_end_date',
+  totalDays: 'total_days',
+  revenueDeduction: 'revenue_deduction',
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
+};
+
 // Users
 export async function getUsers(): Promise<User[]> {
   const { data, error } = await supabaseAdmin.from('users').select('*');
 
   if (error) throw error;
-  return (data || []).map((u: Record<string, unknown>) => ({
-    id: u.id as string,
-    email: u.email as string,
-    name: u.name as string,
-    password: u.password as string,
-    createdAt: u.created_at as string,
-  }));
+  return mapUserRows(data || []);
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {
   const { data, error } = await supabaseAdmin.from('users').select('*').eq('email', email).single();
   if (error && error.code !== 'PGRST116') throw error;
-  return data
-    ? {
-        id: data.id,
-        email: data.email,
-        name: data.name,
-        password: data.password,
-        createdAt: data.created_at,
-      }
-    : null;
+  return data ? mapUserRow(data) : null;
 }
 
 export async function getUserById(id: string): Promise<User | null> {
   const { data, error } = await supabaseAdmin.from('users').select('*').eq('id', id).single();
   if (error && error.code !== 'PGRST116') throw error;
-  return data
-    ? {
-        id: data.id,
-        email: data.email,
-        name: data.name,
-        password: data.password,
-        createdAt: data.created_at,
-      }
-    : null;
+  return data ? mapUserRow(data) : null;
 }
 
 export async function createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
@@ -63,13 +65,7 @@ export async function createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<
     .select()
     .single();
   if (error) throw error;
-  return {
-    id: data.id,
-    email: data.email,
-    name: data.name,
-    password: data.password,
-    createdAt: data.created_at,
-  };
+  return mapUserRow(data);
 }
 
 // Professionals
@@ -79,17 +75,7 @@ export async function getProfessionals(userId: string): Promise<Professional[]> 
     .select('*')
     .eq('user_id', userId);
   if (error) throw error;
-  return (data || []).map((p: Record<string, unknown>) => ({
-    id: p.id as string,
-    userId: p.user_id as string,
-    name: p.name as string,
-    clientManager: p.client_manager as string,
-    monthlyRevenue:
-      typeof p.monthly_revenue === 'string'
-        ? parseFloat(p.monthly_revenue)
-        : (p.monthly_revenue as number),
-    createdAt: p.created_at as string,
-  }));
+  return mapProfessionalRows(data || []);
 }
 
 export async function getProfessionalById(
@@ -103,19 +89,7 @@ export async function getProfessionalById(
     .eq('user_id', userId)
     .single();
   if (error && error.code !== 'PGRST116') throw error;
-  return data
-    ? {
-        id: data.id,
-        userId: data.user_id,
-        name: data.name,
-        clientManager: data.client_manager,
-        monthlyRevenue:
-          typeof data.monthly_revenue === 'string'
-            ? parseFloat(data.monthly_revenue)
-            : data.monthly_revenue,
-        createdAt: data.created_at,
-      }
-    : null;
+  return data ? mapProfessionalRow(data) : null;
 }
 
 export async function createProfessional(
@@ -134,17 +108,7 @@ export async function createProfessional(
     .select()
     .single();
   if (error) throw error;
-  return {
-    id: data.id,
-    userId: data.user_id,
-    name: data.name,
-    clientManager: data.client_manager,
-    monthlyRevenue:
-      typeof data.monthly_revenue === 'string'
-        ? parseFloat(data.monthly_revenue)
-        : data.monthly_revenue,
-    createdAt: data.created_at,
-  };
+  return mapProfessionalRow(data);
 }
 
 export async function updateProfessional(
@@ -170,20 +134,12 @@ export async function updateProfessional(
     throw error;
   }
 
-  return {
-    id: data.id,
-    userId: data.user_id,
-    name: data.name,
-    clientManager: data.client_manager,
-    monthlyRevenue:
-      typeof data.monthly_revenue === 'string'
-        ? parseFloat(data.monthly_revenue)
-        : data.monthly_revenue,
-    createdAt: data.created_at,
-  };
+  return mapProfessionalRow(data);
 }
 
 export async function deleteProfessional(id: string, userId: string): Promise<boolean> {
+  // Note: Consider implementing cascade delete for associated vacation periods
+  // or handle orphaned vacations in application logic
   const { error, count } = await supabaseAdmin
     .from('professionals')
     .delete({ count: 'exact' })
@@ -200,27 +156,64 @@ export async function deleteAllProfessionals(userId: string): Promise<void> {
 }
 
 // Vacation Periods
+
+/**
+ * Get all vacation periods for a user (legacy method)
+ * @deprecated Use getVacationPeriodsPaginated for better performance
+ */
 export async function getVacationPeriods(userId: string): Promise<VacationPeriod[]> {
   const { data, error } = await supabaseAdmin
     .from('vacation_periods')
     .select('*')
     .eq('user_id', userId);
   if (error) throw error;
-  return (data || []).map((v: Record<string, unknown>) => ({
-    id: v.id as string,
-    professionalId: v.professional_id as string,
-    userId: v.user_id as string,
-    acquisitionStartDate: v.acquisition_start_date as string,
-    acquisitionEndDate: v.acquisition_end_date as string,
-    usageStartDate: v.usage_start_date as string,
-    usageEndDate: v.usage_end_date as string,
-    totalDays: v.total_days as number,
-    revenueDeduction:
-      typeof v.revenue_deduction === 'string'
-        ? parseFloat(v.revenue_deduction)
-        : (v.revenue_deduction as number),
-    createdAt: v.created_at as string,
-  }));
+  return mapVacationRows(data || []);
+}
+
+/**
+ * Get vacation periods with database-level pagination and ordering
+ * More efficient for large datasets
+ */
+export async function getVacationPeriodsPaginated(
+  userId: string,
+  options?: PaginationOptions,
+): Promise<PaginatedResult<VacationPeriod>> {
+  // First get total count
+  const { count: totalCount, error: countError } = await supabaseAdmin
+    .from('vacation_periods')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  if (countError) throw countError;
+
+  // Build query with ordering
+  let query = supabaseAdmin.from('vacation_periods').select('*').eq('user_id', userId);
+
+  // Apply ordering at database level
+  if (options?.orderBy) {
+    const dbColumn = VACATION_COLUMN_MAP[options.orderBy] || 'created_at';
+    query = query.order(dbColumn, { ascending: options.orderDir === 'asc' });
+    // Add secondary sort by id for deterministic ordering
+    if (dbColumn !== 'id') {
+      query = query.order('id', { ascending: options.orderDir === 'asc' });
+    }
+  } else {
+    // Default ordering
+    query = query.order('created_at', { ascending: false }).order('id', { ascending: false });
+  }
+
+  // Apply pagination at database level
+  if (options?.limit !== undefined && options?.offset !== undefined) {
+    query = query.range(options.offset, options.offset + options.limit - 1);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return {
+    data: mapVacationRows(data || []),
+    total: totalCount || 0,
+  };
 }
 
 export async function getVacationsByProfessional(
@@ -235,21 +228,7 @@ export async function getVacationsByProfessional(
 
   if (error) throw error;
 
-  return (data || []).map((v: Record<string, unknown>) => ({
-    id: v.id as string,
-    professionalId: v.professional_id as string,
-    userId: v.user_id as string,
-    acquisitionStartDate: v.acquisition_start_date as string,
-    acquisitionEndDate: v.acquisition_end_date as string,
-    usageStartDate: v.usage_start_date as string,
-    usageEndDate: v.usage_end_date as string,
-    totalDays: v.total_days as number,
-    revenueDeduction:
-      typeof v.revenue_deduction === 'string'
-        ? parseFloat(v.revenue_deduction)
-        : (v.revenue_deduction as number),
-    createdAt: v.created_at as string,
-  }));
+  return mapVacationRows(data || []);
 }
 
 export async function createVacationPeriod(
@@ -272,21 +251,7 @@ export async function createVacationPeriod(
     .select()
     .single();
   if (error) throw error;
-  return {
-    id: data.id,
-    professionalId: data.professional_id,
-    userId: data.user_id,
-    acquisitionStartDate: data.acquisition_start_date,
-    acquisitionEndDate: data.acquisition_end_date,
-    usageStartDate: data.usage_start_date,
-    usageEndDate: data.usage_end_date,
-    totalDays: data.total_days,
-    revenueDeduction:
-      typeof data.revenue_deduction === 'string'
-        ? parseFloat(data.revenue_deduction)
-        : data.revenue_deduction,
-    createdAt: data.created_at,
-  };
+  return mapVacationRow(data);
 }
 
 export async function updateVacationPeriod(
@@ -317,21 +282,7 @@ export async function updateVacationPeriod(
     throw error;
   }
 
-  return {
-    id: data.id,
-    professionalId: data.professional_id,
-    userId: data.user_id,
-    acquisitionStartDate: data.acquisition_start_date,
-    acquisitionEndDate: data.acquisition_end_date,
-    usageStartDate: data.usage_start_date,
-    usageEndDate: data.usage_end_date,
-    totalDays: data.total_days,
-    revenueDeduction:
-      typeof data.revenue_deduction === 'string'
-        ? parseFloat(data.revenue_deduction)
-        : data.revenue_deduction,
-    createdAt: data.created_at,
-  };
+  return mapVacationRow(data);
 }
 
 export async function deleteVacationPeriod(id: string, userId: string): Promise<boolean> {

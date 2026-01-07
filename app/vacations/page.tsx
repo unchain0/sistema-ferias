@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SingleDatePicker } from '@/components/ui/SingleDatePicker';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { DEMO_USER_EMAIL } from '@/lib/constants';
 import {
   computeConcessivePeriod,
   formatCurrency,
@@ -19,9 +20,28 @@ import {
 } from '@/lib/utils';
 import { Professional, VacationPeriod } from '@/types';
 
+/**
+ * Custom hook for debouncing a value
+ */
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export default function VacationsPage() {
   const { data: session } = useSession();
-  const isDemo = session?.user?.email === 'demo@sistema-ferias.com';
+  const isDemo = session?.user?.email === DEMO_USER_EMAIL;
   const [vacations, setVacations] = useState<VacationPeriod[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +51,11 @@ export default function VacationsPage() {
   const PAGE_SIZE = 10;
 
   const [searchQuery, setSearchQuery] = useState('');
+  // Debounce search query to avoid excessive API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // Form submission state for preventing double-submit
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useCallback(
@@ -38,13 +63,13 @@ export default function VacationsPage() {
       if (loading || loadingMore) return;
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore && searchQuery === '') {
+        if (entries[0].isIntersecting && hasMore && debouncedSearchQuery === '') {
           setPage((prevPage) => prevPage + 1);
         }
       });
       if (node) observer.current.observe(node);
     },
-    [loading, loadingMore, hasMore, searchQuery],
+    [loading, loadingMore, hasMore, debouncedSearchQuery],
   );
 
   const [showForm, setShowForm] = useState(false);
@@ -58,6 +83,17 @@ export default function VacationsPage() {
     usageStartDate: null as Date | null,
     usageEndDate: null as Date | null,
   });
+
+  // Create a Map for O(1) professional name lookups
+  const professionalNameMap = useMemo(
+    () => new Map(professionals.map((p) => [p.id, p.name])),
+    [professionals],
+  );
+
+  const getProfessionalName = useCallback(
+    (id: string) => professionalNameMap.get(id) || 'Desconhecido',
+    [professionalNameMap],
+  );
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -121,16 +157,21 @@ export default function VacationsPage() {
     }
   }, []);
 
+  // Use debounced search query for triggering search
   useEffect(() => {
-    if (searchQuery !== '') {
+    if (debouncedSearchQuery !== '') {
       fetchAllForSearch();
     } else if (page === 0) {
       fetchData();
     }
-  }, [searchQuery, page, fetchAllForSearch, fetchData]);
+  }, [debouncedSearchQuery, page, fetchAllForSearch, fetchData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent double submission
+    if (isSubmitting) return;
+
     setError(null);
 
     // Validação dos campos obrigatórios
@@ -161,6 +202,8 @@ export default function VacationsPage() {
       usageEndDate: formData.usageEndDate ? formatDateForInput(formData.usageEndDate) : '',
     };
 
+    setIsSubmitting(true);
+
     try {
       let result;
       if (editingId) {
@@ -180,6 +223,8 @@ export default function VacationsPage() {
     } catch (error) {
       console.error('Error saving vacation:', error);
       setError('Erro ao salvar período de férias');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -235,19 +280,16 @@ export default function VacationsPage() {
     setError(null);
   };
 
-  const getProfessionalName = (id: string) => {
-    const professional = professionals.find((p) => p.id === id);
-    return professional?.name || 'Desconhecido';
-  };
-
+  // Filter vacations using optimized name lookup
   const filteredVacations = useMemo(() => {
+    if (!debouncedSearchQuery) return vacations;
+
+    const query = debouncedSearchQuery.toLowerCase();
     return vacations.filter((vacation) => {
-      const query = searchQuery.toLowerCase();
-      const professional = professionals.find((p) => p.id === vacation.professionalId);
-      const professionalName = (professional?.name || 'Desconhecido').toLowerCase();
+      const professionalName = getProfessionalName(vacation.professionalId).toLowerCase();
       return professionalName.includes(query);
     });
-  }, [vacations, searchQuery, professionals]);
+  }, [vacations, debouncedSearchQuery, getProfessionalName]);
 
   return (
     <div className="page-container">
@@ -328,6 +370,7 @@ export default function VacationsPage() {
                   onChange={(e) => setFormData({ ...formData, professionalId: e.target.value })}
                   className="select-base"
                   required
+                  disabled={isSubmitting}
                 >
                   <option value="">Selecione um profissional</option>
                   {professionals.map((prof) => (
@@ -347,7 +390,7 @@ export default function VacationsPage() {
                       setFormData({ ...formData, acquisitionStartDate: date || null })
                     }
                     placeholder="Selecione a data"
-                    disabled={false}
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -359,7 +402,7 @@ export default function VacationsPage() {
                       setFormData({ ...formData, acquisitionEndDate: date || null })
                     }
                     placeholder="Selecione a data"
-                    disabled={false}
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -389,7 +432,7 @@ export default function VacationsPage() {
                       setFormData({ ...formData, usageStartDate: date || null })
                     }
                     placeholder="Selecione a data"
-                    disabled={false}
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -401,14 +444,30 @@ export default function VacationsPage() {
                       setFormData({ ...formData, usageEndDate: date || null })
                     }
                     placeholder="Selecione a data"
-                    disabled={false}
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
 
               <div className="form-actions">
-                <Button type="submit">{editingId ? 'Atualizar' : 'Criar'}</Button>
-                <Button type="button" variant="secondary" onClick={resetForm}>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {editingId ? 'Atualizando...' : 'Criando...'}
+                    </>
+                  ) : editingId ? (
+                    'Atualizar'
+                  ) : (
+                    'Criar'
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={resetForm}
+                  disabled={isSubmitting}
+                >
                   Cancelar
                 </Button>
               </div>
@@ -454,7 +513,7 @@ export default function VacationsPage() {
             <div className="text-center py-12">
               <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <p className="text-muted">
-                Nenhum período de férias encontrado para &quot;{searchQuery}&quot;
+                Nenhum período de férias encontrado para &quot;{debouncedSearchQuery}&quot;
               </p>
             </div>
           </Card>

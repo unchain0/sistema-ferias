@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
 import { professionalRepository } from '@/lib/di';
+import { professionalSchema } from '@/lib/input-validation';
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -46,17 +47,32 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
-    const { name, clientManager, monthlyRevenue } = data;
 
-    if (!name || !clientManager || !monthlyRevenue) {
-      return NextResponse.json({ error: 'Todos os campos são obrigatórios' }, { status: 400 });
+    // Validate input using Zod schema
+    const validation = professionalSchema.safeParse({
+      name: data.name,
+      clientManager: data.clientManager,
+      monthlyRevenue:
+        typeof data.monthlyRevenue === 'string'
+          ? parseFloat(data.monthlyRevenue)
+          : data.monthlyRevenue,
+    });
+
+    if (!validation.success) {
+      const errorMessage = validation.error.errors.map((e) => e.message).join(', ');
+      return NextResponse.json(
+        { error: errorMessage || 'Todos os campos são obrigatórios' },
+        { status: 400 },
+      );
     }
+
+    const { name, clientManager, monthlyRevenue } = validation.data;
 
     const created = await professionalRepository.createProfessional({
       userId: session.user.id,
       name,
       clientManager,
-      monthlyRevenue: parseFloat(monthlyRevenue),
+      monthlyRevenue,
     });
     return NextResponse.json(created, { status: 201 });
   } catch (error) {

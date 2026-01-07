@@ -16,6 +16,7 @@ describe('Vacations API routes', () => {
     vi.doMock('@/lib/di', () => ({
       vacationRepository: {
         getVacationPeriods: vi.fn(),
+        getVacationPeriodsPaginated: vi.fn(),
       },
     }));
 
@@ -29,34 +30,47 @@ describe('Vacations API routes', () => {
       getServerSession: vi.fn(async () => ({ user: { id: 'u1', email: 'u1@test.com' } })),
     }));
 
+    const mockVacations = [
+      {
+        id: 'v1',
+        professionalId: 'p1',
+        userId: 'u1',
+        acquisitionStartDate: '2024-01-01',
+        acquisitionEndDate: '2024-12-31',
+        usageStartDate: '2026-01-01',
+        usageEndDate: '2026-01-05',
+        totalDays: 5,
+        revenueDeduction: 100,
+        createdAt: '2026-01-01',
+      },
+      {
+        id: 'v2',
+        professionalId: 'p1',
+        userId: 'u1',
+        acquisitionStartDate: '2024-01-01',
+        acquisitionEndDate: '2024-12-31',
+        usageStartDate: '2026-02-01',
+        usageEndDate: '2026-02-05',
+        totalDays: 5,
+        revenueDeduction: 100,
+        createdAt: '2026-02-01',
+      },
+    ];
+
     vi.doMock('@/lib/di', () => ({
       vacationRepository: {
-        getVacationPeriods: vi.fn(async () => [
-          {
-            id: 'v1',
-            professionalId: 'p1',
-            userId: 'u1',
-            acquisitionStartDate: '2024-01-01',
-            acquisitionEndDate: '2024-12-31',
-            usageStartDate: '2026-01-01',
-            usageEndDate: '2026-01-05',
-            totalDays: 5,
-            revenueDeduction: 100,
-            createdAt: '2026-01-01',
-          },
-          {
-            id: 'v2',
-            professionalId: 'p1',
-            userId: 'u1',
-            acquisitionStartDate: '2024-01-01',
-            acquisitionEndDate: '2024-12-31',
-            usageStartDate: '2026-02-01',
-            usageEndDate: '2026-02-05',
-            totalDays: 5,
-            revenueDeduction: 100,
-            createdAt: '2026-02-01',
-          },
-        ]),
+        // Mock the new paginated method
+        getVacationPeriodsPaginated: vi.fn(async (_userId, options) => {
+          // Simulate database-level pagination
+          const limit = options?.limit || 50;
+          const offset = options?.offset || 0;
+          const paginatedData = mockVacations.slice(offset, offset + limit);
+          return {
+            data: paginatedData,
+            total: mockVacations.length,
+          };
+        }),
+        getVacationPeriods: vi.fn(async () => mockVacations),
       },
       professionalRepository: {
         getProfessionalById: vi.fn(),
@@ -89,6 +103,7 @@ describe('Vacations API routes', () => {
     vi.doMock('@/lib/di', () => ({
       vacationRepository: {
         getVacationPeriods: vi.fn(),
+        getVacationPeriodsPaginated: vi.fn(),
         createVacationPeriod: vi.fn(),
       },
       professionalRepository: {
@@ -101,7 +116,7 @@ describe('Vacations API routes', () => {
       jsonRequest('http://localhost/api/vacations', {
         method: 'POST',
         body: JSON.stringify({
-          professionalId: 'p1',
+          professionalId: '550e8400-e29b-41d4-a716-446655440000', // Valid UUID format
           acquisitionStartDate: '2024-01-01',
           acquisitionEndDate: '2024-12-31',
           usageStartDate: '2026-01-01',
