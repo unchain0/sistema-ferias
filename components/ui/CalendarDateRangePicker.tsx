@@ -67,10 +67,7 @@ export function CalendarDateRangePicker({
 
   const handleCalendarSelect = (range: DateRange | undefined) => {
     onChange(range);
-    // Fecha o popover automaticamente quando um range completo é selecionado
-    if (range?.from && range?.to) {
-      setTimeout(() => setOpen(false), 150);
-    }
+    // Não fecha automaticamente - deixa o usuário ajustar a seleção se necessário
   };
 
   const handleClear = (e: React.MouseEvent) => {
