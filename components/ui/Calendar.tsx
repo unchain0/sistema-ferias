@@ -3,7 +3,7 @@
 import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as React from 'react';
-import { DayPicker, type DropdownProps } from 'react-day-picker';
+import { DayPicker, type DropdownProps, getDefaultClassNames } from 'react-day-picker';
 
 import { buttonVariants } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   /**
    * Habilita dropdowns para navegação rápida de mês/ano
-   * @default true
+   * @default false para range mode (usa botões), true para single mode (usa dropdowns)
    */
   showDropdowns?: boolean;
 };
@@ -58,99 +58,122 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  showDropdowns = true,
+  showDropdowns,
   ...props
 }: CalendarProps) {
+  // Por padrão: dropdowns para single mode, botões de navegação para range mode
+  const mode = 'mode' in props ? props.mode : undefined;
+  const useDropdowns = showDropdowns ?? mode !== 'range';
+  const defaultClassNames = getDefaultClassNames();
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn('p-3', className)}
       locale={ptBR}
-      // Navegação com dropdowns para mês e ano
-      captionLayout={showDropdowns ? 'dropdown' : 'label'}
-      // Esconde as setas de navegação quando usar dropdowns
-      hideNavigation={showDropdowns}
+      // 'dropdown' mostra dropdowns de mês/ano, 'label' mostra texto com botões de navegação
+      captionLayout={useDropdowns ? 'dropdown' : 'label'}
       startMonth={START_MONTH}
       endMonth={END_MONTH}
       classNames={{
-        // Layout
-        months: 'flex flex-col sm:flex-row gap-4',
+        // Layout principal
+        months: 'flex flex-col sm:flex-row gap-4 sm:gap-6',
         month: 'space-y-4',
-        month_caption: 'flex justify-center pt-1 items-center h-10',
+
+        // Caption (cabeçalho do mês)
+        month_caption: 'flex justify-center pt-1 relative items-center h-10',
         caption_label: 'text-sm font-semibold text-gray-900 dark:text-gray-100',
 
-        // Dropdowns container
-        dropdowns: 'flex items-center gap-1',
+        // Container dos dropdowns
+        dropdowns: 'flex items-center gap-2',
 
-        // Navigation (visível apenas quando showDropdowns=false)
-        nav: 'flex items-center gap-1',
+        // Navegação com botões (quando captionLayout='label')
+        nav: 'flex items-center justify-between absolute inset-x-0 px-1',
         button_previous: cn(
           buttonVariants({ variant: 'outline' }),
-          'h-8 w-8 bg-transparent p-0 text-gray-600 dark:text-gray-400',
-          'hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100',
+          'h-7 w-7 bg-white dark:bg-gray-900 p-0',
+          'text-gray-600 dark:text-gray-400',
+          'hover:bg-gray-100 dark:hover:bg-gray-800',
+          'hover:text-gray-900 dark:hover:text-gray-100',
           'border-gray-200 dark:border-gray-700',
           'transition-colors',
+          'disabled:opacity-50 disabled:pointer-events-none',
         ),
         button_next: cn(
           buttonVariants({ variant: 'outline' }),
-          'h-8 w-8 bg-transparent p-0 text-gray-600 dark:text-gray-400',
-          'hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100',
+          'h-7 w-7 bg-white dark:bg-gray-900 p-0',
+          'text-gray-600 dark:text-gray-400',
+          'hover:bg-gray-100 dark:hover:bg-gray-800',
+          'hover:text-gray-900 dark:hover:text-gray-100',
           'border-gray-200 dark:border-gray-700',
           'transition-colors',
+          'disabled:opacity-50 disabled:pointer-events-none',
         ),
 
-        // Table structure
+        // Ícone do chevron
+        chevron: `${defaultClassNames.chevron} fill-gray-500 dark:fill-gray-400`,
+
+        // Estrutura da tabela
         month_grid: 'w-full border-collapse',
         weekdays: 'flex',
         weekday:
           'text-gray-500 dark:text-gray-400 rounded-md w-10 font-medium text-[0.75rem] uppercase tracking-wide',
         week: 'flex w-full mt-1',
 
-        // Day cells
+        // Célula do dia - container
         day: cn(
           'relative h-10 w-10 p-0 text-center text-sm font-normal',
           'focus-within:relative focus-within:z-20',
-          // Range middle background
-          '[&:has([aria-selected])]:bg-blue-50 dark:[&:has([aria-selected])]:bg-blue-950/30',
-          // First day of range
-          '[&:has([aria-selected].day-range-start)]:rounded-l-lg',
-          // Last day of range
-          '[&:has([aria-selected].day-range-end)]:rounded-r-lg',
-          // Outside days in range
-          '[&:has([aria-selected].day-outside)]:bg-blue-50/50 dark:[&:has([aria-selected].day-outside)]:bg-blue-950/20',
         ),
+
+        // Botão do dia - elemento clicável
         day_button: cn(
           buttonVariants({ variant: 'ghost' }),
-          'h-10 w-10 p-0 font-normal rounded-lg',
+          'h-10 w-10 p-0 font-normal rounded-md',
           'hover:bg-gray-100 dark:hover:bg-gray-800',
-          'focus:bg-gray-100 dark:focus:bg-gray-800',
+          'focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
           'transition-colors',
           'aria-selected:opacity-100',
         ),
 
-        // Range states
-        range_start:
-          'day-range-start rounded-lg !bg-blue-600 !text-white hover:!bg-blue-700 focus:!bg-blue-700 dark:!bg-blue-500 dark:hover:!bg-blue-600',
-        range_end:
-          'day-range-end rounded-lg !bg-blue-600 !text-white hover:!bg-blue-700 focus:!bg-blue-700 dark:!bg-blue-500 dark:hover:!bg-blue-600',
-        range_middle:
-          'rounded-none !bg-transparent text-blue-700 dark:text-blue-300 hover:!bg-blue-100 dark:hover:!bg-blue-900/50 hover:text-blue-800 dark:hover:text-blue-200',
+        // Estados de range - aplicados ao day_button
+        range_start: cn(
+          '!bg-blue-600 !text-white !rounded-l-md !rounded-r-none',
+          'hover:!bg-blue-700 focus:!bg-blue-700',
+          'dark:!bg-blue-500 dark:hover:!bg-blue-600',
+        ),
+        range_end: cn(
+          '!bg-blue-600 !text-white !rounded-r-md !rounded-l-none',
+          'hover:!bg-blue-700 focus:!bg-blue-700',
+          'dark:!bg-blue-500 dark:hover:!bg-blue-600',
+        ),
+        range_middle: cn(
+          '!bg-blue-100 dark:!bg-blue-900/50 !text-blue-900 dark:!text-blue-100',
+          '!rounded-none',
+          'hover:!bg-blue-200 dark:hover:!bg-blue-800/60',
+        ),
 
-        // Selected (single mode)
-        selected:
-          'bg-blue-600 text-white hover:bg-blue-700 focus:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg',
+        // Selecionado (single mode)
+        selected: cn(
+          '!bg-blue-600 !text-white !rounded-md',
+          'hover:!bg-blue-700 focus:!bg-blue-700',
+          'dark:!bg-blue-500 dark:hover:!bg-blue-600',
+        ),
 
-        // Today indicator
-        today:
-          'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold rounded-lg',
+        // Indicador de hoje
+        today: cn(
+          'bg-gray-100 dark:bg-gray-800',
+          'text-gray-900 dark:text-white font-semibold',
+          'rounded-md',
+        ),
 
-        // Outside days (other months)
-        outside: 'day-outside text-gray-400 dark:text-gray-600 opacity-50',
+        // Dias de outros meses
+        outside: cn('text-gray-400 dark:text-gray-600', 'opacity-50 aria-selected:opacity-40'),
 
-        // Disabled days
+        // Dias desabilitados
         disabled: 'text-gray-300 dark:text-gray-700 opacity-50 cursor-not-allowed',
 
-        // Hidden days
+        // Dias ocultos
         hidden: 'invisible',
 
         ...classNames,
