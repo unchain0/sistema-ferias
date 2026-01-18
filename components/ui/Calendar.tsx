@@ -175,7 +175,7 @@ function Calendar({
         day_button: cn(
           buttonVariants({ variant: 'ghost' }),
           'h-10 w-10 p-0 font-normal rounded-md',
-          'hover:bg-gray-100 dark:hover:bg-gray-800',
+          'hover:bg-gray-100 dark:hover:bg-zinc-800',
           'focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
           'transition-colors',
           'aria-selected:opacity-100',
@@ -207,7 +207,7 @@ function Calendar({
 
         // Indicador de hoje
         today: cn(
-          'bg-gray-100 dark:bg-gray-800',
+          'bg-gray-100 dark:bg-zinc-800',
           'text-gray-900 dark:text-white font-semibold',
           'rounded-md',
         ),

@@ -40,17 +40,16 @@ body {
 
   /* Main page container - standard gray background */
   .page-container {
-    @apply min-h-screen bg-gray-50 dark:bg-gray-900;
+    @apply min-h-screen bg-gray-50 dark:bg-gray-950;
   }
 
-  /* Page container with gradient background (dashboard style) */
   .page-container-gradient {
-    @apply min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950;
+    @apply min-h-screen bg-gray-50 dark:bg-gray-950;
   }
 
   /* Auth page container (login/register) */
   .page-container-auth {
-    @apply min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4;
+    @apply min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950 p-4;
   }
 
   /* Content wrapper with max-width and padding */
@@ -110,7 +109,7 @@ body {
   .input-base {
     @apply w-full px-4 py-2 border border-gray-300 rounded-lg 
            focus:outline-none focus:ring-2 focus:ring-blue-500 
-           dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400
+           dark:bg-zinc-900 dark:border-zinc-800 dark:text-white dark:placeholder-gray-400
            transition-colors duration-200;
   }
 
@@ -118,7 +117,7 @@ body {
   .input-search {
     @apply w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg 
            focus:outline-none focus:ring-2 focus:ring-blue-500 
-           dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400
+           dark:bg-zinc-900 dark:border-zinc-800 dark:text-white dark:placeholder-gray-400
            transition-colors duration-200;
   }
 
@@ -126,7 +125,7 @@ body {
   .select-base {
     @apply w-full px-4 py-2 border border-gray-300 rounded-lg 
            focus:outline-none focus:ring-2 focus:ring-blue-500 
-           dark:bg-gray-800 dark:border-gray-700 dark:text-white
+           dark:bg-zinc-900 dark:border-zinc-800 dark:text-white
            transition-colors duration-200;
   }
 
@@ -237,7 +236,7 @@ body {
   /* Icon button (refresh, close, etc.) */
   .btn-icon {
     @apply p-2 rounded-lg text-gray-600 dark:text-gray-400 
-           hover:bg-gray-100 dark:hover:bg-gray-800 
+           hover:bg-gray-100 dark:hover:bg-zinc-900 
            transition-colors duration-200 
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
@@ -268,7 +267,7 @@ body {
   /* Stat card (dashboard) */
   .stat-card {
     @apply group relative overflow-hidden rounded-2xl 
-           border border-gray-200 dark:border-gray-800 
+           border border-gray-200 dark:border-zinc-800 
            bg-gradient-to-br transition-all duration-300 ease-out 
            hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50 
            hover:-translate-y-0.5;
@@ -328,22 +327,22 @@ body {
 
   /* Currency value - positive (green) */
   .value-currency-positive {
-    @apply text-xl font-bold text-green-600 dark:text-green-400;
+    @apply text-xl font-bold text-green-600 dark:text-green-400 tabular-nums;
   }
 
   /* Currency value - negative (red) */
   .value-currency-negative {
-    @apply text-lg font-bold text-red-600 dark:text-red-400;
+    @apply text-lg font-bold text-red-600 dark:text-red-400 tabular-nums;
   }
 
   /* Number value - primary (blue) */
   .value-number-primary {
-    @apply text-lg font-bold text-blue-600 dark:text-blue-400;
+    @apply text-lg font-bold text-blue-600 dark:text-blue-400 tabular-nums;
   }
 
   /* Section divider */
   .divider {
-    @apply pt-3 border-t dark:border-gray-700;
+    @apply pt-3 border-t dark:border-zinc-800;
   }
 
   /* ---------------------------------------------------------------------------
