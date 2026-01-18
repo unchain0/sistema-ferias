@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/lib/auth-config';
-import { deleteProfessional, updateProfessional } from '@/lib/db';
 import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
+import { professionalService } from '@/lib/di';
 import { professionalUpdateSchema, uuidSchema } from '@/lib/input-validation';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -28,17 +28,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const data = await request.json();
 
-    // Pre-process monthlyRevenue if it's a string
-    const processedData = {
-      ...data,
-      monthlyRevenue:
-        typeof data.monthlyRevenue === 'string'
-          ? parseFloat(data.monthlyRevenue)
-          : data.monthlyRevenue,
-    };
-
-    // Validate input using Zod schema
-    const validation = professionalUpdateSchema.safeParse(processedData);
+    // Validate input using Zod schema (transforms/preprocessors handled in schema)
+    const validation = professionalUpdateSchema.safeParse(data);
     if (!validation.success) {
       const errorMessage = validation.error.errors.map((e) => e.message).join(', ');
       return NextResponse.json({ error: errorMessage || 'Dados inválidos' }, { status: 400 });
@@ -46,7 +37,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const updates = validation.data;
 
-    const professional = await updateProfessional(id, session.user.id, updates);
+    const professional = await professionalService.updateProfessional(id, session.user.id, updates);
 
     if (!professional) {
       return NextResponse.json({ error: 'Profissional não encontrado' }, { status: 404 });
@@ -79,9 +70,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
     }
 
-    // Database has ON DELETE CASCADE configured for vacation_periods.professional_id
-    // so deleting the professional will automatically delete associated vacations atomically
-    const success = await deleteProfessional(id, session.user.id);
+    // Use Service Layer
+    const success = await professionalService.deleteProfessional(id, session.user.id);
 
     if (!success) {
       return NextResponse.json({ error: 'Profissional não encontrado' }, { status: 404 });

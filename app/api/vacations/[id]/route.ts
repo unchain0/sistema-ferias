@@ -2,15 +2,9 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/lib/auth-config';
-import {
-  deleteVacationPeriod,
-  getProfessionalById,
-  getVacationPeriodById,
-  updateVacationPeriod,
-} from '@/lib/db';
 import { createDemoProtectionResponse, isDemoUser } from '@/lib/demo-protection';
+import { vacationService } from '@/lib/di';
 import { uuidSchema, vacationUpdateSchema } from '@/lib/input-validation';
-import { calculateRevenueDeduction, calculateVacationDays } from '@/lib/utils';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -41,54 +35,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: errorMessage || 'Dados inválidos' }, { status: 400 });
     }
 
-    const validatedData = validation.data;
-
-    // Fetch existing vacation to merge with partial updates
-    const existingVacation = await getVacationPeriodById(id, session.user.id);
-    if (!existingVacation) {
-      return NextResponse.json({ error: 'Período de férias não encontrado' }, { status: 404 });
-    }
-
-    // Determine the professional ID (use new one if provided, otherwise keep existing)
-    const professionalId = validatedData.professionalId ?? existingVacation.professionalId;
-
-    // Validate the professional exists
-    const professional = await getProfessionalById(professionalId, session.user.id);
-    if (!professional) {
-      return NextResponse.json({ error: 'Profissional não encontrado' }, { status: 404 });
-    }
-
-    // Merge updates with existing values for date calculations
-    const usageStartDate = validatedData.usageStartDate ?? existingVacation.usageStartDate;
-    const usageEndDate = validatedData.usageEndDate ?? existingVacation.usageEndDate;
-
-    // Recalculate totalDays and revenueDeduction based on merged values
-    const totalDays = calculateVacationDays(usageStartDate, usageEndDate);
-    const revenueDeduction = calculateRevenueDeduction(professional.monthlyRevenue, totalDays);
-
-    // Build updates object with only provided fields plus recalculated values
-    const updates: Record<string, unknown> = {
-      totalDays,
-      revenueDeduction,
-    };
-
-    if (validatedData.professionalId !== undefined) {
-      updates.professionalId = validatedData.professionalId;
-    }
-    if (validatedData.acquisitionStartDate !== undefined) {
-      updates.acquisitionStartDate = validatedData.acquisitionStartDate;
-    }
-    if (validatedData.acquisitionEndDate !== undefined) {
-      updates.acquisitionEndDate = validatedData.acquisitionEndDate;
-    }
-    if (validatedData.usageStartDate !== undefined) {
-      updates.usageStartDate = validatedData.usageStartDate;
-    }
-    if (validatedData.usageEndDate !== undefined) {
-      updates.usageEndDate = validatedData.usageEndDate;
-    }
-
-    const vacation = await updateVacationPeriod(id, session.user.id, updates);
+    // Business logic (merging, calculations) moved to service layer
+    const vacation = await vacationService.updateVacation(id, session.user.id, validation.data);
 
     if (!vacation) {
       return NextResponse.json({ error: 'Período de férias não encontrado' }, { status: 404 });
@@ -96,6 +44,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     return NextResponse.json(vacation);
   } catch (error) {
+    if (error instanceof Error && error.message === 'PROFESSIONAL_NOT_FOUND') {
+      return NextResponse.json({ error: 'Profissional não encontrado' }, { status: 404 });
+    }
     console.error('Update vacation error:', error);
     return NextResponse.json({ error: 'Erro ao atualizar período de férias' }, { status: 500 });
   }
@@ -121,7 +72,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
     }
 
-    const success = await deleteVacationPeriod(id, session.user.id);
+    const success = await vacationService.deleteVacation(id, session.user.id);
 
     if (!success) {
       return NextResponse.json({ error: 'Período de férias não encontrado' }, { status: 404 });
