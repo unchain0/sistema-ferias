@@ -212,13 +212,20 @@ export default function ProfessionalsPage() {
       <Navbar />
 
       <div className="page-content">
-        <div className="page-header">
-          <div>
-            <h1 className="heading-page">Profissionais</h1>
-            <p className="text-description">Gerencie os profissionais e seus faturamentos</p>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-2 mb-8">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-1 rounded-full bg-blue-600" />
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                Profissionais
+              </h1>
+            </div>
+            <p className="text-gray-500 dark:text-gray-400 ml-3">
+              Gerencie os profissionais e seus faturamentos
+            </p>
           </div>
 
-          <div className="header-actions">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="search-container">
               <Search className="search-icon" suppressHydrationWarning />
               <input
@@ -233,7 +240,7 @@ export default function ProfessionalsPage() {
             {!showForm && (
               <Button onClick={() => setShowForm(true)} disabled={isDemo} className="btn-action">
                 <Plus className="w-5 h-5 mr-2" suppressHydrationWarning />
-                <span className="font-semibold">Novo Profissional</span>
+                <span className="font-semibold whitespace-nowrap">Novo Profissional</span>
               </Button>
             )}
           </div>
