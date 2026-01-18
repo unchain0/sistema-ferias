@@ -1,6 +1,6 @@
 import { Professional, User, VacationPeriod } from '@/types';
 
-import { hashPassword } from './auth';
+import { authService } from './di';
 
 export async function createDemoData() {
   const demoUserId = 'demo-user-id';
@@ -17,7 +17,7 @@ export async function createDemoData() {
     id: demoUserId,
     email: 'demo@sistema-ferias.com',
     name: 'Usuário Demonstração',
-    password: await hashPassword('demo123'),
+    password: await authService.hashPassword('demo123'),
     createdAt: iso(currentYear - 1, 1, 10),
     updatedAt: iso(currentYear - 1, 1, 10),
   };

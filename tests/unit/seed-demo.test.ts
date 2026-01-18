@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/lib/auth', () => ({
-  hashPassword: vi.fn(async (password: string) => `hashed:${password}`),
+vi.mock('@/lib/di', () => ({
+  authService: {
+    hashPassword: vi.fn(async (password: string) => `hashed:${password}`),
+  },
 }));
 
 describe('createDemoData', () => {

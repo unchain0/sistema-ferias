@@ -58,9 +58,8 @@ describe('Vacations API routes', () => {
     ];
 
     vi.doMock('@/lib/di', () => ({
-      vacationRepository: {
-        // Mock the new paginated method
-        getVacationPeriodsPaginated: vi.fn(async (_userId, options) => {
+      vacationService: {
+        getVacations: vi.fn(async (_userId, options) => {
           // Simulate database-level pagination
           const limit = options?.limit || 50;
           const offset = options?.offset || 0;
@@ -70,10 +69,6 @@ describe('Vacations API routes', () => {
             total: mockVacations.length,
           };
         }),
-        getVacationPeriods: vi.fn(async () => mockVacations),
-      },
-      professionalRepository: {
-        getProfessionalById: vi.fn(),
       },
     }));
 
@@ -112,8 +107,8 @@ describe('Vacations API routes', () => {
     let capturedOptions: { limit?: number; offset?: number } | undefined;
 
     vi.doMock('@/lib/di', () => ({
-      vacationRepository: {
-        getVacationPeriodsPaginated: vi.fn(async (_userId, options) => {
+      vacationService: {
+        getVacations: vi.fn(async (_userId, options) => {
           capturedOptions = options;
           const limit = options?.limit || 50;
           const offset = options?.offset || 0;
@@ -123,9 +118,6 @@ describe('Vacations API routes', () => {
             total: mockVacations.length,
           };
         }),
-      },
-      professionalRepository: {
-        getProfessionalById: vi.fn(),
       },
     }));
 
@@ -154,17 +146,14 @@ describe('Vacations API routes', () => {
     let capturedOptions: { limit?: number; offset?: number } | undefined;
 
     vi.doMock('@/lib/di', () => ({
-      vacationRepository: {
-        getVacationPeriodsPaginated: vi.fn(async (_userId, options) => {
+      vacationService: {
+        getVacations: vi.fn(async (_userId, options) => {
           capturedOptions = options;
           return {
             data: [],
             total: 0,
           };
         }),
-      },
-      professionalRepository: {
-        getProfessionalById: vi.fn(),
       },
     }));
 
@@ -198,8 +187,8 @@ describe('Vacations API routes', () => {
     }));
 
     vi.doMock('@/lib/di', () => ({
-      vacationRepository: {
-        getVacationPeriodsPaginated: vi.fn(async (_userId, options) => {
+      vacationService: {
+        getVacations: vi.fn(async (_userId, options) => {
           const limit = options?.limit || 50;
           const offset = options?.offset || 0;
           const paginatedData = mockVacations.slice(offset, offset + limit);
@@ -208,9 +197,6 @@ describe('Vacations API routes', () => {
             total: mockVacations.length,
           };
         }),
-      },
-      professionalRepository: {
-        getProfessionalById: vi.fn(),
       },
     }));
 
@@ -232,8 +218,8 @@ describe('Vacations API routes', () => {
     }));
 
     vi.doMock('@/lib/di', () => ({
-      vacationRepository: {
-        getVacationPeriodsPaginated: vi.fn(async (_userId, options) => {
+      vacationService: {
+        getVacations: vi.fn(async (_userId, options) => {
           const limit = options?.limit || 50;
           const offset = options?.offset || 0;
           const paginatedData = mockVacations.slice(offset, offset + limit);
@@ -242,9 +228,6 @@ describe('Vacations API routes', () => {
             total: mockVacations.length,
           };
         }),
-      },
-      professionalRepository: {
-        getProfessionalById: vi.fn(),
       },
     }));
 
@@ -270,13 +253,10 @@ describe('Vacations API routes', () => {
     }));
 
     vi.doMock('@/lib/di', () => ({
-      vacationRepository: {
-        getVacationPeriods: vi.fn(),
-        getVacationPeriodsPaginated: vi.fn(),
-        createVacationPeriod: vi.fn(),
-      },
-      professionalRepository: {
-        getProfessionalById: vi.fn(async () => null),
+      vacationService: {
+        createVacation: vi.fn(async () => {
+          throw new Error('PROFESSIONAL_NOT_FOUND');
+        }),
       },
     }));
 

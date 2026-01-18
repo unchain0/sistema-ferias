@@ -15,34 +15,27 @@ if (missing.length > 0) {
 
 async function main() {
   const { createDemoData } = await import('@/lib/seed-demo');
-  const {
-    createProfessional,
-    createUser,
-    createVacationPeriod,
-    deleteAllProfessionals,
-    deleteAllVacationPeriods,
-    getUserByEmail,
-  } = await import('@/lib/db');
+  const { professionalRepository, userRepository, vacationRepository } = await import('@/lib/di');
 
   const demoData = await createDemoData();
 
-  let user = await getUserByEmail(demoData.user.email);
+  let user = await userRepository.getUserByEmail(demoData.user.email);
   if (!user) {
-    user = await createUser({
+    user = await userRepository.createUser({
       email: demoData.user.email,
       name: demoData.user.name,
       password: demoData.user.password,
     });
     console.log(`Created demo user: ${user.email}`);
   } else {
-    await deleteAllVacationPeriods(user.id);
-    await deleteAllProfessionals(user.id);
+    await vacationRepository.deleteAllVacationPeriods(user.id);
+    await professionalRepository.deleteAllProfessionals(user.id);
     console.log(`Reset demo data for user: ${user.email}`);
   }
 
   const profIdMap: Record<string, string> = {};
   for (const professional of demoData.professionals) {
-    const created = await createProfessional({
+    const created = await professionalRepository.createProfessional({
       userId: user.id,
       name: professional.name,
       clientManager: professional.clientManager,
@@ -55,7 +48,7 @@ async function main() {
     const mappedProfessionalId = profIdMap[vacation.professionalId];
     if (!mappedProfessionalId) continue;
 
-    await createVacationPeriod({
+    await vacationRepository.createVacationPeriod({
       professionalId: mappedProfessionalId,
       userId: user.id,
       acquisitionStartDate: vacation.acquisitionStartDate,

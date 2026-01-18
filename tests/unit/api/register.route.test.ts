@@ -130,7 +130,9 @@ describe('POST /api/auth/register', () => {
 
     vi.doMock('@/lib/di', () => ({
       authService: {
-        registerUser: vi.fn(async () => null),
+        registerUser: vi.fn(async () => {
+          throw new Error('USER_ALREADY_EXISTS');
+        }),
       },
     }));
 
@@ -143,7 +145,7 @@ describe('POST /api/auth/register', () => {
     );
 
     expect(res.status).toBe(400);
-    await expect(res.json()).resolves.toMatchObject({ error: 'Email já cadastrado' });
+    await expect(res.json()).resolves.toMatchObject({ error: 'Usuário ou email já cadastrados' });
   });
 
   it('returns 500 when registerUser throws', async () => {
