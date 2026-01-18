@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
+import { Session } from 'next-auth';
 
 function requireEnv(name: string): string {
   const v = process.env[name];
@@ -27,5 +28,20 @@ export function createSupabaseForClaims(claims: Record<string, string | number |
         Authorization: `Bearer ${token}`,
       },
     },
+  });
+}
+
+/**
+ * Returns a Supabase client authenticated as the current user.
+ * This client respects Row Level Security (RLS) policies.
+ */
+export function getSupabaseUserClient(session: Session) {
+  if (!session?.user?.id || !session?.user?.email) {
+    throw new Error('Unauthorized: Missing session user data');
+  }
+
+  return createSupabaseForClaims({
+    sub: session.user.id,
+    email: session.user.email,
   });
 }

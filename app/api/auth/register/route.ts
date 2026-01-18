@@ -72,15 +72,17 @@ export async function POST(request: Request) {
         { message: 'Usuário criado com sucesso', userId: user.id },
         { status: 201 },
       );
-    } catch (error: any) {
-      if (error.message === 'USER_ALREADY_EXISTS') {
-        return NextResponse.json({ error: 'Email já cadastrado' }, { status: 400 });
-      }
-      if (error.message === 'INVALID_PASSWORD') {
-        return NextResponse.json(
-          { error: 'A senha deve ter entre 6 e 72 caracteres' },
-          { status: 400 },
-        );
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'USER_ALREADY_EXISTS') {
+          return NextResponse.json({ error: 'Usuário ou email já cadastrados' }, { status: 400 });
+        }
+        if (error.message === 'INVALID_PASSWORD') {
+          return NextResponse.json(
+            { error: 'A senha deve ter entre 6 e 72 caracteres' },
+            { status: 400 },
+          );
+        }
       }
 
       console.error('Registration error:', error);
