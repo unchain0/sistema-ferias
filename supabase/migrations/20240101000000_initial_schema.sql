@@ -58,6 +58,7 @@ for select using (
 );
 
 drop policy if exists users_insert_self on public.users;
+drop policy if exists "Users can insert their own data" on public.users;
 create policy users_insert_self on public.users
 for insert with check (
   id = (select auth.uid())
