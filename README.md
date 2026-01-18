@@ -77,13 +77,13 @@ Se você usa Linux com pasta Home criptografada (ecryptfs) e receber o erro `fil
    ```
 3. **Configurar Ambiente**:
    ```bash
-   cp .env.local.example .env.local
+   cp .env.example .env.local
    ```
 4. **Verificar Status**:
    ```bash
    npm run supabase:status
    ```
-   (Se as chaves forem diferentes das do `.env.local.example`, atualize o seu `.env.local`).
+   (Atualize o seu `.env.local` com as chaves exibidas).
 
 ### Comandos Supabase úteis
 
@@ -91,6 +91,22 @@ Se você usa Linux com pasta Home criptografada (ecryptfs) e receber o erro `fil
 - `npm run supabase:stop`: Para o ambiente.
 - `npm run supabase:status`: Mostra URLs e chaves locais.
 - `npm run supabase:reset`: Reseta o banco e aplica as migrations da pasta `supabase/migrations`.
+- `npx supabase migration new nome_da_migracao`: Cria uma nova migração.
+
+## CI/CD (GitHub Actions)
+
+O projeto possui um pipeline de CI/CD automatizado para o Supabase:
+
+1. **Testes de Migração**: Toda PR ou push para `main`/`dev` valida se as migrações SQL aplicam corretamente em um container limpo.
+2. **Deploy Automático**: Ao fazer push para a branch `main`, as migrações são enviadas automaticamente para o projeto de produção no Supabase.
+
+### Configuração Necessária (GitHub Secrets)
+
+Para que o deploy funcione, você deve configurar os seguintes **Secrets** no seu repositório GitHub (Settings > Secrets and variables > Actions):
+
+- `SUPABASE_ACCESS_TOKEN`: Token de acesso pessoal ([Dashboard Supabase > Account](https://supabase.com/dashboard/account/tokens)).
+- `SUPABASE_PROJECT_ID`: ID de referência do projeto de produção (encontrado na URL do dashboard ou Settings > API).
+- `SUPABASE_DB_PASSWORD`: Senha do banco de dados de produção.
 
 ## Comandos básicos
 
