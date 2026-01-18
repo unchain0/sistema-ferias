@@ -23,7 +23,7 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full border-b border-gray-200/50 dark:border-gray-800/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
+      <nav className="sticky top-0 z-50 w-full border-b border-gray-200/50 dark:border-zinc-800/50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center space-x-8">
@@ -55,7 +55,7 @@ export function Navbar() {
                         'flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200',
                         isActive
                           ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-50',
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-zinc-800 dark:hover:text-gray-50',
                       )}
                     >
                       <Icon className="w-4 h-4" suppressHydrationWarning />
@@ -86,30 +86,30 @@ export function Navbar() {
               </Button>
             </div>
           </div>
+        </div>
 
-          {/* Mobile Nav */}
-          <div className="md:hidden border-t border-gray-100 dark:border-gray-800 py-2">
-            <div className="flex justify-around items-center">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      'flex flex-col items-center justify-center p-2 rounded-lg text-xs font-medium transition-colors w-full',
-                      isActive
-                        ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/10'
-                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
-                    )}
-                  >
-                    <Icon className="w-5 h-5 mb-1" suppressHydrationWarning />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
+        {/* Mobile Nav */}
+        <div className="md:hidden border-t border-gray-100 dark:border-zinc-800 py-2">
+          <div className="flex justify-around items-center">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    'flex flex-col items-center justify-center p-2 rounded-lg text-xs font-medium transition-colors w-full',
+                    isActive
+                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/10'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800',
+                  )}
+                >
+                  <Icon className="w-5 h-5 mb-1" suppressHydrationWarning />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </nav>
