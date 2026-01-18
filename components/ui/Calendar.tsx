@@ -1,11 +1,17 @@
 'use client';
 
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as React from 'react';
-import { DayPicker, type DropdownProps, getDefaultClassNames } from 'react-day-picker';
+import {
+  DayPicker,
+  type DropdownProps,
+  getDefaultClassNames,
+  useNavigation,
+} from 'react-day-picker';
 
-import { buttonVariants } from '@/components/ui/Button';
+import { Button, buttonVariants } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
@@ -16,10 +22,63 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   showDropdowns?: boolean;
 };
 
-// Range de anos para o dropdown (10 anos para trás, 5 para frente)
+// Range de anos para o dropdown (1 ano para trás, 1 para frente)
 const currentYear = new Date().getFullYear();
-const START_MONTH = new Date(currentYear - 10, 0);
-const END_MONTH = new Date(currentYear + 5, 11);
+const START_MONTH = new Date(currentYear - 1, 0);
+const END_MONTH = new Date(currentYear + 1, 11);
+
+function CustomMonthCaption(props: {
+  displayIndex: number;
+  calendarMonth: { date: Date };
+  children?: React.ReactNode;
+}) {
+  const { displayIndex, calendarMonth } = props;
+  const { goToMonth, previousMonth, nextMonth } = useNavigation();
+
+  const monthName = React.useMemo(() => {
+    return format(calendarMonth.date, 'MMMM yyyy', { locale: ptBR }).replace(/^\w/, (c: string) =>
+      c.toUpperCase(),
+    );
+  }, [calendarMonth.date]);
+
+  return (
+    <div className="flex items-center justify-center h-10 gap-2 relative w-full px-8">
+      {displayIndex === 0 && (
+        <Button
+          variant="outline"
+          className={cn(
+            'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 transition-all border-neutral-800 absolute left-0',
+            !previousMonth && 'opacity-20 pointer-events-none',
+          )}
+          onClick={() => previousMonth && goToMonth(previousMonth)}
+          disabled={!previousMonth}
+          type="button"
+        >
+          <ChevronLeft className="h-4 w-4 text-neutral-400" />
+        </Button>
+      )}
+
+      <div className="text-sm font-bold text-neutral-100 min-w-[140px] text-center mx-auto">
+        {monthName}
+      </div>
+
+      {(displayIndex === 1 || (!nextMonth && displayIndex === 0)) && (
+        <Button
+          variant="outline"
+          className={cn(
+            'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 transition-all border-neutral-800 absolute right-0',
+            !nextMonth && 'opacity-20 pointer-events-none',
+          )}
+          onClick={() => nextMonth && goToMonth(nextMonth)}
+          disabled={!nextMonth}
+          type="button"
+        >
+          <ChevronRight className="h-4 w-4 text-neutral-400" />
+        </Button>
+      )}
+    </div>
+  );
+}
 
 // Componente customizado para os dropdowns de mês/ano
 function CustomDropdown(props: DropdownProps) {
@@ -81,37 +140,16 @@ function Calendar({
         month: 'space-y-4',
 
         // Caption (cabeçalho do mês)
-        month_caption: 'flex justify-center pt-1 relative items-center h-10 px-8',
-        caption_label: 'text-sm font-semibold text-gray-900 dark:text-gray-100',
+        month_caption: 'flex justify-center relative items-center h-10 w-full',
+        caption_label: 'text-sm font-semibold text-gray-100',
 
         // Container dos dropdowns
         dropdowns: 'flex items-center gap-2',
 
-        // Navegação com botões (quando captionLayout='label')
-        nav: 'flex items-center gap-1',
-        button_previous: cn(
-          buttonVariants({ variant: 'outline' }),
-          'h-7 w-7 bg-white dark:bg-gray-900 p-0',
-          'text-gray-600 dark:text-gray-400',
-          'hover:bg-gray-100 dark:hover:bg-gray-800',
-          'hover:text-gray-900 dark:hover:text-gray-100',
-          'border-gray-200 dark:border-gray-700',
-          'transition-colors absolute left-0',
-          'disabled:opacity-50 disabled:pointer-events-none',
-        ),
-        button_next: cn(
-          buttonVariants({ variant: 'outline' }),
-          'h-7 w-7 bg-white dark:bg-gray-900 p-0',
-          'text-gray-600 dark:text-gray-400',
-          'hover:bg-gray-100 dark:hover:bg-gray-800',
-          'hover:text-gray-900 dark:hover:text-gray-100',
-          'border-gray-200 dark:border-gray-700',
-          'transition-colors absolute right-0',
-          'disabled:opacity-50 disabled:pointer-events-none',
-        ),
+        nav: 'hidden',
 
         // Ícone do chevron
-        chevron: `${defaultClassNames.chevron} fill-gray-500 dark:fill-gray-400`,
+        chevron: `${defaultClassNames.chevron} fill-gray-400`,
 
         // Estrutura da tabela
         month_grid: 'w-full border-collapse',
@@ -184,6 +222,7 @@ function Calendar({
           return <Icon className="h-4 w-4" {...chevronProps} suppressHydrationWarning />;
         },
         Dropdown: CustomDropdown,
+        MonthCaption: CustomMonthCaption,
       }}
       {...props}
     />
