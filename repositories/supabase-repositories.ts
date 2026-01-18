@@ -11,9 +11,12 @@ import { PROFESSIONAL_COLUMN_MAP, VACATION_COLUMN_MAP } from '@/lib/constants';
 import {
   mapProfessionalRow,
   mapProfessionalRows,
+  mapProfessionalToDb,
   mapUserRow,
+  mapUserToDb,
   mapVacationRow,
   mapVacationRows,
+  mapVacationToDb,
 } from '@/lib/db-mappers';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { Professional, User, VacationPeriod } from '@/types';
@@ -43,7 +46,7 @@ export class SupabaseUserRepository implements IUserRepository {
     const id = randomUUID();
     const { data, error } = await this.supabase
       .from('users')
-      .insert([{ id, ...user }])
+      .insert([mapUserToDb({ id, ...user })])
       .select()
       .single();
     if (error) throw error;
@@ -131,14 +134,7 @@ export class SupabaseProfessionalRepository implements IProfessionalRepository {
   ): Promise<Professional> {
     const { data, error } = await this.supabase
       .from('professionals')
-      .insert([
-        {
-          user_id: professional.userId,
-          name: professional.name,
-          client_manager: professional.clientManager,
-          monthly_revenue: professional.monthlyRevenue,
-        },
-      ])
+      .insert([mapProfessionalToDb(professional)])
       .select()
       .single();
     if (error) throw error;
@@ -150,14 +146,9 @@ export class SupabaseProfessionalRepository implements IProfessionalRepository {
     userId: string,
     updates: Partial<Professional>,
   ): Promise<Professional | null> {
-    const updateData: Record<string, unknown> = {};
-    if (updates.name) updateData.name = updates.name;
-    if (updates.clientManager) updateData.client_manager = updates.clientManager;
-    if (updates.monthlyRevenue !== undefined) updateData.monthly_revenue = updates.monthlyRevenue;
-
     const { data, error } = await this.supabase
       .from('professionals')
-      .update(updateData)
+      .update(mapProfessionalToDb(updates))
       .eq('id', id)
       .eq('user_id', userId)
       .select()
@@ -179,6 +170,11 @@ export class SupabaseProfessionalRepository implements IProfessionalRepository {
       .eq('user_id', userId);
     if (error) throw error;
     return (count || 0) > 0;
+  }
+
+  async deleteAllProfessionals(userId: string): Promise<void> {
+    const { error } = await this.supabase.from('professionals').delete().eq('user_id', userId);
+    if (error) throw error;
   }
 }
 
@@ -246,6 +242,17 @@ export class SupabaseVacationRepository implements IVacationRepository {
     };
   }
 
+  async getVacationPeriodById(id: string, userId: string): Promise<VacationPeriod | null> {
+    const { data, error } = await this.supabase
+      .from('vacation_periods')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data ? mapVacationRow(data) : null;
+  }
+
   async getVacationsByProfessional(
     professionalId: string,
     userId: string,
@@ -264,18 +271,7 @@ export class SupabaseVacationRepository implements IVacationRepository {
   ): Promise<VacationPeriod> {
     const { data, error } = await this.supabase
       .from('vacation_periods')
-      .insert([
-        {
-          professional_id: vacation.professionalId,
-          user_id: vacation.userId,
-          acquisition_start_date: vacation.acquisitionStartDate,
-          acquisition_end_date: vacation.acquisitionEndDate,
-          usage_start_date: vacation.usageStartDate,
-          usage_end_date: vacation.usageEndDate,
-          total_days: vacation.totalDays,
-          revenue_deduction: vacation.revenueDeduction,
-        },
-      ])
+      .insert([mapVacationToDb(vacation)])
       .select()
       .single();
     if (error) throw error;
@@ -287,19 +283,9 @@ export class SupabaseVacationRepository implements IVacationRepository {
     userId: string,
     updates: Partial<VacationPeriod>,
   ): Promise<VacationPeriod | null> {
-    const updateData: Record<string, unknown> = {};
-    if (updates.acquisitionStartDate)
-      updateData.acquisition_start_date = updates.acquisitionStartDate;
-    if (updates.acquisitionEndDate) updateData.acquisition_end_date = updates.acquisitionEndDate;
-    if (updates.usageStartDate) updateData.usage_start_date = updates.usageStartDate;
-    if (updates.usageEndDate) updateData.usage_end_date = updates.usageEndDate;
-    if (updates.totalDays !== undefined) updateData.total_days = updates.totalDays;
-    if (updates.revenueDeduction !== undefined)
-      updateData.revenue_deduction = updates.revenueDeduction;
-
     const { data, error } = await this.supabase
       .from('vacation_periods')
-      .update(updateData)
+      .update(mapVacationToDb(updates))
       .eq('id', id)
       .eq('user_id', userId)
       .select()
@@ -319,5 +305,10 @@ export class SupabaseVacationRepository implements IVacationRepository {
       .eq('user_id', userId);
     if (error) throw error;
     return (count || 0) > 0;
+  }
+
+  async deleteAllVacationPeriods(userId: string): Promise<void> {
+    const { error } = await this.supabase.from('vacation_periods').delete().eq('user_id', userId);
+    if (error) throw error;
   }
 }

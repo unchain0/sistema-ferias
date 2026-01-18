@@ -50,6 +50,7 @@ export interface IProfessionalRepository {
     updates: Partial<Professional>,
   ): Promise<Professional | null>;
   deleteProfessional(id: string, userId: string): Promise<boolean>;
+  deleteAllProfessionals(userId: string): Promise<void>;
 }
 
 export interface IVacationRepository {
@@ -68,6 +69,7 @@ export interface IVacationRepository {
     options?: PaginationOptions,
   ): Promise<PaginatedResult<VacationPeriod>>;
 
+  getVacationPeriodById(id: string, userId: string): Promise<VacationPeriod | null>;
   getVacationsByProfessional(professionalId: string, userId: string): Promise<VacationPeriod[]>;
   createVacationPeriod(
     vacation: Omit<VacationPeriod, 'id' | 'createdAt' | 'updatedAt'>,
@@ -78,4 +80,5 @@ export interface IVacationRepository {
     updates: Partial<VacationPeriod>,
   ): Promise<VacationPeriod | null>;
   deleteVacationPeriod(id: string, userId: string): Promise<boolean>;
+  deleteAllVacationPeriods(userId: string): Promise<void>;
 }

@@ -85,3 +85,47 @@ export function mapProfessionalRows(rows: DbRow[]): Professional[] {
 export function mapVacationRows(rows: DbRow[]): VacationPeriod[] {
   return (rows || []).map(mapVacationRow);
 }
+
+/**
+ * Maps User model to database row
+ */
+export function mapUserToDb(user: Partial<User>): DbRow {
+  const row: DbRow = {};
+  if (user.id !== undefined) row.id = user.id;
+  if (user.email !== undefined) row.email = user.email;
+  if (user.name !== undefined) row.name = user.name;
+  if (user.password !== undefined) row.password = user.password;
+  return row;
+}
+
+/**
+ * Maps Professional model to database row
+ */
+export function mapProfessionalToDb(professional: Partial<Professional>): DbRow {
+  const row: DbRow = {};
+  if (professional.id !== undefined) row.id = professional.id;
+  if (professional.userId !== undefined) row.user_id = professional.userId;
+  if (professional.name !== undefined) row.name = professional.name;
+  if (professional.clientManager !== undefined) row.client_manager = professional.clientManager;
+  if (professional.monthlyRevenue !== undefined) row.monthly_revenue = professional.monthlyRevenue;
+  return row;
+}
+
+/**
+ * Maps VacationPeriod model to database row
+ */
+export function mapVacationToDb(vacation: Partial<VacationPeriod>): DbRow {
+  const row: DbRow = {};
+  if (vacation.id !== undefined) row.id = vacation.id;
+  if (vacation.professionalId !== undefined) row.professional_id = vacation.professionalId;
+  if (vacation.userId !== undefined) row.user_id = vacation.userId;
+  if (vacation.acquisitionStartDate !== undefined)
+    row.acquisition_start_date = vacation.acquisitionStartDate;
+  if (vacation.acquisitionEndDate !== undefined)
+    row.acquisition_end_date = vacation.acquisitionEndDate;
+  if (vacation.usageStartDate !== undefined) row.usage_start_date = vacation.usageStartDate;
+  if (vacation.usageEndDate !== undefined) row.usage_end_date = vacation.usageEndDate;
+  if (vacation.totalDays !== undefined) row.total_days = vacation.totalDays;
+  if (vacation.revenueDeduction !== undefined) row.revenue_deduction = vacation.revenueDeduction;
+  return row;
+}
