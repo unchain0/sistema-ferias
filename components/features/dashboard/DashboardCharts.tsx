@@ -2,7 +2,17 @@
 
 import { BarChart3, TrendingDown } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 interface ChartData {
   month: string;
@@ -163,7 +173,7 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
                   fontWeight: 600,
                   marginBottom: '4px',
                 }}
-                itemStyle={{ color: '#6366f1' }}
+                itemStyle={{ color: '#6366f1', fontVariantNumeric: 'tabular-nums' }}
               />
               <Bar
                 dataKey="count"
@@ -195,11 +205,11 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
         </div>
         <div className="px-6 pb-6 h-[320px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={processedData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <AreaChart data={processedData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <defs>
-                <linearGradient id="barGradientRose" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f43f5e" stopOpacity={1} />
-                  <stop offset="100%" stopColor="#e11d48" stopOpacity={0.8} />
+                <linearGradient id="areaGradientRose" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#f43f5e" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
@@ -224,24 +234,27 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
               <Tooltip
                 formatter={(v: number) => [formatCurrency(v), 'Impacto']}
                 contentStyle={tooltipStyles}
-                cursor={{ fill: isDark ? '#27272a' : '#f4f4f5', opacity: 0.5, radius: 4 }}
+                cursor={{ stroke: isDark ? '#f43f5e' : '#f43f5e', strokeWidth: 2 }}
                 labelStyle={{
                   color: tooltipStyles.color,
                   fontWeight: 600,
                   marginBottom: '4px',
                 }}
-                itemStyle={{ color: '#f43f5e' }}
+                itemStyle={{ color: '#f43f5e', fontVariantNumeric: 'tabular-nums' }}
               />
-              <Bar
+              <Area
+                type="monotone"
                 dataKey="impact"
-                fill="url(#barGradientRose)"
+                stroke="#f43f5e"
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#areaGradientRose)"
                 name="Impacto (R$)"
-                radius={[6, 6, 0, 0]}
                 isAnimationActive={shouldAnimate}
-                animationDuration={800}
-                animationEasing="ease-out"
+                animationDuration={1000}
+                animationEasing="ease-in-out"
               />
-            </BarChart>
+            </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>

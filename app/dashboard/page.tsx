@@ -23,6 +23,7 @@ import { DateRange } from 'react-day-picker';
 
 import { AlertsFeed } from '@/components/features/dashboard/AlertsFeed';
 import { Navbar } from '@/components/layout/Navbar';
+import { Button } from '@/components/ui/Button';
 import { CalendarDateRangePicker } from '@/components/ui/CalendarDateRangePicker';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -129,8 +130,7 @@ export default function DashboardPage() {
       icon: Users,
       trend: null,
       gradient: 'from-blue-500 to-indigo-600',
-      bgGradient: 'from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40',
-      iconBg: 'bg-blue-100 dark:bg-blue-900/50',
+      iconBg: 'bg-blue-100 dark:bg-blue-900/40',
       iconColor: 'text-blue-600 dark:text-blue-400',
     },
     {
@@ -139,8 +139,7 @@ export default function DashboardPage() {
       icon: Calendar,
       trend: data?.totalVacationDays && data.totalVacationDays > 0 ? 'up' : null,
       gradient: 'from-emerald-500 to-teal-600',
-      bgGradient: 'from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40',
-      iconBg: 'bg-emerald-100 dark:bg-emerald-900/50',
+      iconBg: 'bg-emerald-100 dark:bg-emerald-900/40',
       iconColor: 'text-emerald-600 dark:text-emerald-400',
     },
     {
@@ -149,22 +148,20 @@ export default function DashboardPage() {
       icon: TrendingDown,
       trend: data?.totalRevenueImpact && data.totalRevenueImpact > 0 ? 'down' : null,
       gradient: 'from-rose-500 to-pink-600',
-      bgGradient: 'from-rose-50 to-pink-50 dark:from-rose-950/40 dark:to-pink-950/40',
-      iconBg: 'bg-rose-100 dark:bg-rose-900/50',
+      iconBg: 'bg-rose-100 dark:bg-rose-900/40',
       iconColor: 'text-rose-600 dark:text-rose-400',
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-2">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-1 rounded-full bg-gradient-to-b from-blue-500 to-indigo-600" />
+              <div className="h-8 w-1 rounded-full bg-blue-600" />
               <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Dashboard
               </h1>
@@ -173,34 +170,31 @@ export default function DashboardPage() {
               Visão geral do impacto financeiro e gestão de férias
             </p>
           </div>
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className={cn(
-              'inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg',
-              'text-gray-600 dark:text-gray-400',
-              'hover:bg-gray-100 dark:hover:bg-gray-800',
-              'transition-colors duration-200',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
-            )}
-          >
-            <RefreshCw
-              className={cn('h-4 w-4', isRefreshing && 'animate-spin')}
-              suppressHydrationWarning
-            />
-            Atualizar
-          </button>
-        </div>
 
-        {/* Date Range Filter */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <CalendarDateRangePicker value={dateRange} onChange={handleFilterChange} />
-          {loading && (
-            <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-              Carregando dados...
-            </span>
-          )}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex items-center gap-3">
+              <CalendarDateRangePicker value={dateRange} onChange={handleFilterChange} />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="shrink-0"
+                title="Atualizar dados"
+              >
+                <RefreshCw
+                  className={cn('h-4 w-4', isRefreshing && 'animate-spin')}
+                  suppressHydrationWarning
+                />
+              </Button>
+            </div>
+            {loading && (
+              <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 px-1">
+                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                Atualizando...
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -209,7 +203,7 @@ export default function DashboardPage() {
             ? Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-6"
+                  className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6"
                 >
                   <div className="flex items-center justify-between space-y-0 pb-2">
                     <Skeleton className="h-4 w-[100px]" />
@@ -226,12 +220,11 @@ export default function DashboardPage() {
                   <div
                     key={stat.title}
                     className={cn(
-                      'group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800',
-                      'bg-gradient-to-br',
-                      stat.bgGradient,
-                      'hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50',
+                      'group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-zinc-800',
+                      'bg-white dark:bg-zinc-950',
+                      'hover:shadow-xl hover:shadow-gray-200/40 dark:hover:shadow-black/40',
                       'transition-all duration-300 ease-out',
-                      'hover:-translate-y-0.5',
+                      'hover:-translate-y-1',
                     )}
                   >
                     {/* Decorative gradient bar */}
@@ -244,17 +237,17 @@ export default function DashboardPage() {
                     <div className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="space-y-2">
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
                             {stat.title}
                           </p>
                           <div className="flex items-baseline gap-2">
-                            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                            <p className="text-3xl font-bold text-gray-900 dark:text-white tabular-nums">
                               {stat.value ?? '-'}
                             </p>
                             {stat.trend && (
                               <span
                                 className={cn(
-                                  'flex items-center text-xs font-medium',
+                                  'flex items-center text-xs font-bold',
                                   stat.trend === 'up'
                                     ? 'text-emerald-600 dark:text-emerald-400'
                                     : 'text-rose-600 dark:text-rose-400',
@@ -271,8 +264,8 @@ export default function DashboardPage() {
                         </div>
                         <div
                           className={cn(
-                            'p-3 rounded-xl transition-transform duration-300',
-                            'group-hover:scale-110',
+                            'p-3 rounded-xl transition-all duration-300',
+                            'group-hover:scale-110 group-hover:rotate-3',
                             stat.iconBg,
                           )}
                         >
