@@ -105,7 +105,7 @@ export function CalendarDateRangePicker({
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  handleClear(e as any);
+                  handleClear(e as unknown as React.MouseEvent);
                 }
               }}
             >
