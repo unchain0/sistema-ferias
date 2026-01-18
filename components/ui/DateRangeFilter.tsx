@@ -142,7 +142,7 @@ export function DateRangeFilter({
               !hasValue && 'text-muted-foreground',
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+            <CalendarIcon className="mr-2 h-4 w-4 shrink-0" suppressHydrationWarning />
             <span className="flex-1 truncate">
               {date?.from ? (
                 date.to ? (
@@ -161,6 +161,7 @@ export function DateRangeFilter({
               <X
                 className="ml-2 h-4 w-4 shrink-0 opacity-50 hover:opacity-100 transition-opacity"
                 onClick={handleClear}
+                suppressHydrationWarning
               />
             )}
           </Button>

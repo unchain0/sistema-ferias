@@ -86,11 +86,12 @@ export default function RegisterPage() {
         fill
         className="object-cover opacity-40 dark:opacity-30 select-none pointer-events-none"
         priority
+        suppressHydrationWarning
       />
 
       <Card className="w-full max-w-md relative z-10">
         <div className="flex flex-col items-center mb-6">
-          <Calendar className="w-12 h-12 text-blue-600 mb-2" />
+          <Calendar className="w-12 h-12 text-blue-600 mb-2" suppressHydrationWarning />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Criar Conta</h1>
           <p className="text-muted mt-1">Cadastre-se no Sistema de Férias</p>
         </div>

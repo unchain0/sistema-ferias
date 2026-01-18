@@ -327,7 +327,7 @@ export default function VacationsPage() {
 
           <div className="header-actions">
             <div className="search-container">
-              <Search className="search-icon" />
+              <Search className="search-icon" suppressHydrationWarning />
               <input
                 type="text"
                 placeholder="Buscar por nome do profissional..."
@@ -343,7 +343,7 @@ export default function VacationsPage() {
                 disabled={isDemo || loading}
                 className="btn-action"
               >
-                <Plus className="w-5 h-5 mr-2" />
+                <Plus className="w-5 h-5 mr-2" suppressHydrationWarning />
                 <span className="font-semibold">Novo Período</span>
               </Button>
             )}

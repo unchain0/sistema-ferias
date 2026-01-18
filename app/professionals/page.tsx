@@ -220,7 +220,7 @@ export default function ProfessionalsPage() {
 
           <div className="header-actions">
             <div className="search-container">
-              <Search className="search-icon" />
+              <Search className="search-icon" suppressHydrationWarning />
               <input
                 type="text"
                 placeholder="Buscar por nome ou gestor..."
@@ -232,7 +232,7 @@ export default function ProfessionalsPage() {
 
             {!showForm && (
               <Button onClick={() => setShowForm(true)} disabled={isDemo} className="btn-action">
-                <Plus className="w-5 h-5 mr-2" />
+                <Plus className="w-5 h-5 mr-2" suppressHydrationWarning />
                 <span className="font-semibold">Novo Profissional</span>
               </Button>
             )}

@@ -184,7 +184,10 @@ export default function DashboardPage() {
               'disabled:opacity-50 disabled:cursor-not-allowed',
             )}
           >
-            <RefreshCw className={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
+            <RefreshCw
+              className={cn('h-4 w-4', isRefreshing && 'animate-spin')}
+              suppressHydrationWarning
+            />
             Atualizar
           </button>
         </div>
@@ -258,9 +261,9 @@ export default function DashboardPage() {
                                 )}
                               >
                                 {stat.trend === 'up' ? (
-                                  <ArrowUpRight className="h-4 w-4" />
+                                  <ArrowUpRight className="h-4 w-4" suppressHydrationWarning />
                                 ) : (
-                                  <ArrowDownRight className="h-4 w-4" />
+                                  <ArrowDownRight className="h-4 w-4" suppressHydrationWarning />
                                 )}
                               </span>
                             )}
@@ -273,7 +276,10 @@ export default function DashboardPage() {
                             stat.iconBg,
                           )}
                         >
-                          <Icon className={cn('w-6 h-6', stat.iconColor)} />
+                          <Icon
+                            className={cn('w-6 h-6', stat.iconColor)}
+                            suppressHydrationWarning
+                          />
                         </div>
                       </div>
                     </div>

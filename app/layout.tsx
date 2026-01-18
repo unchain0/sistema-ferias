@@ -22,7 +22,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={cn('antialiased min-h-screen bg-background font-sans', inter.variable)}>
+      <body
+        className={cn('antialiased min-h-screen bg-background font-sans', inter.variable)}
+        suppressHydrationWarning
+      >
         <Providers>{children}</Providers>
         <SpeedInsights />
         <Analytics />

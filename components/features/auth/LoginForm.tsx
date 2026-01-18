@@ -112,7 +112,7 @@ export function LoginForm() {
           onClick={handleDemoLogin}
           disabled={loading || demoLoading}
         >
-          <Eye className="w-5 h-5 mr-2" />
+          <Eye className="w-5 h-5 mr-2" suppressHydrationWarning />
           {demoLoading ? 'Carregando demonstração...' : 'Acessar Demonstração'}
         </Button>
 

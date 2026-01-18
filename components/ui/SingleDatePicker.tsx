@@ -53,7 +53,7 @@ export function SingleDatePicker({
             )}
             disabled={disabled}
           >
-            <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+            <CalendarIcon className="mr-2 h-4 w-4 shrink-0" suppressHydrationWarning />
             <span className="flex-1 truncate">
               {date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : placeholder}
             </span>
@@ -61,6 +61,7 @@ export function SingleDatePicker({
               <X
                 className="ml-2 h-4 w-4 shrink-0 opacity-50 hover:opacity-100 transition-opacity"
                 onClick={handleClear}
+                suppressHydrationWarning
               />
             )}
           </Button>

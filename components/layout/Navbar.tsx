@@ -32,7 +32,10 @@ export function Navbar() {
                 className="flex items-center space-x-2 transition-opacity hover:opacity-80"
               >
                 <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  <Calendar
+                    className="w-6 h-6 text-blue-600 dark:text-blue-400"
+                    suppressHydrationWarning
+                  />
                 </div>
                 <span className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
                   Sistema de Férias
@@ -55,7 +58,7 @@ export function Navbar() {
                           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-50',
                       )}
                     >
-                      <Icon className="w-4 h-4" />
+                      <Icon className="w-4 h-4" suppressHydrationWarning />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -78,7 +81,7 @@ export function Navbar() {
                 onClick={() => signOut({ callbackUrl: '/login' })}
                 className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
               >
-                <LogOut className="w-4 h-4 sm:mr-2" />
+                <LogOut className="w-4 h-4 sm:mr-2" suppressHydrationWarning />
                 <span className="hidden sm:inline">Sair</span>
               </Button>
             </div>
@@ -101,7 +104,7 @@ export function Navbar() {
                         : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
                     )}
                   >
-                    <Icon className="w-5 h-5 mb-1" />
+                    <Icon className="w-5 h-5 mb-1" suppressHydrationWarning />
                     <span>{item.label}</span>
                   </Link>
                 );

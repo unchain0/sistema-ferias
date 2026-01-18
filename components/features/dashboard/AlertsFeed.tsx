@@ -16,14 +16,14 @@ export function AlertsFeed({ alerts }: AlertsFeedProps) {
         <div className="p-6 border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
-              <Bell className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <Bell className="h-4 w-4 text-gray-600 dark:text-gray-400" suppressHydrationWarning />
             </div>
             <h3 className="font-semibold text-gray-900 dark:text-white">Alertas e Atualizações</h3>
           </div>
         </div>
         <div className="flex flex-col items-center justify-center h-[280px] text-gray-500 p-6">
           <div className="p-4 rounded-full bg-emerald-50 dark:bg-emerald-900/20 mb-4">
-            <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+            <CheckCircle2 className="w-10 h-10 text-emerald-500" suppressHydrationWarning />
           </div>
           <p className="font-medium text-gray-900 dark:text-white">Tudo certo!</p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -40,7 +40,10 @@ export function AlertsFeed({ alerts }: AlertsFeedProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40">
-              <Bell className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <Bell
+                className="h-4 w-4 text-amber-600 dark:text-amber-400"
+                suppressHydrationWarning
+              />
             </div>
             <h3 className="font-semibold text-gray-900 dark:text-white">Alertas e Atualizações</h3>
           </div>
@@ -74,9 +77,9 @@ export function AlertsFeed({ alerts }: AlertsFeedProps) {
                 )}
               >
                 {alert.type === 'expiring_period' ? (
-                  <AlertCircle className="w-4 h-4" />
+                  <AlertCircle className="w-4 h-4" suppressHydrationWarning />
                 ) : (
-                  <CalendarClock className="w-4 h-4" />
+                  <CalendarClock className="w-4 h-4" suppressHydrationWarning />
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -99,7 +102,7 @@ export function AlertsFeed({ alerts }: AlertsFeedProps) {
                   {alert.details}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 flex items-center gap-1">
-                  <CalendarClock className="w-3 h-3" />
+                  <CalendarClock className="w-3 h-3" suppressHydrationWarning />
                   {formatDateToPtBR(alert.date)}
                 </p>
               </div>

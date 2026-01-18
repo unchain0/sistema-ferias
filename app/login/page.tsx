@@ -19,6 +19,7 @@ export default function LoginPage() {
         fill
         className="object-cover opacity-40 dark:opacity-30 select-none pointer-events-none"
         priority
+        suppressHydrationWarning
       />
 
       <Card className="w-full max-w-md relative z-10">
