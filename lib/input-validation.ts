@@ -35,7 +35,10 @@ export const nameSchema = z
 export const professionalSchema = z.object({
   name: z.string().min(VALIDATION_LIMITS.NAME_MIN).max(VALIDATION_LIMITS.NAME_MAX),
   clientManager: z.string().min(VALIDATION_LIMITS.NAME_MIN).max(VALIDATION_LIMITS.NAME_MAX),
-  monthlyRevenue: z.number().positive().max(VALIDATION_LIMITS.MONTHLY_REVENUE_MAX),
+  monthlyRevenue: z.preprocess(
+    (val) => (typeof val === 'string' ? parseFloat(val) : val),
+    z.number().positive().max(VALIDATION_LIMITS.MONTHLY_REVENUE_MAX),
+  ),
 });
 
 // Professional validation for updates (partial, allows undefined fields)
@@ -47,7 +50,10 @@ export const professionalUpdateSchema = z
       .min(VALIDATION_LIMITS.NAME_MIN)
       .max(VALIDATION_LIMITS.NAME_MAX)
       .optional(),
-    monthlyRevenue: z.number().positive().max(VALIDATION_LIMITS.MONTHLY_REVENUE_MAX).optional(),
+    monthlyRevenue: z.preprocess(
+      (val) => (val === undefined ? undefined : typeof val === 'string' ? parseFloat(val) : val),
+      z.number().positive().max(VALIDATION_LIMITS.MONTHLY_REVENUE_MAX).optional(),
+    ),
   })
   .refine((data) => data.name || data.clientManager || data.monthlyRevenue !== undefined, {
     message: 'Pelo menos um campo deve ser fornecido para atualização',
