@@ -61,16 +61,31 @@ export async function POST(request: Request) {
 
     const sanitizedName = sanitizeString(name);
 
-    const user = await authService.registerUser(email, password, sanitizedName);
+    try {
+      const user = await authService.registerUser(email, password, sanitizedName);
 
-    if (!user) {
-      return NextResponse.json({ error: 'Email já cadastrado' }, { status: 400 });
+      if (!user) {
+        throw new Error('REGISTRATION_FAILED');
+      }
+
+      return NextResponse.json(
+        { message: 'Usuário criado com sucesso', userId: user.id },
+        { status: 201 },
+      );
+    } catch (error: any) {
+      if (error.message === 'USER_ALREADY_EXISTS') {
+        return NextResponse.json({ error: 'Email já cadastrado' }, { status: 400 });
+      }
+      if (error.message === 'INVALID_PASSWORD') {
+        return NextResponse.json(
+          { error: 'A senha deve ter entre 6 e 72 caracteres' },
+          { status: 400 },
+        );
+      }
+
+      console.error('Registration error:', error);
+      return NextResponse.json({ error: 'Erro ao criar usuário' }, { status: 500 });
     }
-
-    return NextResponse.json(
-      { message: 'Usuário criado com sucesso', userId: user.id },
-      { status: 201 },
-    );
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json({ error: 'Erro ao criar usuário' }, { status: 500 });

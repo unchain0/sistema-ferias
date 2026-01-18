@@ -113,32 +113,41 @@ export class AuthService {
 
   async registerUser(email: string, password: string, name: string): Promise<User | null> {
     try {
+      const cleanEmail = email.trim().toLowerCase();
+
       if (
         typeof password !== 'string' ||
         password.length < 6 ||
         password.length > MAX_PASSWORD_LENGTH
       ) {
-        return null;
+        throw new Error('INVALID_PASSWORD');
       }
 
-      const existingUser = await this.userRepository.getUserByEmail(email);
+      const existingUser = await this.userRepository.getUserByEmail(cleanEmail);
       if (existingUser) {
-        return null;
+        throw new Error('USER_ALREADY_EXISTS');
       }
 
       const hashedPassword = await this.hashPassword(password);
       if (!hashedPassword || typeof hashedPassword !== 'string' || hashedPassword.length < 10) {
-        return null;
+        throw new Error('HASH_FAILED');
       }
 
       return await this.userRepository.createUser({
-        email: email.trim().toLowerCase(),
+        email: cleanEmail,
         password: hashedPassword,
         name: name.trim(),
       });
     } catch (error) {
+      if (
+        error instanceof Error &&
+        ['USER_ALREADY_EXISTS', 'INVALID_PASSWORD', 'HASH_FAILED'].includes(error.message)
+      ) {
+        throw error;
+      }
+
       console.error('Error in registerUser:', error);
-      return null;
+      throw new Error('REGISTRATION_FAILED');
     }
   }
 }
