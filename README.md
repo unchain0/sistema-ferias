@@ -49,9 +49,25 @@ export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
    # Exemplo de saída: \\.\pipe\podman-machine-default
    ```
 3. Configure a variável de ambiente (convertendo barras invertidas):
-   ```powershell
+   ````powershell
    $env:DOCKER_HOST="npipe:////./pipe/podman-machine-default"
+    ```
+   ````
+
+#### Solução de Problemas: "File name too long" (Linux/Podman)
+
+Se você usa Linux com pasta Home criptografada (ecryptfs) e receber o erro `file name too long`, o Podman não conseguirá extrair as imagens do Supabase.
+
+**Solução:**
+
+1. Crie uma pasta fora da sua Home criptografada: `mkdir -p /var/tmp/podman-$USER`
+2. Crie/Edite o arquivo `~/.config/containers/storage.conf`:
+   ```toml
+   [storage]
+   driver = "overlay"
+   graphroot = "/var/tmp/podman-seu-usuario"
    ```
+3. Execute `podman system migrate`.
 
 ---
 
