@@ -22,12 +22,6 @@ export const RATE_LIMIT_LOGIN = {
   maxRequests: 10,
 };
 
-// Cache TTL defaults (in seconds)
-export const CACHE_TTL = {
-  PRIVATE_DATA: 5, // 5 seconds for user-specific data
-  PUBLIC_DATA: 60, // 1 minute for public data
-};
-
 // Validation limits
 export const VALIDATION_LIMITS = {
   NAME_MIN: 2,

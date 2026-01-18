@@ -5,7 +5,6 @@ import {
   calculateVacationDays,
   cn,
   computeConcessivePeriod,
-  convertISOToBR,
   formatCurrency,
   formatDateForInput,
   formatDateToPtBR,
@@ -78,15 +77,6 @@ describe('Utils', () => {
       expect(cn('c1', 'c2')).toBe('c1 c2');
       expect(cn('c1', { c2: true, c3: false })).toBe('c1 c2');
       expect(cn('p-4 p-2')).toBe('p-2'); // Tailwind merge
-    });
-  });
-
-  describe('convertISOToBR', () => {
-    it('should convert ISO date to BR format', () => {
-      expect(convertISOToBR('2023-12-25')).toBe('25/12/2023');
-    });
-    it('should return empty string for empty input', () => {
-      expect(convertISOToBR('')).toBe('');
     });
   });
 });

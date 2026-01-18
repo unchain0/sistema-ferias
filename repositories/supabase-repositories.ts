@@ -60,21 +60,7 @@ export class SupabaseProfessionalRepository implements IProfessionalRepository {
   }
 
   /**
-   * Get all professionals for a user (legacy method)
-   * @deprecated Use getProfessionalsPaginated for better performance
-   */
-  async getProfessionals(userId: string): Promise<Professional[]> {
-    const { data, error } = await this.supabase
-      .from('professionals')
-      .select('*')
-      .eq('user_id', userId);
-    if (error) throw error;
-    return mapProfessionalRows(data || []);
-  }
-
-  /**
    * Get professionals with database-level pagination and ordering
-   * More efficient for large datasets as sorting/pagination happens in the database
    */
   async getProfessionalsPaginated(
     userId: string,
@@ -184,21 +170,7 @@ export class SupabaseVacationRepository implements IVacationRepository {
   }
 
   /**
-   * Get all vacation periods for a user (legacy method)
-   * @deprecated Use getVacationPeriodsPaginated for better performance
-   */
-  async getVacationPeriods(userId: string): Promise<VacationPeriod[]> {
-    const { data, error } = await this.supabase
-      .from('vacation_periods')
-      .select('*')
-      .eq('user_id', userId);
-    if (error) throw error;
-    return mapVacationRows(data || []);
-  }
-
-  /**
    * Get vacation periods with database-level pagination and ordering
-   * More efficient for large datasets as sorting/pagination happens in the database
    */
   async getVacationPeriodsPaginated(
     userId: string,

@@ -58,23 +58,6 @@ export function formatDateForInput(date: string | Date | null | undefined): stri
   return '';
 }
 
-/**
- * Converts date from ISO format (yyyy-MM-dd) to Brazilian format (dd/mm/yyyy)
- */
-export function convertISOToBR(isoDate: string): string {
-  if (!isoDate) return '';
-
-  // Handle ISO datetime format
-  const dateOnly = isoDate.split('T')[0];
-  const [year, month, day] = dateOnly.split('-');
-
-  if (year && month && day) {
-    return `${day}/${month}/${year}`;
-  }
-
-  return '';
-}
-
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 

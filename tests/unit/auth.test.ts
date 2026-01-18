@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { IUserRepository } from '@/interfaces/repositories';
 import { AuthService } from '@/services/auth-service';
 
 vi.mock('bcryptjs', () => ({
@@ -18,7 +19,7 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    authService = new AuthService(mockUserRepository as any);
+    authService = new AuthService(mockUserRepository as unknown as IUserRepository);
   });
 
   describe('hashPassword', () => {

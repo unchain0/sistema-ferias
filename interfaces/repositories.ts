@@ -26,14 +26,7 @@ export interface IUserRepository {
 
 export interface IProfessionalRepository {
   /**
-   * Get all professionals for a user
-   * @deprecated Use getProfessionalsPaginated for better performance with large datasets
-   */
-  getProfessionals(userId: string): Promise<Professional[]>;
-
-  /**
-   * Get professionals with pagination and ordering at database level
-   * More efficient for large datasets as sorting/pagination happens in the database
+   * Get professionals with database-level pagination and ordering
    */
   getProfessionalsPaginated(
     userId: string,
@@ -55,14 +48,7 @@ export interface IProfessionalRepository {
 
 export interface IVacationRepository {
   /**
-   * Get all vacation periods for a user
-   * @deprecated Use getVacationPeriodsPaginated for better performance with large datasets
-   */
-  getVacationPeriods(userId: string): Promise<VacationPeriod[]>;
-
-  /**
-   * Get vacation periods with pagination and ordering at database level
-   * More efficient for large datasets as sorting/pagination happens in the database
+   * Get vacation periods with database-level pagination and ordering
    */
   getVacationPeriodsPaginated(
     userId: string,

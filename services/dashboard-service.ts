@@ -16,8 +16,8 @@ export class DashboardService {
     startDate?: string | null,
     endDate?: string | null,
   ): Promise<DashboardData> {
-    const professionals = await this.professionalRepo.getProfessionals(userId);
-    const allVacations = await this.vacationRepo.getVacationPeriods(userId);
+    const { data: professionals } = await this.professionalRepo.getProfessionalsPaginated(userId);
+    const { data: allVacations } = await this.vacationRepo.getVacationPeriodsPaginated(userId);
     let vacations = [...allVacations];
 
     if (startDate && endDate) {

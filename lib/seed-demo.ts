@@ -157,6 +157,3 @@ export async function createDemoData() {
     vacations: demoVacations,
   };
 }
-
-export const DEMO_EMAIL = 'demo@sistema-ferias.com';
-export const DEMO_PASSWORD = 'demo123';

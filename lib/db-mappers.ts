@@ -66,13 +66,6 @@ export function mapVacationRow(row: DbRow): VacationPeriod {
 }
 
 /**
- * Maps an array of database rows to User models
- */
-export function mapUserRows(rows: DbRow[]): User[] {
-  return (rows || []).map(mapUserRow);
-}
-
-/**
  * Maps an array of database rows to Professional models
  */
 export function mapProfessionalRows(rows: DbRow[]): Professional[] {
