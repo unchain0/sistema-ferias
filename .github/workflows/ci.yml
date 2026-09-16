@@ -19,6 +19,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Do not persist GITHUB_TOKEN in the local git config: the validation
+          # steps run repo-controlled npm code and never need git credentials.
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
