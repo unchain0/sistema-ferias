@@ -23,14 +23,10 @@ Preconditions:
 - App is running at `http://127.0.0.1:5000`.
 - No existing session (fresh browser context).
 - Demo data is seeded: `POST /api/auth/init-demo` has been called.
-- The demo credentials are `demo@sistema-ferias.com` / `demo123`.
-
 - **Open form.** Go to `/login`. The form fields "Email" and "Senha" are visible.
-- **Enter demo credentials.** Fill email with `demo@sistema-ferias.com` and password with `demo123`.
-- **Submit.** Click the "Entrar" (Sign In) button.
+- **Start demo.** Click "Acessar Demonstração". The app initializes its demo account and submits its credentials internally.
 - **Success.** Verify the browser navigigates to `/dashboard` and the dashboard header "Dashboard de Impacto Financeiro" is visible.
 - **Proof.** Capture screenshot at `artifacts/login/success.png` showing the dashboard. Capture ARIA snapshot at `artifacts/login/success.aria.txt`.
-- **Failure.** Submit with wrong password (`demo123` → `wrongpassword`). Verify the error `Não autorizado` or a generic login error appears.
 - **Session persist.** Reload the dashboard page. Verify the user remains logged in and the dashboard is still visible.
 - **Log out.** (Optional) Click the navbar logout link if present, then re-login to confirm the cycle works.
 

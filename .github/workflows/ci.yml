@@ -36,11 +36,9 @@ jobs:
         run: npm run lint
 
       - name: Build
-        # Next 16 defaults to Turbopack and errors out when next.config.js has a
-        # webpack config and no turbopack config. Build with the existing webpack
-        # config instead (same settings Vercel-era webpack builds relied on);
-        # keeps `npm run build` untouched for Vercel production.
-        run: npx next build --webpack
+        # package.json `build` is `next build --webpack` so Next 16 does not
+        # pick Turbopack while next.config.js still defines a webpack block.
+        run: npm run build
         env:
           NEXTAUTH_URL: http://localhost:3000
           NEXTAUTH_SECRET: ci-dummy-secret-not-used-in-production
