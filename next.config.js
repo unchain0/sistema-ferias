@@ -68,6 +68,8 @@ const nextConfig = {
   
   // Security: Disable x-powered-by header
   poweredByHeader: false,
+
+  turbopack: {},
 }
 
 module.exports = nextConfig
