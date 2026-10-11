@@ -1,0 +1,4 @@
+GET / -> 307
+<title>Sistema de Férias</title>
+GET /login -> 200
+POST /api/auth/init-demo -> 200
