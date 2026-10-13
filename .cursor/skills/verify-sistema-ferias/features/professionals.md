@@ -1,46 +1,42 @@
 # Professionals
 
-Professionals CRUD lets a logged-in user manage professional records (name, client manager, monthly revenue).
+Professionals lets an authenticated user list, search, create, edit, and delete professional records (name, client manager, monthly revenue).
 
 ## Sub-features
 
-- `prof-list` views the list of professionals.
-- `prof-create` creates a new professional.
-- `prof-edit` edits an existing professional.
-- `prof-delete` deletes a professional.
-- `prof-search` searches/filter professionals by name or client manager.
+- `prof-list` shows the professionals page heading `Profissionais` or empty state `Nenhum profissional cadastrado`.
+- `prof-search` filters by name or client manager via placeholder `Buscar por nome ou gestor...`.
+- `prof-create` creates a row through `Novo Profissional` → fields → `Criar`.
+- `prof-edit` updates a row via `Editar` → `Atualizar`.
+- `prof-delete` removes a row via `Excluir` (browser confirm).
+- `prof-demo-block` confirms demo user mutations return protected errors (403 via `lib/demo-protection.ts`).
 
 ## How to get to it (user POV)
 
-- From the dashboard, click the "Novo Profissional" (New Professional) button in the header.
-- From the main navigation, select the "Profissionais" route.
-- Search bar at the top of the professionals page filters by name or client manager.
+- Navbar link `Profissionais` → `/professionals`.
+- From the dashboard header actions when present, use `Novo Profissional`.
+- Requires an authenticated non-expired session.
 
 ## Driving it with Playwright
 
 Preconditions:
 
-- App is running at `http://127.0.0.1:5000`.
-- User is authenticated (demo session or fresh account).
-- Demo data is seeded via `POST /api/auth/init-demo`.
-- Professionals list is visible (at least one professional exists, or the "Nenhum profissional cadastrado" empty state is the starting point).
+- Authenticated as a **non-demo** throwaway user for create/edit/delete.
+- `helpers/doctor.sh` green before auth.
+- Local filesystem DB.
 
-- **Open list.** Navigate to the professionals page (`/professionals`). The table of professionals is visible, or the empty state "Nenhum profissional cadastrado" is shown.
-- **Search.** Focus the search input, type `João`, and verify the list filters to show only professionals matching `João` in name or client manager. Clear the search to restore the full list.
-- **Create new.** Click "Novo Profissional". The form fields "Nome do Profissional", "Gestor no Cliente", "Faturamento Mensal (R$)" are visible. Fill in:
-  - Name: `Profissional Teste Automação`
-  - Client Manager: `Automator Fulano`
-  - Monthly Revenue: `9999.99`
-- **Submit.** Click "Criar". The new professional appears in the list.
-- **Proof.** Capture screenshot at `artifacts/professionals/created.png` showing the new entry in the list. Capture ARIA snapshot at `artifacts/professionals/created.aria.txt`.
-- **Edit.** Hover over the new professional row, click "Editar". Modify the name to `Profissional Teste Atualizado`. Click "Atualizar". Verify the list shows the updated name.
-- **Delete.** Hover over the updated professional, click "Excluir". Confirm the deletion dialog. Verify the professional is removed from the list.
-- **Empty state.** If starting with no professionals, click "Novo Profissional", create one, verify it appears, then delete it to return to the empty state.
+- **Open list.** Navigate to `/professionals`. Expect heading `Profissionais`.
+- **Create.** Click `Novo Profissional`. Fill `Nome do Profissional` input (order: name, gestor, revenue — use the three text/number inputs in the form), e.g. name `Profissional Verify`, gestor `Gestor Verify`, revenue `9999.99`. Click `Criar`. Expect the name visible in the list.
+- **Search.** Type `Verify` into the search box with placeholder `Buscar por nome ou gestor...`. Expect the new row; clear search to restore.
+- **Edit.** Click `Editar` on the row, change name to `Profissional Verify Editado`, click `Atualizar`. Expect updated text.
+- **Delete.** Click `Excluir`, accept the confirm dialog. Expect the name gone (or empty state).
+- **Demo block (optional).** Only if demo session is active: attempt create and expect the demo protection message rather than a new row.
+- **Proof.** Screenshot list-after-create into `$VERIFY_EVIDENCE_DIR/professionals-created.png`.
 
 ## Gotchas
 
-- The search input supports debounced filtering — wait for the list to update after typing, do not assert immediately.
-- Editable fields trim whitespace on save; verify the rendered value, not the raw input value.
-- The "Excluir" button triggers a JavaScript confirmation dialog — the verification must click "OK" or dismiss the dialog appropriately.
-- If the demo account is used, modifications are blocked by `demo-protection` (403). Use a freshly registered account for create/edit/delete flows, or test only the list-view and search behaviors with the demo account.
-- Monthly revenue input accepts decimal values with `step=0.01`; commas and periods are locale-dependent — use the format expected by the API (dot as decimal separator).
+- Demo user (`demo@sistema-ferias.com`) cannot mutate; API returns the demo protection response.
+- Search is debounced in the page state filter — wait for list text to change.
+- Delete uses `window.confirm`; Playwright must accept the dialog (`page.once('dialog', d => d.accept())`).
+- Revenue uses a dotted decimal in the placeholder (`15000.00`); send a plain number string.
+- Labels are not `htmlFor`-linked; locate inputs inside the visible form card after opening `Novo Profissional`.
