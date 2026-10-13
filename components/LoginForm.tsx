@@ -45,7 +45,13 @@ export function LoginForm() {
     setDemoLoading(true);
 
     try {
-      await fetch('/api/auth/init-demo', { method: 'POST' });
+      const res = await fetch('/api/auth/init-demo', { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || '❌ Erro ao inicializar demonstração');
+        setDemoLoading(false);
+        return;
+      }
       const result = await signIn('credentials', {
         email: 'demo@sistema-ferias.com',
         password: 'demo123',
