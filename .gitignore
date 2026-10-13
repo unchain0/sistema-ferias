@@ -16,6 +16,9 @@
 # production
 /build
 
+# verification evidence (step 4) — never delete proof artifacts
+.verify-evidence/
+
 # misc
 .DS_Store
 *.pem
