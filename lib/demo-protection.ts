@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { isDemoEmail } from './seed-demo';
 
 export function isDemoUser(email?: string | null): boolean {
-  return email === 'demo@sistema-ferias.com';
+  return isDemoEmail(email);
 }
 
 export function createDemoProtectionResponse() {
