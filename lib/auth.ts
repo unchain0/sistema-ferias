@@ -1,6 +1,9 @@
 import { compare, hash } from 'bcryptjs';
 import { getUserByEmail, createUser } from './db-switch';
 import { User } from '@/types';
+import { DEMO_EMAIL, DEMO_PASSWORD, getDemoSnapshot, isDemoEmail } from './seed-demo';
+import { secureCompare } from './input-validation';
+import { isStorageUnavailable } from './storage-errors';
 
 const MAX_PASSWORD_LENGTH = 72; // Limite do bcrypt no pgcrypto
 
@@ -74,39 +77,54 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 
 export async function authenticateUser(email: string, password: string): Promise<User | null> {
   try {
-    // Validação básica
-    if (typeof email !== 'string' || typeof password !== 'string' || 
+    if (typeof email !== 'string' || typeof password !== 'string' ||
         email.length === 0 || password.length === 0) {
       console.error('Invalid email or password format');
       return null;
     }
 
-    // Verifica se a senha está dentro do limite
     if (password.length > MAX_PASSWORD_LENGTH) {
       console.error('Password exceeds maximum length');
       return null;
     }
 
-    // Busca o usuário pelo email
-    const user = await getUserByEmail(email.trim().toLowerCase());
-    
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Demo account must work even when Supabase/DNS is down: seed credentials
+    // are the source of truth for this read-only path.
+    if (isDemoEmail(normalizedEmail)) {
+      if (!secureCompare(password, DEMO_PASSWORD)) {
+        return null;
+      }
+      try {
+        const existing = await getUserByEmail(DEMO_EMAIL);
+        if (existing) {
+          const ok = await verifyPassword(password, existing.password);
+          if (ok) return existing;
+        }
+      } catch (error) {
+        if (!isStorageUnavailable(error)) {
+          console.error('Demo auth storage error:', error);
+        }
+      }
+      return (await getDemoSnapshot()).user;
+    }
+
+    const user = await getUserByEmail(normalizedEmail);
+
     if (!user) {
       console.log('User not found');
-      // Não revelar que o usuário não existe por questões de segurança
-      // Simulamos a verificação de senha para evitar timing attacks
-      // Hash válido gerado de uma senha dummy para manter timing consistente
       await verifyPassword('dummy_password', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5eSVEGrwQcxIq');
       return null;
     }
-    
-    // Verifica a senha
+
     const isValid = await verifyPassword(password, user.password);
-    
+
     if (!isValid) {
       console.log('Invalid password for user');
       return null;
     }
-    
+
     console.log('Authentication successful');
     return user;
   } catch (error) {

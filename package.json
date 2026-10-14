@@ -7,7 +7,8 @@
     "build": "next build --webpack",
     "start": "next start -p 5000 -H 0.0.0.0",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --report-unused-disable-directives",
-    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "test": "tsx --test test/**/*.test.ts"
   },
   "engines": {
     "node": ">=18.x"
@@ -32,7 +33,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.6",
-    "@types/node": "^20",
+    "@types/node": "^20.19.43",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
@@ -40,6 +41,7 @@
     "eslint-config-next": "15.0.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
