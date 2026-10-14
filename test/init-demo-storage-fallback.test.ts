@@ -42,10 +42,10 @@ describe('init-demo storage fallback', () => {
   it('POST /api/auth/init-demo returns 200 with storage=seed when Supabase fetch fails', async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL =
       'https://this-project-does-not-exist-xyz.supabase.co';
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24ifQ.demo';
-    process.env.SUPABASE_JWT_SECRET = 'test-jwt-secret-for-regression-only';
-    process.env.NEXTAUTH_SECRET = 'test-nextauth-secret-for-regression-only';
+    // Non-empty placeholders only (not real credentials; avoid JWT-shaped fixtures).
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key-not-a-credential';
+    process.env.SUPABASE_JWT_SECRET = 'test-jwt-secret-not-a-credential';
+    process.env.NEXTAUTH_SECRET = 'test-nextauth-secret-not-a-credential';
     process.env.VERCEL = '1';
 
     // Isolate module graph so hasSupabaseEnv() sees the dead URL.
@@ -74,9 +74,8 @@ describe('init-demo storage fallback', () => {
   it('authenticateUser accepts demo credentials without reachable Supabase', async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL =
       'https://this-project-does-not-exist-xyz.supabase.co';
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24ifQ.demo';
-    process.env.SUPABASE_JWT_SECRET = 'test-jwt-secret-for-regression-only';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key-not-a-credential';
+    process.env.SUPABASE_JWT_SECRET = 'test-jwt-secret-not-a-credential';
     process.env.VERCEL = '1';
 
     const suffix = `?auth=${Date.now()}`;
