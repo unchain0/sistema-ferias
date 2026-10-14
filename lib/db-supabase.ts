@@ -1,7 +1,7 @@
 import { User, Professional, VacationPeriod } from '@/types';
 import { supabase } from './supabase';
 import { createSupabaseForClaims } from './supabase-server';
-import { randomUUID } from 'crypto';
+import { uuidv7 } from './uuid-v7';
 
 // Users
 export async function getUsers(): Promise<User[]> {
@@ -54,7 +54,7 @@ export async function getUserById(id: string): Promise<User | null> {
 }
 
 export async function createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
-  const id = randomUUID();
+  const id = uuidv7();
   const s = createSupabaseForClaims({ sub: id });
   const { data, error } = await s
     .from('users')
