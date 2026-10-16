@@ -1,15 +1,66 @@
+import { hash } from 'bcryptjs';
 import { User, Professional, VacationPeriod } from '@/types';
-import { hashPassword } from './auth';
+import { uuidv7 } from './uuid-v7';
 
-export async function createDemoData() {
-  const demoUserId = 'demo-user-id';
-  
-  // Demo User
+/** Stable UUIDv7 for the read-only demo account (session + seed rows). */
+export const DEMO_USER_ID = '01941f29-7c00-7e43-b999-cafa1b9c8ee9';
+
+export type DemoSnapshot = {
+  user: User;
+  professionals: Professional[];
+  vacations: VacationPeriod[];
+};
+
+let snapshotPromise: Promise<DemoSnapshot> | null = null;
+
+/** Cached demo dataset used when external storage is unavailable. */
+export function getDemoSnapshot(): Promise<DemoSnapshot> {
+  if (!snapshotPromise) {
+    snapshotPromise = createDemoData();
+  }
+  return snapshotPromise;
+}
+
+export function isDemoUserId(userId?: string | null): boolean {
+  return userId === DEMO_USER_ID;
+}
+
+export function isDemoEmail(email?: string | null): boolean {
+  return (email || '').trim().toLowerCase() === DEMO_EMAIL;
+}
+
+/** Ensure seed IDs are unique so in-memory maps and tests stay honest. */
+export function assertUniqueSeedIds(snapshot: DemoSnapshot): void {
+  const profIds = snapshot.professionals.map((p) => p.id);
+  const vacIds = snapshot.vacations.map((v) => v.id);
+  const uniqueProf = new Set(profIds);
+  const uniqueVac = new Set(vacIds);
+  if (uniqueProf.size !== profIds.length) {
+    throw new Error('Demo seed has duplicate professional IDs');
+  }
+  if (uniqueVac.size !== vacIds.length) {
+    throw new Error('Demo seed has duplicate vacation period IDs');
+  }
+}
+
+function ensureUniqueVacationIds(vacations: VacationPeriod[]): void {
+  const seen = new Set<string>();
+  for (const vacation of vacations) {
+    if (!vacation.id || seen.has(vacation.id)) {
+      vacation.id = uuidv7();
+    }
+    seen.add(vacation.id);
+  }
+}
+
+export async function createDemoData(): Promise<DemoSnapshot> {
+  const demoUserId = DEMO_USER_ID;
+
   const demoUser: User = {
     id: demoUserId,
-    email: 'demo@sistema-ferias.com',
+    email: DEMO_EMAIL,
     name: 'Usuário Demonstração',
-    password: await hashPassword('demo123'),
+    password: await hash(DEMO_PASSWORD, 12),
     createdAt: new Date('2025-01-01').toISOString(),
   };
 
@@ -739,11 +790,15 @@ export async function createDemoData() {
     idx += count;
   }
 
-  return {
+  ensureUniqueVacationIds(demoVacations);
+
+  const snapshot: DemoSnapshot = {
     user: demoUser,
     professionals: demoProfessionals,
     vacations: demoVacations,
   };
+  assertUniqueSeedIds(snapshot);
+  return snapshot;
 }
 
 export const DEMO_EMAIL = 'demo@sistema-ferias.com';
