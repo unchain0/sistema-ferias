@@ -18,6 +18,13 @@ const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const PROFESSIONALS_FILE = path.join(DATA_DIR, 'professionals.json');
 const VACATIONS_FILE = path.join(DATA_DIR, 'vacations.json');
 
+function getMemoryBucket(filePath: string): User[] | Professional[] | VacationPeriod[] {
+  if (filePath === USERS_FILE) return memoryStorage.users;
+  if (filePath === PROFESSIONALS_FILE) return memoryStorage.professionals;
+  if (filePath === VACATIONS_FILE) return memoryStorage.vacations;
+  return [];
+}
+
 async function ensureDataDirectory(): Promise<void> {
   if (IS_SERVERLESS) return; // Skip filesystem operations in serverless
   try {
@@ -29,7 +36,7 @@ async function ensureDataDirectory(): Promise<void> {
 
 async function readJsonFile<T>(filePath: string): Promise<T[]> {
   if (IS_SERVERLESS) {
-    return [];
+    return [...getMemoryBucket(filePath)] as T[];
   }
   try {
     const data = await fs.readFile(filePath, 'utf8');
@@ -41,6 +48,9 @@ async function readJsonFile<T>(filePath: string): Promise<T[]> {
 
 async function writeJsonFile<T>(filePath: string, data: readonly T[]): Promise<void> {
   if (IS_SERVERLESS) {
+    const bucket = getMemoryBucket(filePath) as T[];
+    bucket.length = 0;
+    bucket.push(...data);
     return;
   }
   await ensureDataDirectory();
