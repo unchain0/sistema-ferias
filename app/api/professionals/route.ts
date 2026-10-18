@@ -37,7 +37,15 @@ export async function POST(request: Request): Promise<ReturnType<typeof NextResp
     const data = (await request.json()) as CreateProfessionalBody;
     const { name, clientManager, monthlyRevenue } = data;
 
-    if (name === '' || clientManager === '' || monthlyRevenue === '' || monthlyRevenue === null || monthlyRevenue === undefined) {
+    if (
+      typeof name !== 'string' ||
+      name.trim() === '' ||
+      typeof clientManager !== 'string' ||
+      clientManager.trim() === '' ||
+      monthlyRevenue === undefined ||
+      monthlyRevenue === null ||
+      (typeof monthlyRevenue === 'string' && monthlyRevenue.trim() === '')
+    ) {
       return NextResponse.json(
         { error: 'Todos os campos são obrigatórios' },
         { status: 400 }
