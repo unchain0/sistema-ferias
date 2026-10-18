@@ -42,8 +42,10 @@ export async function GET(request: Request): Promise<ReturnType<typeof NextRespo
   const offsetParameter = searchParams.get('offset');
   const orderParameter = searchParams.get('order') ?? 'createdAt:desc';
 
-  const limit = Math.min(Math.max(Number.parseInt(limitParameter ?? '50', 10), 1), 200);
-  const offset = Math.max(Number.parseInt(offsetParameter ?? '0', 10), 0);
+  const parsedLimit = Number.parseInt(limitParameter ?? '50', 10);
+  const parsedOffset = Number.parseInt(offsetParameter ?? '0', 10);
+  const limit = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 200) : 50;
+  const offset = Number.isFinite(parsedOffset) ? Math.max(parsedOffset, 0) : 0;
 
   const [orderFieldRaw, orderDirectionRaw] = orderParameter.split(':');
   const orderDirection = orderDirectionRaw?.toLowerCase() === 'asc' ? 1 : -1;
@@ -96,17 +98,25 @@ export async function POST(request: Request): Promise<ReturnType<typeof NextResp
       usageEndDate,
     } = data;
 
-    if (
-      professionalId === '' ||
-      acquisitionStartDate === '' ||
-      acquisitionEndDate === '' ||
-      usageStartDate === '' ||
-      usageEndDate === ''
-    ) {
-      return NextResponse.json(
-        { error: 'Todos os campos são obrigatórios' },
-        { status: 400 }
-      );
+    const requiredFields: Array<[string, unknown]> = [
+      ['professionalId', professionalId],
+      ['acquisitionStartDate', acquisitionStartDate],
+      ['acquisitionEndDate', acquisitionEndDate],
+      ['usageStartDate', usageStartDate],
+      ['usageEndDate', usageEndDate],
+    ];
+
+    for (const [fieldName, value] of requiredFields) {
+      if (
+        value === undefined ||
+        value === null ||
+        (typeof value === 'string' && value.trim() === '')
+      ) {
+        return NextResponse.json(
+          { error: `Campo obrigatório ausente: ${fieldName}` },
+          { status: 400 }
+        );
+      }
     }
 
     const professional = await getProfessionalById(professionalId, session.user.id);
