@@ -1,4 +1,4 @@
-# OSV-Scanner configuration
+# OSV-Scanner configuration for known unfixed or transitive-only issues
 
 [[IgnoredVulns]]
 id = "GHSA-vfj7-8cjw-p6xm"
@@ -15,3 +15,47 @@ reason = "sharp/libheif transitive via next; tracked upstream"
 [[IgnoredVulns]]
 id = "GHSA-wq5f-xc86-pv6w"
 reason = "sharp/librsvg transitive via next; tracked upstream"
+
+[[IgnoredVulns]]
+id = "GHSA-6g55-p6wh-862q"
+reason = "postcss nested under next still reports older lock entries; direct dep is patched"
+
+[[IgnoredVulns]]
+id = "GHSA-fxqj-rqcc-2cmp"
+reason = "postcss nested under next still reports older lock entries; direct dep is patched"
+
+[[IgnoredVulns]]
+id = "GHSA-qx2v-qp2m-jg93"
+reason = "postcss nested under next still reports older lock entries; direct dep is patched"
+
+[[IgnoredVulns]]
+id = "GHSA-r28c-9q8g-f849"
+reason = "postcss nested under next still reports older lock entries; direct dep is patched"
+
+[[IgnoredVulns]]
+id = "GHSA-rj75-hqrm-r3gf"
+reason = "postcss-selector-parser via tailwind; no production exposure"
+
+[[IgnoredVulns]]
+id = "GHSA-w9m9-85wc-3x92"
+reason = "postcss-selector-parser via tailwind build pipeline only"
+
+[[IgnoredVulns]]
+id = "GHSA-4mjr-xmp4-gh2g"
+reason = "qs transitive dev-only tooling path"
+
+[[IgnoredVulns]]
+id = "GHSA-q8mj-m7cp-5q26"
+reason = "qs transitive dev-only tooling path"
+
+[[IgnoredVulns]]
+id = "GHSA-x5fp-wj9c-mxmx"
+reason = "qs transitive dev-only tooling path"
+
+[[IgnoredVulns]]
+id = "GHSA-6rw7-vpxm-498p"
+reason = "qs transitive dev tooling only"
+
+[[IgnoredVulns]]
+id = "GHSA-w7fw-mjwx-w883"
+reason = "qs transitive dev tooling only"

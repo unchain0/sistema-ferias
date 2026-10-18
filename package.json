@@ -124,5 +124,10 @@
     "*.{ts,tsx,js,jsx}": [
       "eslint --max-warnings 0 --fix"
     ]
+  },
+  "overrides": {
+    "postcss": "8.5.31",
+    "qs": "6.16.1",
+    "postcss-selector-parser": "7.1.6"
   }
 }
