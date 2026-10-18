@@ -1,28 +1,29 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef, startTransition, useDeferredValue } from 'react';
-import { Navbar } from '@/components/Navbar';
-import { Card } from '@/components/Card';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { DateRangeFilter, DateRange } from '@/components/DateRangeFilter';
-import { DashboardData } from '@/types';
-import { formatCurrency } from '@/lib/utils';
-import dynamic from 'next/dynamic';
 import { Users, Calendar, DollarSign, TrendingDown } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { useState, useEffect, useCallback, useMemo, useRef, startTransition, useDeferredValue } from 'react';
+
+import { Card } from '@/components/card';
+import { DateRangeFilter, type DateRange } from '@/components/date-range-filter';
+import { LoadingSpinner } from '@/components/loading-spinner';
+import { Navbar } from '@/components/navbar';
+import { formatCurrency } from '@/lib/utils';
+import type { DashboardData } from '@/types';
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  const hasAnimatedRef = useRef(false);
+  const abortReference = useRef<AbortController | null>(null);
+  const hasAnimatedReference = useRef(false);
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
     try {
-      if (abortRef.current) abortRef.current.abort();
+      if (abortReference.current) abortReference.current.abort();
       const controller = new AbortController();
-      abortRef.current = controller;
+      abortReference.current = controller;
 
       let url = '/api/dashboard';
       if (dateRange) {
@@ -30,11 +31,11 @@ export default function DashboardPage() {
       }
       const response = await fetch(url, { signal: controller.signal });
       if (response.ok) {
-        const dashboardData = await response.json();
+        const dashboardData = (await response.json()) as DashboardData;
         setData(dashboardData);
       }
-    } catch (error: any) {
-      if (error?.name !== 'AbortError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name !== 'AbortError') {
         console.error('Error fetching dashboard:', error);
       }
     } finally {
@@ -43,7 +44,7 @@ export default function DashboardPage() {
   }, [dateRange]);
 
   useEffect(() => {
-    fetchDashboard();
+    void fetchDashboard();
   }, [fetchDashboard]);
 
   const handleFilterChange = (range: DateRange | null) => {
@@ -57,9 +58,9 @@ export default function DashboardPage() {
   const deferredChartData = useDeferredValue(chartData);
   const deferredTableData = useDeferredValue(tableData);
   const animateCharts = useMemo(() => deferredChartData.length <= 24, [deferredChartData]);
-  const shouldAnimate = animateCharts && !hasAnimatedRef.current;
+  const shouldAnimate = animateCharts && !hasAnimatedReference.current;
 
-  const DashboardCharts = useMemo(() => dynamic(() => import('@/components/DashboardCharts'), {
+  const DashboardCharts = useMemo(() => dynamic(() => import('@/components/dashboard-charts'), {
     ssr: false,
     loading: () => (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -69,14 +70,14 @@ export default function DashboardPage() {
     )
   }), []);
 
-  const VirtualizedTable = useMemo(() => dynamic(() => import('@/components/VirtualizedTable'), {
+  const VirtualizedTable = useMemo(() => dynamic(() => import('@/components/virtualized-table'), {
     ssr: false,
     loading: () => <div className="h-[420px] rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse" />
   }), []);
 
   useEffect(() => {
-    if (data && !hasAnimatedRef.current) {
-      hasAnimatedRef.current = true;
+    if (data && !hasAnimatedReference.current) {
+      hasAnimatedReference.current = true;
     }
   }, [data]);
 

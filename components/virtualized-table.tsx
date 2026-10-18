@@ -3,18 +3,17 @@
 import { Virtuoso } from 'react-virtuoso';
 
 interface Row {
-  professionalName: string;
-  totalDays: number;
-  revenueImpact: number;
+  readonly professionalName: string;
+  readonly totalDays: number;
+  readonly revenueImpact: number;
 }
 
-export default function VirtualizedTable({
-  items,
-  formatCurrency,
-}: {
-  items: Row[];
-  formatCurrency: (v: number) => string;
-}) {
+interface VirtualizedTableProps {
+  readonly items: ReadonlyArray<Row>;
+  readonly formatCurrency: (v: number) => string;
+}
+
+export default function VirtualizedTable({ items, formatCurrency }: VirtualizedTableProps): JSX.Element {
   return (
     <div className="overflow-hidden border border-gray-200 dark:border-gray-700 rounded-lg">
       <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -27,6 +26,7 @@ export default function VirtualizedTable({
         totalCount={items.length}
         itemContent={(index: number) => {
           const impact = items[index];
+          if (impact === undefined) return null;
           return (
             <div className="grid grid-cols-3 px-4 py-3 border-b dark:border-gray-800 text-sm">
               <div className="text-gray-900 dark:text-white">{impact.professionalName}</div>

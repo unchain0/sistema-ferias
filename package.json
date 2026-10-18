@@ -4,44 +4,155 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 5000 -H 0.0.0.0",
-    "build": "next build --webpack",
+    "build": "next build",
     "start": "next start -p 5000 -H 0.0.0.0",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --report-unused-disable-directives",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
-    "test": "tsx --test test/**/*.test.ts"
+    "typecheck": "tsc --noEmit --project tsconfig.json && tsc --noEmit --project tsconfig.node.json",
+    "test": "tsx --test test/**/*.test.ts",
+    "test:coverage": "c8 --reporter=lcov --reporter=text --reporter=html --reporter=json tsx --test test/**/*.test.ts",
+    "test:mutation": "stryker run",
+    "test:property": "tsx --test test/property/**/*.test.ts",
+    "audit": "npm audit --audit-level=high",
+    "audit:ci": "npm audit --audit-level=high --json | npx audit-ci --config .github/audit-ci.json",
+    "gitleaks": "npx gitleaks detect --source . --verbose --config .github/gitleaks.toml",
+    "prepare": "husky"
   },
   "engines": {
-    "node": ">=18.x"
+    "node": ">=20.0.0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
+    "@supabase/supabase-js": "^2.45.4",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "bcryptjs": "^2.4.3",
-    "date-fns": "^3.0.0",
+    "date-fns": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.295.0",
-    "next": "16.4.0",
-    "next-auth": "^4.24.15",
+    "lucide-react": "^0.453.0",
+    "next": "^15.0.3",
+    "next-auth": "^4.24.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-hot-toast": "^2.6.0",
-    "react-virtuoso": "^4.14.1",
-    "recharts": "^2.10.0",
-    "zod": "^3.22.4"
+    "react-hot-toast": "^2.5.1",
+    "react-virtuoso": "^4.12.3",
+    "recharts": "^2.15.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stryker-mutator/core": "^10.0.0",
+    "@stryker-mutator/jest-runner": "^10.0.0",
+    "@stryker-mutator/typescript-checker": "^10.0.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.0.1",
     "@types/bcryptjs": "^2.4.6",
-    "@types/jsonwebtoken": "^9.0.6",
-    "@types/node": "^20.19.43",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "autoprefixer": "^10.0.1",
-    "eslint": "^8",
-    "eslint-config-next": "15.0.0",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "tsx": "^4.23.15",
-    "typescript": "^5"
+    "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.8.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.71.2",
+    "@typescript-eslint/parser": "^8.71.2",
+    "audit-ci": "^7.1.0",
+    "autoprefixer": "^10.4.20",
+    "c8": "^12.0.0",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-complexity": "^1.0.2",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-promise": "^7.3.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-unicorn": "^56.0.0",
+    "fast-check": "^3.22.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "playwright": "^1.64.1",
+    "postcss": "^8.4.47",
+    "prettier": "^3.9.10",
+    "stryker": "^0.35.1",
+    "tailwindcss": "^3.4.14",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.71.2"
+  },
+  "c8": {
+    "all": true,
+    "include": [
+      "lib/**/*.ts",
+      "app/**/*.ts",
+      "app/**/*.tsx",
+      "components/**/*.tsx"
+    ],
+    "exclude": [
+      "test/**/*",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.spec.tsx",
+      "lib/seed-demo.ts",
+      "lib/db.ts",
+      "lib/db-supabase.ts",
+      "lib/db-switch.ts",
+      "app/api/**/*",
+      "middleware.ts",
+      "middleware-custom.ts"
+    ],
+    "reporter": [
+      "lcov",
+      "text",
+      "html",
+      "json"
+    ],
+    "check-coverage": true,
+    "branches": 90,
+    "functions": 90,
+    "lines": 90,
+    "statements": 90,
+    "watermarks": {
+      "branches": [
+        70,
+        90
+      ],
+      "functions": [
+        70,
+        90
+      ],
+      "lines": [
+        70,
+        90
+      ],
+      "statements": [
+        70,
+        90
+      ]
+    }
+  },
+  "stryker": {
+    "mutator": "typescript",
+    "testRunner": "jest",
+    "checkers": [
+      "typescript"
+    ],
+    "reporters": [
+      "html",
+      "clear-text",
+      "progress",
+      "json"
+    ],
+    "coverageAnalysis": "perTest",
+    "concurrency": 4,
+    "thresholds": {
+      "high": 80,
+      "low": 60,
+      "break": 60
+    },
+    "packageManager": "npm",
+    "since": "main",
+    "maxConcurrentTestRunners": 4,
+    "timeoutMS": 60000,
+    "timeoutFactor": 1.5
   }
 }

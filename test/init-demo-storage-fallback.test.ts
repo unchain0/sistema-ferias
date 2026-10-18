@@ -11,7 +11,7 @@ import { describe, it } from 'node:test';
 
 describe('init-demo storage fallback', () => {
   it('isStorageUnavailable detects the production fetch-failed shape', async () => {
-    const { isStorageUnavailable } = await import('../lib/storage-errors');
+    const { isStorageUnavailable } = await import('../lib/storage-errors.ts');
     assert.equal(
       isStorageUnavailable({
         message: 'TypeError: fetch failed',
@@ -26,7 +26,7 @@ describe('init-demo storage fallback', () => {
   });
 
   it('demo seed IDs are unique and user id is UUIDv7', async () => {
-    const seed = await import('../lib/seed-demo');
+    const seed = await import('../lib/seed-demo.ts');
     const snapshot = await seed.getDemoSnapshot();
     seed.assertUniqueSeedIds(snapshot);
     assert.equal(snapshot.user.email, seed.DEMO_EMAIL);
@@ -35,8 +35,8 @@ describe('init-demo storage fallback', () => {
       snapshot.user.id,
       /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
     );
-    assert.ok(snapshot.professionals.length >= 1);
-    assert.ok(snapshot.vacations.length >= 1);
+    assert.ok(snapshot.professionals.length > 0);
+    assert.ok(snapshot.vacations.length > 0);
   });
 
   it('POST /api/auth/init-demo returns 200 with storage=seed when Supabase fetch fails', async () => {
@@ -50,11 +50,15 @@ describe('init-demo storage fallback', () => {
 
     // Isolate module graph so hasSupabaseEnv() sees the dead URL.
     const suffix = `?fallback=${Date.now()}`;
-    const { POST } = await import('../app/api/auth/init-demo/route' + suffix);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const routeModule = await import(`../app/api/auth/init-demo/route.ts${suffix}`);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const { POST } = routeModule as { POST: () => Promise<Response> };
 
-    const res = await POST();
-    assert.equal(res.status, 200, `expected 200 from init-demo, got ${res.status}`);
-    const body = (await res.json()) as {
+    const response = await POST();
+    assert.equal(response.status, 200, `expected 200 from init-demo, got ${response.status}`);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const body = (await response.json()) as {
       error?: string;
       email?: string;
       storage?: string;
@@ -79,15 +83,21 @@ describe('init-demo storage fallback', () => {
     process.env.VERCEL = '1';
 
     const suffix = `?auth=${Date.now()}`;
-    const { authenticateUser } = await import('../lib/auth' + suffix);
-    const { DEMO_EMAIL, DEMO_PASSWORD, DEMO_USER_ID } = await import(
-      '../lib/seed-demo' + suffix
-    );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const authenticationModule = await import(`../lib/auth.ts${suffix}`);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const { authenticateUser } = authenticationModule as { authenticateUser: (email: string, password: string) => Promise<{ email: string; id: string } | null> };
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const seedModule = await import(`../lib/seed-demo.ts${suffix}`);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const { DEMO_EMAIL, DEMO_PASSWORD, DEMO_USER_ID } = seedModule as { DEMO_EMAIL: string; DEMO_PASSWORD: string; DEMO_USER_ID: string };
 
     const user = await authenticateUser(DEMO_EMAIL, DEMO_PASSWORD);
     assert.ok(user, 'demo user should authenticate from seed');
-    assert.equal(user!.email, DEMO_EMAIL);
-    assert.equal(user!.id, DEMO_USER_ID);
+    if (user !== null) {
+      assert.equal(user.email, DEMO_EMAIL);
+      assert.equal(user.id, DEMO_USER_ID);
+    }
 
     const denied = await authenticateUser(DEMO_EMAIL, 'wrong-password');
     assert.equal(denied, null);

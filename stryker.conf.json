@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/stryker.json",
+  "mutator": "typescript",
+  "testRunner": "jest",
+  "checkers": ["typescript"],
+  "reporters": ["html", "clear-text", "progress", "json"],
+  "coverageAnalysis": "perTest",
+  "concurrency": 4,
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 60
+  },
+  "packageManager": "npm",
+  "since": "main",
+  "maxConcurrentTestRunners": 4,
+  "timeoutMS": 60000,
+  "timeoutFactor": 1.5,
+  "mutate": [
+    "lib/**/*.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "components/**/*.tsx"
+  ],
+  "ignorePatterns": [
+    "test/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "lib/seed-demo.ts",
+    "lib/db.ts",
+    "lib/db-supabase.ts",
+    "lib/db-switch.ts",
+    "app/api/**/*",
+    "middleware.ts",
+    "middleware-custom.ts"
+  ],
+  "plugins": [
+    "@stryker-mutator/typescript-checker",
+    "@stryker-mutator/jest-runner"
+  ]
+}

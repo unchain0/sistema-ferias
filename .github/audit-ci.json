@@ -1,0 +1,6 @@
+{
+  "moderate": "allow",
+  "high": "error",
+  "critical": "error",
+  "registry": "https://registry.npmjs.org/"
+}

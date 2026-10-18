@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Input } from '@/components/Input';
-import { Button } from '@/components/Button';
 import { Eye } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
+
+import { Button } from '@/components/button';
+import { Input } from '@/components/input';
+
 
 export function LoginForm() {
   const router = useRouter();
@@ -47,8 +49,8 @@ export function LoginForm() {
     try {
       const res = await fetch('/api/auth/init-demo', { method: 'POST' });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        toast.error(err.error || '❌ Erro ao inicializar demonstração');
+        const error = await res.json().catch(() => ({}));
+        toast.error(error.error || '❌ Erro ao inicializar demonstração');
         setDemoLoading(false);
         return;
       }
@@ -79,7 +81,7 @@ export function LoginForm() {
           label="Email"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => { setEmail(e.target.value); }}
           placeholder="seu@email.com"
           required
         />
@@ -88,7 +90,7 @@ export function LoginForm() {
           label="Senha"
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => { setPassword(e.target.value); }}
           placeholder="••••••••"
           required
           maxLength={100}
@@ -102,7 +104,7 @@ export function LoginForm() {
       <div className="mt-4">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
+            <div className="w-full border-t border-gray-300 dark:border-gray-700" />
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">

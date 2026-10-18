@@ -1,11 +1,12 @@
 'use client';
 
+import { LayoutDashboard, Users, Calendar, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
-import { LayoutDashboard, Users, Calendar, LogOut } from 'lucide-react';
-import { Button } from './Button';
-import { DemoBanner } from './DemoBanner';
+
+import { Button } from './button';
+import { DemoBanner } from './demo-banner';
 
 export function Navbar() {
   const pathname = usePathname();

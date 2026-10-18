@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
-import { registerUser } from '@/lib/auth';
-import { rateLimit, getClientIdentifier, createRateLimitResponse } from '@/lib/rate-limit';
-import { emailSchema, passwordSchema, nameSchema, sanitizeString } from '@/lib/input-validation';
 
-export async function POST(request: Request) {
+import { registerUser } from '@/lib/auth';
+import { emailSchema, passwordSchema, nameSchema, sanitizeString } from '@/lib/input-validation';
+import { rateLimit, getClientIdentifier, createRateLimitResponse } from '@/lib/rate-limit';
+
+interface RegisterBody {
+  readonly email: string;
+  readonly password: string;
+  readonly name: string;
+}
+
+export async function POST(request: Request): Promise<ReturnType<typeof NextResponse.json>> {
   // Rate limiting: 5 registrations per 15 minutes per IP
   const identifier = getClientIdentifier(request);
   const allowed = rateLimit(`register:${identifier}`, {
@@ -16,11 +23,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json();
+    const body = (await request.json()) as RegisterBody;
     const { email, password, name } = body;
 
     // Validate inputs
-    if (!email || !password || !name) {
+    if (email === '' || password === '' || name === '') {
       return NextResponse.json(
         { error: 'Todos os campos são obrigatórios' },
         { status: 400 }
@@ -38,7 +45,6 @@ export async function POST(request: Request) {
 
     // Validação de comprimento da senha
     if (typeof password !== 'string' || password.length < 6 || password.length > 72) {
-      console.error('Invalid password length:', password?.length);
       return NextResponse.json(
         { error: 'A senha deve ter entre 6 e 72 caracteres' },
         { status: 400 }
@@ -48,7 +54,6 @@ export async function POST(request: Request) {
     // Validação de força da senha
     const passwordValidation = passwordSchema.safeParse(password);
     if (!passwordValidation.success) {
-      console.error('Password validation failed:', passwordValidation.error);
       return NextResponse.json(
         { error: 'A senha não atende aos requisitos mínimos de segurança' },
         { status: 400 }
@@ -68,7 +73,7 @@ export async function POST(request: Request) {
 
     const user = await registerUser(email, password, sanitizedName);
 
-    if (!user) {
+    if (user === null) {
       return NextResponse.json(
         { error: 'Email já cadastrado' },
         { status: 400 }

@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Input } from '@/components/Input';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
 import { Calendar } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
+
+import { Button } from '@/components/button';
+import { Card } from '@/components/card';
+import { Input } from '@/components/input';
+
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -65,13 +67,13 @@ export default function RegisterPage() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        toast.error(`❌ ${data.error || 'Erro ao criar conta'}`);
-      } else {
+      if (response.ok) {
         toast.success('✅ Conta criada com sucesso!');
         router.push('/login');
+      } else {
+        toast.error(`❌ ${data.error || 'Erro ao criar conta'}`);
       }
-    } catch (err) {
+    } catch {
       toast.error('❌ Erro ao criar conta');
     } finally {
       setLoading(false);
@@ -96,7 +98,7 @@ export default function RegisterPage() {
             label="Nome"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => { setName(e.target.value); }}
             placeholder="Seu nome completo"
             required
           />
@@ -105,7 +107,7 @@ export default function RegisterPage() {
             label="Email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => { setEmail(e.target.value); }}
             placeholder="seu@email.com"
             required
           />
@@ -114,7 +116,7 @@ export default function RegisterPage() {
             label="Senha"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => { setPassword(e.target.value); }}
             placeholder="••••••••"
             required
             maxLength={72}
@@ -124,7 +126,7 @@ export default function RegisterPage() {
             label="Confirmar Senha"
             type="password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => { setConfirmPassword(e.target.value); }}
             placeholder="••••••••"
             required
             maxLength={72}

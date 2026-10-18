@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { Navbar } from '@/components/Navbar';
-import { Card } from '@/components/Card';
-import { Button } from '@/components/Button';
-import { Input } from '@/components/Input';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { Professional, VacationPeriod } from '@/types';
-import { formatCurrency, computeConcessivePeriod, formatDateToPtBR, formatDateForInput } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, Calendar, AlertCircle, Search } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { useState, useEffect, useMemo } from 'react';
+
+import { Button } from '@/components/button';
+import { Card } from '@/components/card';
+import { Input } from '@/components/input';
+import { Navbar } from '@/components/navbar';
 import { handleDemoError } from '@/lib/handle-demo-error';
+import { formatCurrency, computeConcessivePeriod, formatDateToPtBR, formatDateForInput } from '@/lib/utils';
+import type { Professional, VacationPeriod } from '@/types';
 
 export default function VacationsPage() {
   const { data: session } = useSession();
@@ -186,14 +186,14 @@ export default function VacationsPage() {
                 type="text"
                 placeholder="Buscar por nome do profissional..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); }}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
               />
             </div>
             
             {!showForm && professionals.length > 0 && (
               <Button 
-                onClick={() => setShowForm(true)}
+                onClick={() => { setShowForm(true); }}
                 disabled={isDemo || loading}
                 className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
               >
@@ -215,7 +215,7 @@ export default function VacationsPage() {
               <p className="text-sm text-amber-700 dark:text-amber-400">{error}</p>
             </div>
             <button
-              onClick={() => setError(null)}
+              onClick={() => { setError(null); }}
               className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200"
             >
               <X className="w-5 h-5" />
@@ -259,7 +259,7 @@ export default function VacationsPage() {
                 </label>
                 <select
                   value={formData.professionalId}
-                  onChange={(e) => setFormData({ ...formData, professionalId: e.target.value })}
+                  onChange={(e) => { setFormData({ ...formData, professionalId: e.target.value }); }}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                   required
                 >
@@ -277,7 +277,7 @@ export default function VacationsPage() {
                   label="Início Período Aquisitivo"
                   type="date"
                   value={formData.acquisitionStartDate}
-                  onChange={(e) => setFormData({ ...formData, acquisitionStartDate: e.target.value })}
+                  onChange={(e) => { setFormData({ ...formData, acquisitionStartDate: e.target.value }); }}
                   required
                 />
 
@@ -285,7 +285,7 @@ export default function VacationsPage() {
                   label="Fim Período Aquisitivo"
                   type="date"
                   value={formData.acquisitionEndDate}
-                  onChange={(e) => setFormData({ ...formData, acquisitionEndDate: e.target.value })}
+                  onChange={(e) => { setFormData({ ...formData, acquisitionEndDate: e.target.value }); }}
                   required
                 />
               </div>
@@ -296,7 +296,7 @@ export default function VacationsPage() {
                   <div className="text-sm text-gray-700 dark:text-gray-300">
                     <span className="font-semibold">Período Concessivo: </span>
                     {formatDateToPtBR(concessivePeriod.start)}
-                    {" "}até{" "}
+                    {' '}até{' '}
                     {formatDateToPtBR(concessivePeriod.end)}
                   </div>
                 );
@@ -307,7 +307,7 @@ export default function VacationsPage() {
                   label="Início Período de Gozo"
                   type="date"
                   value={formData.usageStartDate}
-                  onChange={(e) => setFormData({ ...formData, usageStartDate: e.target.value })}
+                  onChange={(e) => { setFormData({ ...formData, usageStartDate: e.target.value }); }}
                   required
                 />
 
@@ -315,7 +315,7 @@ export default function VacationsPage() {
                   label="Fim Período de Gozo"
                   type="date"
                   value={formData.usageEndDate}
-                  onChange={(e) => setFormData({ ...formData, usageEndDate: e.target.value })}
+                  onChange={(e) => { setFormData({ ...formData, usageEndDate: e.target.value }); }}
                   required
                 />
               </div>
@@ -346,18 +346,18 @@ export default function VacationsPage() {
         {/* Skeleton list during initial load to preserve layout height */}
         {loading && (
           <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
+            {Array.from({length: 3}).map((_, i) => (
               <Card key={`skeleton-${i}`}>
                 <div className="animate-pulse">
-                  <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+                  <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4" />
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
-                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24" />
+                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24" />
                   </div>
                 </div>
               </Card>
@@ -447,7 +447,7 @@ export default function VacationsPage() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      onClick={() => handleEdit(vacation)}
+                      onClick={() => { handleEdit(vacation); }}
                       disabled={isDemo}
                       className="flex-1 md:flex-none md:w-28 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
                     >

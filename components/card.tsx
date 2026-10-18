@@ -1,13 +1,15 @@
-import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-interface CardProps {
+import type { ReactNode } from 'react';
+
+
+interface CardProperties {
   children: ReactNode;
   className?: string;
   title?: string;
 }
 
-export function Card({ children, className, title }: CardProps) {
+export function Card({ children, className, title }: CardProperties) {
   return (
     <div
       className={cn(

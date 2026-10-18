@@ -5,8 +5,8 @@
 export function isStorageUnavailable(error: unknown): boolean {
   const parts: string[] = [];
 
-  const walk = (value: unknown, depth: number) => {
-    if (value == null || depth > 5) return;
+  const walk = (value: unknown, depth: number): void => {
+    if (value === null || value === undefined || depth > 5) return;
     if (typeof value === 'string') {
       parts.push(value);
       return;

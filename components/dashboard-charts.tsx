@@ -3,22 +3,22 @@
 import { useEffect, useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
-interface ChartsProps {
+interface ChartsProperties {
   data: Array<{ month: string; count: number; impact: number }>;
   shouldAnimate: boolean;
   formatCurrency: (v: number) => string;
 }
 
-export default function DashboardCharts({ data, shouldAnimate, formatCurrency }: ChartsProps) {
+export default function DashboardCharts({ data, shouldAnimate, formatCurrency }: ChartsProperties) {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    const apply = (e: MediaQueryList | MediaQueryListEvent) => setIsDark('matches' in e ? e.matches : (e as MediaQueryList).matches);
+    const mql = globalThis.matchMedia('(prefers-color-scheme: dark)');
+    const apply = (e: MediaQueryList | MediaQueryListEvent) => { setIsDark('matches' in e ? e.matches : (e as MediaQueryList).matches); };
     apply(mql);
     if ('addEventListener' in mql) {
       mql.addEventListener('change', apply);
-      return () => mql.removeEventListener('change', apply);
+      return () => { mql.removeEventListener('change', apply); };
     } else {
       (mql as any).addListener(apply);
       return () => {

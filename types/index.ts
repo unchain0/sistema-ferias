@@ -32,14 +32,14 @@ export interface DashboardData {
   totalProfessionals: number;
   totalVacationDays: number;
   totalRevenueImpact: number;
-  vacationsByMonth: {
+  vacationsByMonth: Array<{
     month: string;
     count: number;
     impact: number;
-  }[];
-  professionalImpacts: {
+  }>;
+  professionalImpacts: Array<{
     professionalName: string;
     totalDays: number;
     revenueImpact: number;
-  }[];
+  }>;
 }

@@ -2,12 +2,12 @@ import { z } from 'zod';
 
 // Sanitize string inputs to prevent XSS
 export function sanitizeString(input: string): string {
-  if (!input) return '';
-  
+  if (input === '' || input === null || input === undefined) return '';
+
   return input
     .trim()
-    .replace(/[<>]/g, '') // Remove < and > to prevent HTML injection
-    .substring(0, 500); // Limit length
+    .replaceAll(/[<>]/g, '') // Remove < and > to prevent HTML injection
+    .slice(0, 500); // Limit length
 }
 
 // Email validation
@@ -23,7 +23,7 @@ export const nameSchema = z.string().min(2).max(100);
 export const professionalSchema = z.object({
   name: z.string().min(2).max(100),
   clientManager: z.string().min(2).max(100),
-  monthlyRevenue: z.number().positive().max(1000000),
+  monthlyRevenue: z.number().positive().max(1_000_000),
 });
 
 // Vacation validation
@@ -36,7 +36,10 @@ export const vacationSchema = z.object({
 });
 
 // Generic validation helper
-export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): { success: boolean; data?: T; error?: string } {
+export function validateInput<T>(
+  schema: Readonly<z.ZodSchema<T>>,
+  data: unknown
+): { success: true; data: T } | { success: false; error: string } {
   try {
     const validated = schema.parse(data);
     return { success: true, data: validated };
@@ -44,12 +47,12 @@ export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): { succe
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: error.errors.map(e => e.message).join(', ')
+        error: error.errors.map((e) => e.message).join(', '),
       };
     }
     return {
       success: false,
-      error: 'Erro de validação'
+      error: 'Erro de validação',
     };
   }
 }
@@ -59,11 +62,12 @@ export function secureCompare(a: string, b: string): boolean {
   if (a.length !== b.length) {
     return false;
   }
-  
+
   let result = 0;
+  // eslint-disable-next-line unicorn/no-for-loop -- index access required for constant-time comparison
   for (let i = 0; i < a.length; i++) {
     result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
-  
+
   return result === 0;
 }

@@ -1,0 +1,25 @@
+# OSV-Scanner configuration for Sistema de Férias
+# Used in CI for vulnerability scanning
+
+[scanner]
+# Scan the package-lock.json for vulnerabilities
+lockfile = "package-lock.json"
+
+# Also scan npm audit as fallback
+[scanner.npm]
+enabled = true
+
+[output]
+# Output format for CI
+format = "table"
+# Also output JSON for potential parsing
+json = true
+# Exit with non-zero code if vulnerabilities found
+fail = true
+
+[filter]
+# Only report high and critical vulnerabilities in CI
+severity = ["HIGH", "CRITICAL"]
+
+# Ignore specific advisories if needed (e.g., false positives)
+# ignore = ["GHSA-xxxx-xxxx-xxxx"]

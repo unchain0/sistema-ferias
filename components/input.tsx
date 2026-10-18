@@ -1,13 +1,16 @@
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { forwardRef } from 'react';
+
 import { cn } from '@/lib/utils';
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+import type { InputHTMLAttributes} from 'react';
+
+interface InputProperties extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className, type, placeholder, lang, ...props }, ref) => {
+export const Input = forwardRef<HTMLInputElement, InputProperties>(
+  ({ label, error, className, type, placeholder, lang, ...properties }, reference) => {
     const resolvedPlaceholder = placeholder;
     return (
       <div className="w-full">
@@ -17,7 +20,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         <input
-          ref={ref}
+          ref={reference}
           className={cn(
             'w-full px-4 py-2 border rounded-lg transition-all duration-200',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -28,7 +31,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           type={type}
           placeholder={resolvedPlaceholder}
           {...(lang ? { lang } : {})}
-          {...props}
+          {...properties}
         />
         {error && (
           <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>

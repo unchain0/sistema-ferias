@@ -1,9 +1,10 @@
 'use client';
 
-import { SessionProvider } from 'next-auth/react';
-import { ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
+import { SessionProvider } from 'next-auth/react';
+
+import type { ReactNode } from 'react';
 
 const ToasterDynamic = dynamic(() => import('react-hot-toast').then(m => m.Toaster), {
   ssr: false,

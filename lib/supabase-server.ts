@@ -1,16 +1,20 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
 
-function requireEnv(name: string): string {
-  const v = process.env[name];
-  if (!v) throw new Error(`Missing env ${name}`);
-  return v;
+function requireEnvironment(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value === '') {
+    throw new Error(`Missing env ${name}`);
+  }
+  return value;
 }
 
-export function createSupabaseForClaims(claims: Record<string, any>) {
-  const supabaseUrl = requireEnv('NEXT_PUBLIC_SUPABASE_URL');
-  const anonKey = requireEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY');
-  const jwtSecret = requireEnv('SUPABASE_JWT_SECRET');
+export function createSupabaseForClaims(
+  claims: Readonly<Record<string, unknown>>
+): SupabaseClient {
+  const supabaseUrl = requireEnvironment('NEXT_PUBLIC_SUPABASE_URL');
+  const anonKey = requireEnvironment('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  const jwtSecret = requireEnvironment('SUPABASE_JWT_SECRET');
 
   const token = jwt.sign(
     { ...claims, role: 'authenticated' },
