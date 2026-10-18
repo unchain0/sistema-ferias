@@ -4,7 +4,7 @@ import path from 'node:path';
 import type { User, Professional, VacationPeriod } from '@/types';
 
 // Detect if running in serverless environment (Vercel)
-const IS_SERVERLESS = process.env.VERCEL === '1' || (process.env.NODE_ENV === 'production' && process.env['USE_FILESYSTEM'] !== '1');
+const IS_SERVERLESS = process.env.VERCEL === '1' || (process.env.NODE_ENV === 'production' && !process.env['USE_FILESYSTEM']);
 
 // In-memory storage for serverless environments
 const memoryStorage = {
