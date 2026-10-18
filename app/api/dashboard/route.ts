@@ -91,8 +91,11 @@ export async function GET(request: Request): Promise<ReturnType<typeof NextRespo
   try {
     // Get query parameters for date filtering
     const { searchParams } = new URL(request.url);
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
+    const startDateRaw = searchParams.get('startDate');
+    const endDateRaw = searchParams.get('endDate');
+    // Treat empty strings as absent (no filter)
+    const startDate = startDateRaw === '' ? null : startDateRaw;
+    const endDate = endDateRaw === '' ? null : endDateRaw;
 
     const professionals = await getProfessionals(session.user.id);
     const allVacations = await getVacationPeriods(session.user.id);
