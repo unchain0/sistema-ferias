@@ -22,4 +22,25 @@ describe('handleDemoError', () => {
     );
     assert.equal(handleDemoError(new Response(null, { status: 200 }), {}), null);
   });
+
+  it('returns null for 403 with missing demo key', () => {
+    assert.equal(
+      handleDemoError(new Response(null, { status: 403 }), {}),
+      null
+    );
+  });
+
+  it('returns null for 403 with demo: undefined', () => {
+    assert.equal(
+      handleDemoError(new Response(null, { status: 403 }), { demo: undefined }),
+      null
+    );
+  });
+
+  it('returns null for 403 with demo: null', () => {
+    assert.equal(
+      handleDemoError(new Response(null, { status: 403 }), { demo: null }),
+      null
+    );
+  });
 });
