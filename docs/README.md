@@ -6,17 +6,9 @@ Sistema de Férias is a professional vacation management system with financial i
 
 ## Documentation
 
-- [Architecture](architecture.md) — System architecture, data flow, and design decisions
-- [API Routes](api-routes.md) — REST API endpoints and data contracts
-- [Authentication](authentication.md) — NextAuth.js configuration, sessions, and demo mode
-- [Data Storage](storage.md) — JSON file storage, serverless in-memory fallback, and Supabase integration
-- [Development](development.md) — Local development setup, scripts, and workflow
-- [Testing](testing.md) — Unit tests, property tests, mutation testing, and coverage requirements
-- [Deployment](deployment.md) — Vercel deployment, environment variables, and CI/CD pipeline
-- [Security](security.md) — Security practices, audit-ci allowlist, and secret management
+Documentation files are maintained in the root of the repository:
 
-## Quick Links
+- [Project README](../README.md) — Project overview, getting started, and scripts
+- [Security Policy](../SECURITY.md) — Security practices, audit-ci allowlist, and vulnerability reporting
 
-- [README](../README.md) — Project overview and getting started
-- [Contributing](../CONTRIBUTING.md) — Contribution guidelines
-- [Changelog](../CHANGELOG.md) — Version history
+Additional documentation will be added as the project evolves.

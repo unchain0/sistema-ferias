@@ -8,7 +8,10 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'audit-ci-'));
 const npmrc = path.join(tmpDir, '.npmrc');
-fs.writeFileSync(npmrc, 'fund=false\n');
+// Disable scripts to avoid EALLOWSCRIPTS error from user config
+// and disable fund to reduce noise
+// Set allow-scripts to empty array to override user config
+fs.writeFileSync(npmrc, 'ignore-scripts=true\nfund=false\nallow-scripts=[]\n');
 
 const audit = spawnSync('npm', ['audit', '--json'], {
   cwd: root,
@@ -17,7 +20,6 @@ const audit = spawnSync('npm', ['audit', '--json'], {
     ...process.env,
     npm_config_userconfig: npmrc,
     npm_config_globalconfig: npmrc,
-    npm_config_allow_scripts: 'false',
   },
   maxBuffer: 20 * 1024 * 1024,
 });
@@ -28,6 +30,24 @@ try {
 } catch (error) {
   console.error('Failed to parse npm audit JSON');
   console.error(audit.stderr || String(error));
+  process.exit(1);
+}
+
+// npm audit exits with:
+// 0 = no vulnerabilities found
+// 1 = vulnerabilities found (but JSON is valid)
+// Other codes = actual errors (registry unreachable, etc.)
+// Check for error field in report which indicates a real failure
+if (report.error) {
+  console.error('npm audit returned an error:');
+  console.error(JSON.stringify(report.error, null, 2));
+  process.exit(1);
+}
+
+// If status is not 0 or 1, it's an actual error (not just vulns found)
+if (audit.status !== 0 && audit.status !== 1) {
+  console.error('npm audit exited with unexpected status:', audit.status);
+  console.error(audit.stderr || 'No stderr output');
   process.exit(1);
 }
 
