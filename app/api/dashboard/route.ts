@@ -84,7 +84,6 @@ function aggregateVacationsByProfessional(
 export async function GET(request: Request): Promise<ReturnType<typeof NextResponse.json>> {
   const session = await getServerSession(authOptions);
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- explicit check preferred for clarity
   if (session?.user?.id === undefined) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }

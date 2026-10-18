@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 // Sanitize string inputs to prevent XSS
-export function sanitizeString(input: string): string {
-  if (input === '' || input === null || input === undefined) return '';
+export function sanitizeString(input: string | null | undefined): string {
+  if (input === null || input === undefined || input === '') return '';
 
   return input
     .trim()
@@ -64,7 +64,6 @@ export function secureCompare(a: string, b: string): boolean {
   }
 
   let result = 0;
-  // eslint-disable-next-line unicorn/no-for-loop -- index access required for constant-time comparison
   for (let i = 0; i < a.length; i++) {
     result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }

@@ -16,15 +16,21 @@ export default function DashboardCharts({ data, shouldAnimate, formatCurrency }:
     const mql = globalThis.matchMedia('(prefers-color-scheme: dark)');
     const apply = (e: MediaQueryList | MediaQueryListEvent) => { setIsDark('matches' in e ? e.matches : (e as MediaQueryList).matches); };
     apply(mql);
-    if ('addEventListener' in mql) {
+    if (typeof mql.addEventListener === 'function') {
       mql.addEventListener('change', apply);
-      return () => { mql.removeEventListener('change', apply); };
-    } else {
-      (mql as any).addListener(apply);
       return () => {
-        (mql as any).removeListener(apply);
+        mql.removeEventListener('change', apply);
       };
     }
+
+    const legacy = mql as MediaQueryList & {
+      addListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+      removeListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+    };
+    if (legacy.addListener) legacy.addListener(apply);
+    return () => {
+      if (legacy.removeListener) legacy.removeListener(apply);
+    };
   }, []);
 
   const tooltipStyles = {

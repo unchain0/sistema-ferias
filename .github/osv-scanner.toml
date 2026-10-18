@@ -1,25 +1,17 @@
-# OSV-Scanner configuration for Sistema de Férias
-# Used in CI for vulnerability scanning
+# OSV-Scanner configuration
 
-[scanner]
-# Scan the package-lock.json for vulnerabilities
-lockfile = "package-lock.json"
+[[IgnoredVulns]]
+id = "GHSA-vfj7-8cjw-p6xm"
+reason = "braces has no fixed release on the 3.x line used by the toolchain"
 
-# Also scan npm audit as fallback
-[scanner.npm]
-enabled = true
+[[IgnoredVulns]]
+id = "GHSA-f88m-g3jw-g9cj"
+reason = "sharp/libvips transitive via next; tracked upstream"
 
-[output]
-# Output format for CI
-format = "table"
-# Also output JSON for potential parsing
-json = true
-# Exit with non-zero code if vulnerabilities found
-fail = true
+[[IgnoredVulns]]
+id = "GHSA-rgj7-g3m4-5g8c"
+reason = "sharp/libheif transitive via next; tracked upstream"
 
-[filter]
-# Only report high and critical vulnerabilities in CI
-severity = ["HIGH", "CRITICAL"]
-
-# Ignore specific advisories if needed (e.g., false positives)
-# ignore = ["GHSA-xxxx-xxxx-xxxx"]
+[[IgnoredVulns]]
+id = "GHSA-wq5f-xc86-pv6w"
+reason = "sharp/librsvg transitive via next; tracked upstream"

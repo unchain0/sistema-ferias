@@ -17,9 +17,7 @@ let snapshotPromise: Promise<DemoSnapshot> | null = null;
 
 /** Cached demo dataset used when external storage is unavailable. */
 export function getDemoSnapshot(): Promise<DemoSnapshot> {
-  if (snapshotPromise === null) {
-    snapshotPromise = createDemoData();
-  }
+  snapshotPromise ??= createDemoData();
   return snapshotPromise;
 }
 
@@ -48,7 +46,7 @@ export function assertUniqueSeedIds(snapshot: DemoSnapshot): void {
 function ensureUniqueVacationIds(vacations: VacationPeriod[]): void {
   const seen = new Set<string>();
   for (const vacation of vacations) {
-    if (vacation.id === undefined || vacation.id === '' || seen.has(vacation.id)) {
+    if (vacation.id === '' || seen.has(vacation.id)) {
       vacation.id = uuidv7();
     }
     seen.add(vacation.id);

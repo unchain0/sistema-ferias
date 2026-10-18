@@ -30,7 +30,7 @@ export default function ProfessionalsPage() {
   });
 
   useEffect(() => {
-    fetchProfessionals();
+    void fetchProfessionals();
   }, []);
 
   const fetchProfessionals = async () => {

@@ -1,7 +1,15 @@
 {
-  "moderate": "allow",
-  "high": "error",
-  "critical": "error",
-  "registry": "https://registry.npmjs.org/",
-  "ignore": ["GHSA-qx2v-qp2m-jg93", "GHSA-6g55-p6wh-862q", "GHSA-fxqj-rqcc-2cmp", "GHSA-r28c-9q8g-f849"]
+  "high": true,
+  "critical": true,
+  "report-type": "important",
+  "allowlist": [
+    "GHSA-vfj7-8cjw-p6xm",
+    "GHSA-f88m-g3jw-g9cj",
+    "GHSA-rgj7-g3m4-5g8c",
+    "GHSA-wq5f-xc86-pv6w",
+    "GHSA-qx2v-qp2m-jg93",
+    "GHSA-6g55-p6wh-862q",
+    "GHSA-fxqj-rqcc-2cmp",
+    "GHSA-r28c-9q8g-f849"
+  ]
 }

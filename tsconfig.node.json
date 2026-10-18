@@ -10,23 +10,26 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["node", "jest", "@types/node"],
+    "types": ["node"],
     "allowJs": true,
-    "allowImportingTsExtensions": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
     "paths": {
       "@/*": ["./*"]
     }
   },
   "include": [
     "eslint.config.js",
-    ".eslintrc.json",
     "next.config.js",
     "tailwind.config.ts",
     "postcss.config.mjs",
     "scripts/**/*",
-    "test/**/*",
-    ".github/workflows/**/*",
-    "lib/**/*.test.ts"
+    "stryker.conf.json"
   ],
   "exclude": ["node_modules", ".next", "out", "dist"]
 }

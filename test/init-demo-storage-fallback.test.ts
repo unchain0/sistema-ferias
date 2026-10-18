@@ -50,14 +50,11 @@ describe('init-demo storage fallback', () => {
 
     // Isolate module graph so hasSupabaseEnv() sees the dead URL.
     const suffix = `?fallback=${Date.now()}`;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const routeModule = await import(`../app/api/auth/init-demo/route.ts${suffix}`);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const { POST } = routeModule as { POST: () => Promise<Response> };
 
     const response = await POST();
     assert.equal(response.status, 200, `expected 200 from init-demo, got ${response.status}`);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const body = (await response.json()) as {
       error?: string;
       email?: string;
@@ -83,13 +80,9 @@ describe('init-demo storage fallback', () => {
     process.env.VERCEL = '1';
 
     const suffix = `?auth=${Date.now()}`;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const authenticationModule = await import(`../lib/auth.ts${suffix}`);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const { authenticateUser } = authenticationModule as { authenticateUser: (email: string, password: string) => Promise<{ email: string; id: string } | null> };
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const seedModule = await import(`../lib/seed-demo.ts${suffix}`);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const { DEMO_EMAIL, DEMO_PASSWORD, DEMO_USER_ID } = seedModule as { DEMO_EMAIL: string; DEMO_PASSWORD: string; DEMO_USER_ID: string };
 
     const user = await authenticateUser(DEMO_EMAIL, DEMO_PASSWORD);

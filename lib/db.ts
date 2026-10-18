@@ -1,4 +1,3 @@
-// eslint-disable-next-line unicorn/prevent-abbreviations -- well-known abbreviation "db" for database
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -40,7 +39,7 @@ async function readJsonFile<T>(filePath: string): Promise<T[]> {
   }
 }
 
-async function writeJsonFile<T>(filePath: string, data: ReadonlyArray<T>): Promise<void> {
+async function writeJsonFile<T>(filePath: string, data: readonly T[]): Promise<void> {
   if (IS_SERVERLESS) {
     return;
   }
@@ -117,7 +116,6 @@ export async function deleteProfessional(id: string, userId: string): Promise<bo
 export async function deleteAllProfessionals(userId: string): Promise<void> {
   const professionals = await getProfessionals(userId);
   for (const p of professionals) {
-    // eslint-disable-next-line no-await-in-loop -- sequential deletion required for data consistency
     await deleteProfessional(p.id, userId);
   }
 }
@@ -169,13 +167,12 @@ export async function deleteVacationPeriod(id: string, userId: string): Promise<
 export async function deleteAllVacationPeriods(userId: string): Promise<void> {
   const vacations = await getVacationPeriods(userId);
   for (const v of vacations) {
-    // eslint-disable-next-line no-await-in-loop -- sequential deletion required for data consistency
     await deleteVacationPeriod(v.id, userId);
   }
 }
 
 // Initialize demo data in memory storage (for serverless)
-export async function initializeMemoryStorage(
+export function initializeMemoryStorage(
   demoData: Readonly<{ user: User; professionals: Professional[]; vacations: VacationPeriod[] }>
 ): Promise<void> {
   if (IS_SERVERLESS) {
@@ -183,4 +180,5 @@ export async function initializeMemoryStorage(
     memoryStorage.professionals = demoData.professionals;
     memoryStorage.vacations = demoData.vacations;
   }
+  return Promise.resolve();
 }

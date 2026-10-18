@@ -32,7 +32,7 @@ export default function VacationsPage() {
   });
 
   useEffect(() => {
-    fetchData();
+    void fetchData();
   }, []);
 
   const fetchData = async () => {

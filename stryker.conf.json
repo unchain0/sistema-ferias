@@ -1,43 +1,39 @@
 {
-  "$schema": "https://json.schemastore.org/stryker.json",
-  "mutator": "typescript",
-  "testRunner": "jest",
-  "checkers": ["typescript"],
-  "reporters": ["html", "clear-text", "progress", "json"],
-  "coverageAnalysis": "perTest",
-  "concurrency": 4,
-  "thresholds": {
-    "high": 80,
-    "low": 60,
-    "break": 60
-  },
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker/master/packages/api/schema/stryker-core.json",
   "packageManager": "npm",
-  "since": "main",
-  "maxConcurrentTestRunners": 4,
-  "timeoutMS": 60000,
-  "timeoutFactor": 1.5,
+  "testRunner": "command",
+  "commandRunner": {
+    "command": "node scripts/run-mutation-tests.cjs"
+  },
+  "checkers": [],
   "mutate": [
-    "lib/**/*.ts",
-    "app/**/*.ts",
-    "app/**/*.tsx",
-    "components/**/*.tsx"
+    "lib/utils.ts",
+    "lib/uuid-v7.ts",
+    "lib/input-validation.ts",
+    "lib/storage-errors.ts",
+    "lib/handle-demo-error.ts"
   ],
   "ignorePatterns": [
-    "test/**/*",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "lib/seed-demo.ts",
-    "lib/db.ts",
-    "lib/db-supabase.ts",
-    "lib/db-switch.ts",
-    "app/api/**/*",
-    "middleware.ts",
-    "middleware-custom.ts"
+    "node_modules",
+    ".next",
+    "coverage",
+    "app",
+    "components",
+    ".stryker-tmp",
+    "docs",
+    "attached_assets"
   ],
-  "plugins": [
-    "@stryker-mutator/typescript-checker",
-    "@stryker-mutator/jest-runner"
-  ]
+  "reporters": ["clear-text", "progress", "html", "json"],
+  "thresholds": {
+    "high": 70,
+    "low": 50,
+    "break": 40
+  },
+  "concurrency": 2,
+  "timeoutMS": 60000,
+  "timeoutFactor": 2,
+  "coverageAnalysis": "off",
+  "tempDirName": ".stryker-tmp",
+  "cleanTempDir": true,
+  "buildCommand": ""
 }

@@ -56,30 +56,30 @@ function mapDatabaseUser(data: DatabaseUser): User {
 }
 
 function mapDatabaseProfessional(data: DatabaseProfessional): Professional {
-  const monthlyRevenue = data['monthly_revenue'];
+  const monthlyRevenue = data.monthly_revenue;
   return {
     id: data.id ?? '',
     userId: data.user_id ?? '',
-    name: (data['name'] as string) ?? '',
-    clientManager: (data['client_manager'] as string | null) ?? '',
-    monthlyRevenue: typeof monthlyRevenue === 'string' ? Number.parseFloat(monthlyRevenue) : (monthlyRevenue as number) ?? 0,
-    createdAt: (data.created_at as string) ?? '',
+    name: (data.name) ?? '',
+    clientManager: (data.client_manager) ?? '',
+    monthlyRevenue: typeof monthlyRevenue === 'string' ? Number.parseFloat(monthlyRevenue) : (monthlyRevenue) ?? 0,
+    createdAt: (data.created_at) ?? '',
   };
 }
 
 function mapDatabaseVacationPeriod(data: DatabaseVacationPeriod): VacationPeriod {
-  const revenueDeduction = data['revenue_deduction'];
+  const revenueDeduction = data.revenue_deduction;
   return {
     id: data.id ?? '',
     professionalId: data.professional_id ?? '',
     userId: data.user_id ?? '',
-    acquisitionStartDate: (data['acquisition_start_date'] as string) ?? '',
-    acquisitionEndDate: (data['acquisition_end_date'] as string) ?? '',
-    usageStartDate: (data['usage_start_date'] as string) ?? '',
-    usageEndDate: (data['usage_end_date'] as string) ?? '',
-    totalDays: (data['total_days'] as number) ?? 0,
-    revenueDeduction: typeof revenueDeduction === 'string' ? Number.parseFloat(revenueDeduction) : (revenueDeduction as number) ?? 0,
-    createdAt: (data.created_at as string) ?? '',
+    acquisitionStartDate: (data.acquisition_start_date) ?? '',
+    acquisitionEndDate: (data.acquisition_end_date) ?? '',
+    usageStartDate: (data.usage_start_date) ?? '',
+    usageEndDate: (data.usage_end_date) ?? '',
+    totalDays: (data.total_days) ?? 0,
+    revenueDeduction: typeof revenueDeduction === 'string' ? Number.parseFloat(revenueDeduction) : (revenueDeduction) ?? 0,
+    createdAt: (data.created_at) ?? '',
   };
 }
 
@@ -177,9 +177,9 @@ export async function updateProfessional(
   updates: Readonly<Partial<Professional>>
 ): Promise<Professional | null> {
   const updateData: Record<string, unknown> = {};
-  if (updates['name'] !== undefined) updateData['name'] = updates['name'];
-  if (updates['clientManager'] !== undefined) updateData['client_manager'] = updates['clientManager'];
-  if (updates['monthlyRevenue'] !== undefined) updateData['monthly_revenue'] = updates['monthlyRevenue'];
+  if (updates.name !== undefined) updateData['name'] = updates.name;
+  if (updates.clientManager !== undefined) updateData['client_manager'] = updates.clientManager;
+  if (updates.monthlyRevenue !== undefined) updateData['monthly_revenue'] = updates.monthlyRevenue;
 
   const s = createSupabaseForClaims({ sub: userId });
   const { data, error } = await s
@@ -274,12 +274,12 @@ export async function updateVacationPeriod(
   updates: Readonly<Partial<VacationPeriod>>
 ): Promise<VacationPeriod | null> {
   const updateData: Record<string, unknown> = {};
-  if (updates['acquisitionStartDate'] !== undefined) updateData['acquisition_start_date'] = updates['acquisitionStartDate'];
-  if (updates['acquisitionEndDate'] !== undefined) updateData['acquisition_end_date'] = updates['acquisitionEndDate'];
-  if (updates['usageStartDate'] !== undefined) updateData['usage_start_date'] = updates['usageStartDate'];
-  if (updates['usageEndDate'] !== undefined) updateData['usage_end_date'] = updates['usageEndDate'];
-  if (updates['totalDays'] !== undefined) updateData['total_days'] = updates['totalDays'];
-  if (updates['revenueDeduction'] !== undefined) updateData['revenue_deduction'] = updates['revenueDeduction'];
+  if (updates.acquisitionStartDate !== undefined) updateData['acquisition_start_date'] = updates.acquisitionStartDate;
+  if (updates.acquisitionEndDate !== undefined) updateData['acquisition_end_date'] = updates.acquisitionEndDate;
+  if (updates.usageStartDate !== undefined) updateData['usage_start_date'] = updates.usageStartDate;
+  if (updates.usageEndDate !== undefined) updateData['usage_end_date'] = updates.usageEndDate;
+  if (updates.totalDays !== undefined) updateData['total_days'] = updates.totalDays;
+  if (updates.revenueDeduction !== undefined) updateData['revenue_deduction'] = updates.revenueDeduction;
 
   const s = createSupabaseForClaims({ sub: userId });
   const { data, error } = await s
@@ -337,13 +337,11 @@ export async function initializeSupabaseDemo(demoData: Readonly<{
 
   // Create professionals
   for (const prof of demoData.professionals) {
-    // eslint-disable-next-line no-await-in-loop -- sequential creation required for referential integrity
     await createProfessional({ ...prof, userId: user.id });
   }
 
   // Create vacations
   for (const vac of demoData.vacations) {
-    // eslint-disable-next-line no-await-in-loop -- sequential creation required for referential integrity
     await createVacationPeriod({ ...vac, userId: user.id });
   }
 

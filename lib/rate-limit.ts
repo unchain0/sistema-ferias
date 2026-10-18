@@ -7,15 +7,22 @@ interface RateLimitRecord {
 
 const rateLimitStore = new Map<string, RateLimitRecord>();
 
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
+/** Remove expired rate-limit windows. Exported for tests. */
+export function pruneExpiredRateLimits(now = Date.now()): void {
   for (const [key, record] of rateLimitStore.entries()) {
     if (record.resetTime < now) {
       rateLimitStore.delete(key);
     }
   }
+}
+
+// Periodic cleanup (unref so tests/CLI can exit).
+const cleanupTimer = setInterval(() => {
+  pruneExpiredRateLimits();
 }, 5 * 60 * 1000);
+if (typeof cleanupTimer.unref === 'function') {
+  cleanupTimer.unref();
+}
 
 export interface RateLimitConfig {
   readonly interval: number; // in milliseconds

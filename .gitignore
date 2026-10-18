@@ -44,3 +44,6 @@ next-env.d.ts
 
 # local verification evidence (survives skill cleanup; never commit)
 .verify-evidence/
+
+.stryker-tmp/
+reports/

@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 
 import { Button } from '@/components/button';
 import { Input } from '@/components/input';
+import { errorMessage, readJson } from '@/lib/json';
 
 
 export function LoginForm() {
@@ -49,8 +50,8 @@ export function LoginForm() {
     try {
       const res = await fetch('/api/auth/init-demo', { method: 'POST' });
       if (!res.ok) {
-        const error = await res.json().catch(() => ({}));
-        toast.error(error.error || '❌ Erro ao inicializar demonstração');
+        const body = await readJson(res).catch(() => ({}));
+        toast.error(errorMessage(body, '❌ Erro ao inicializar demonstração'));
         setDemoLoading(false);
         return;
       }

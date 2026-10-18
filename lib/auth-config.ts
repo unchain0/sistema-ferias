@@ -1,8 +1,8 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-import { authenticateUser } from './auth';
-
 import type { NextAuthOptions } from 'next-auth';
+
+import { authenticateUser } from './auth';
 
 function requireEnvironment(name: string): string {
   const value = process.env[name];
@@ -22,13 +22,14 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Senha', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        const email = credentials?.email;
+        const password = credentials?.password;
+        if (email === undefined || email === '' || password === undefined || password === '') {
           return null;
         }
 
-        const user = await authenticateUser(credentials.email, credentials.password);
-
-        if (!user) {
+        const user = await authenticateUser(email, password);
+        if (user === null) {
           return null;
         }
 
@@ -47,15 +48,18 @@ export const authOptions: NextAuthOptions = {
     signIn: '/login',
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+    jwt({ token, user }) {
+      // On sign-in, NextAuth passes the user object; copy id onto the JWT.
+      const signedIn = user as { id?: string } | undefined;
+      if (signedIn?.id !== undefined) {
+        token.id = signedIn.id;
       }
       return token;
     },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
+    session({ session, token }) {
+      const sessionUser = session.user as { id?: string } | undefined;
+      if (sessionUser !== undefined && typeof token.id === 'string') {
+        sessionUser.id = token.id;
       }
       return session;
     },

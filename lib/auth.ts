@@ -21,7 +21,7 @@ export async function hashPassword(password: string): Promise<string> {
     // Trunca para 72 bytes, respeitando limites de caracteres UTF-8
     let byteLength = 0;
     let charIndex = 0;
-    // eslint-disable-next-line no-constant-binary-expression -- byteLength changes each iteration
+     
     while (charIndex < password.length && byteLength < 72) {
       const char = password[charIndex];
       if (char === undefined) break;

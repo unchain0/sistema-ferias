@@ -9,7 +9,7 @@ interface Row {
 }
 
 interface VirtualizedTableProps {
-  readonly items: ReadonlyArray<Row>;
+  readonly items: readonly Row[];
   readonly formatCurrency: (v: number) => string;
 }
 

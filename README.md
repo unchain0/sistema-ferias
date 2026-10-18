@@ -1,169 +1,147 @@
 # Sistema de Férias
 
-Professional vacation management system built with Next.js 15, TypeScript, and Supabase.
+Vacation management for Brazilian teams: track acquisition and usage periods, revenue impact, and professionals in one Next.js app.
+
+[![CI](https://github.com/unchain0/sistema-ferias/actions/workflows/ci.yml/badge.svg)](https://github.com/unchain0/sistema-ferias/actions/workflows/ci.yml)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](./.nvmrc)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](./tsconfig.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.txt)
+[![Coverage](https://img.shields.io/badge/coverage-90%25%20branches-success)](./package.json)
+
+## Live UI
+
+Login screen (running app on `localhost:5000`):
+
+![Login page of Sistema de Férias](docs/assets/login.png)
+
+Demo dashboard after seed login:
+
+![Dashboard with vacation analytics](docs/assets/dashboard.png)
 
 ## Features
 
-- **Vacation Period Management** - Track acquisition and usage periods for each professional
-- **Dashboard Analytics** - Visualize vacation days, revenue impact, and monthly trends
-- **Professional Management** - CRUD operations for professionals with client manager and revenue tracking
-- **Demo Mode** - Pre-seeded demo account for evaluation without external dependencies
-- **Rate Limiting** - IP-based rate limiting for authentication endpoints
-- **Input Validation** - Comprehensive sanitization and validation for all user inputs
-- **Secure Authentication** - NextAuth.js with bcrypt password hashing
+- Acquisition and usage period tracking per professional
+- Dashboard with vacation days and revenue impact
+- Professional CRUD with client manager and monthly revenue
+- Demo mode with seeded data when Supabase is unavailable
+- Rate limiting on auth endpoints
+- Zod input validation and UUIDv7 identifiers (OS CSPRNG)
+- NextAuth credentials auth with bcrypt password hashing
 
-## Tech Stack
+## Quick start
 
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript 5 (strict mode)
-- **Styling**: Tailwind CSS
-- **Database**: Supabase (PostgreSQL) with JSON file fallback for demo
-- **Authentication**: NextAuth.js
-- **Testing**: Node.js native test runner with c8 coverage
-- **Linting**: ESLint 9 with TypeScript strict type-checked rules
-- **CI/CD**: GitHub Actions with pinned action SHAs
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 20+
-- npm 10+
-
-### Installation
+**Prerequisites:** Node.js 20+ (see `.nvmrc`), npm 10+
 
 ```bash
-# Clone the repository
 git clone https://github.com/unchain0/sistema-ferias.git
 cd sistema-ferias
-
-# Install dependencies
 npm ci --legacy-peer-deps
-
-# Copy environment variables
 cp .env.example .env.local
-# Edit .env.local with your Supabase credentials
+# Set at least NEXTAUTH_SECRET (32+ chars) and NEXTAUTH_URL=http://localhost:5000
+npm run dev
 ```
 
-### Environment Variables
+Open [http://localhost:5000](http://localhost:5000).
+
+### Demo account
+
+| Field    | Value                     |
+|----------|---------------------------|
+| Email    | `demo@sistema-ferias.com` |
+| Password | `demo123`                 |
+
+Demo mode works without Supabase using an in-memory seed store.
+
+## Configuration
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | No (demo mode works without) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | No |
-| `SUPABASE_JWT_SECRET` | JWT secret for Supabase auth | No |
-| `NEXTAUTH_SECRET` | NextAuth.js secret | Yes |
-| `NEXTAUTH_URL` | Application URL | Yes |
+| `NEXTAUTH_SECRET` | NextAuth signing secret | Yes |
+| `NEXTAUTH_URL` | Public app URL | Yes |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | No (demo works without) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | No |
+| `SUPABASE_JWT_SECRET` | Supabase JWT secret | No |
+| `DEMO_MODE` | Force demo path (`true`/`false`) | No |
 
-### Development
+See [`.env.example`](./.env.example). Never commit real secrets.
+
+## Stack
+
+- Next.js 15 App Router, React 18, TypeScript (strict)
+- Tailwind CSS
+- Supabase PostgreSQL with JSON/memory fallback for demo
+- NextAuth.js, Zod, c8 coverage, fast-check property tests, Stryker mutation tests
+
+```mermaid
+flowchart LR
+  Browser --> NextApp
+  NextApp --> NextAuth
+  NextApp --> API
+  API --> DbSwitch
+  DbSwitch --> Supabase
+  DbSwitch --> SeedDemo
+```
+
+## Development
 
 ```bash
-# Start development server
-npm run dev
-
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-
-# Run linting
-npm run lint
-
-# Run type checking
-npm run typecheck
-
-# Build for production
-npm run build
+npm run lint          # ESLint strict type-checked, max-warnings 0
+npm run typecheck     # tsc --noEmit (app + node configs)
+npm run complexity    # complexity and size limits via ESLint
+npm test              # unit + property + regression tests
+npm run test:coverage # c8 with 90% branch gate on pure lib modules
+npm run test:property # fast-check properties
+npm run test:mutation # Stryker on pure lib modules
+npm run build         # production build
 ```
 
-## Demo Account
+### Engineering standards
 
-The application includes a pre-seeded demo account for evaluation:
+- TypeScript: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`
+- ESLint: `strictTypeChecked`, complexity ≤ 15 (pages higher), max file/function size
+- IDs: UUIDv7 via `lib/uuid-v7.ts` and `crypto.randomBytes` (OS CSPRNG)
+- Coverage: ≥ 90% branches on covered pure modules
+- CI treats warnings as errors; no `continue-on-error` / `|| true` on quality gates
 
-- **Email**: `demo@sistema-ferias.com`
-- **Password**: `demo123`
+## CI/CD and quality
 
-The demo mode works without any Supabase configuration, using an in-memory JSON file store.
+GitHub Actions (`.github/workflows/ci.yml`) on `ubuntu-latest`:
 
-## Project Structure
+1. Lint, typecheck, complexity
+2. Tests and 90% branch coverage
+3. audit-ci, gitleaks, OSV scanner, knip
+4. Stryker mutation testing
+5. Production build
+6. actionlint + zizmor (pinned action SHAs, `contents: read`)
+
+Concurrency cancels in-progress runs on the same ref. npm cache is enabled.
+
+## Project layout
 
 ```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── api/               # API routes
-│   │   ├── auth/          # Authentication endpoints
-│   │   ├── dashboard/     # Dashboard data
-│   │   ├── professionals/ # Professional CRUD
-│   │   └── vacations/     # Vacation period CRUD
-│   ├── dashboard/         # Dashboard page
-│   ├── login/             # Login page
-│   ├── professionals/     # Professionals management page
-│   └── vacations/         # Vacations management page
-├── components/            # React components
-├── lib/                   # Core libraries
-│   ├── auth.ts            # Authentication logic
-│   ├── auth-config.ts     # NextAuth configuration
-│   ├── db.ts              # JSON file storage
-│   ├── db-supabase.ts     # Supabase storage
-│   ├── db-switch.ts       # Storage abstraction
-│   ├── rate-limit.ts      # Rate limiting
-│   ├── input-validation.ts # Input sanitization
-│   ├── uuid-v7.ts         # UUIDv7 generation
-│   └── utils.ts           # Utility functions
-└── types/                 # TypeScript types
+app/            # App Router pages and API routes
+components/     # UI components
+lib/            # Auth, storage switch, validation, UUIDv7, utils
+test/           # node:test unit, property, and regression tests
+docs/assets/    # Real screenshots from the running app
+.github/        # CI, gitleaks, audit-ci, osv-scanner config
 ```
 
-## API Endpoints
+## Status
 
-### Authentication
+| Field | Value |
+|-------|-------|
+| Objective | Manage vacation periods and revenue impact for professionals |
+| Status | Active development |
+| Demo | Built-in seed account (no external DB required) |
 
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/init-demo` - Initialize demo data
+## Contributing
 
-### Dashboard
-
-- `GET /api/dashboard` - Get dashboard analytics
-
-### Professionals
-
-- `GET /api/professionals` - List professionals
-- `POST /api/professionals` - Create professional
-- `PUT /api/professionals/[id]` - Update professional
-- `DELETE /api/professionals/[id]` - Delete professional
-
-### Vacations
-
-- `GET /api/vacations` - List vacation periods
-- `POST /api/vacations` - Create vacation period
-- `PUT /api/vacations/[id]` - Update vacation period
-- `DELETE /api/vacations/[id]` - Delete vacation period
-
-## Quality Standards
-
-- **TypeScript**: Strict mode with `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`
-- **ESLint**: Type-checked rules with complexity limits (max 15 complexity, max 4 depth)
-- **Tests**: ≥90% branch coverage enforced in CI
-- **Dependencies**: Pinned action SHAs, least-privilege permissions
-- **Security**: Gitleaks secret scanning, npm audit, OSV vulnerability scanning
-
-## CI Pipeline
-
-The CI pipeline runs on every push and pull request:
-
-1. **Lint** - ESLint with strict type-checked rules
-2. **Type Check** - TypeScript strict compilation
-3. **Complexity** - Cyclomatic complexity analysis
-4. **Test** - Unit and integration tests
-5. **Coverage** - Code coverage with 90% branch threshold
-6. **Audit** - Dependency vulnerability audit
-7. **Secret Scan** - Gitleaks secret detection
-8. **Vulnerability Scan** - OSV vulnerability scanning
-9. **Mutation Testing** - Stryker mutation testing
-10. **Build** - Next.js production build
-11. **Actionlint** - GitHub Actions workflow validation
-12. **Zizmor** - GitHub Actions security analysis
+1. Fork and create a branch
+2. Use Conventional Commits (`feat:`, `fix:`, `chore:`, …)
+3. Keep `npm run lint`, `typecheck`, and `test:coverage` green
+4. Open a PR against `main`
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT. See [LICENSE.txt](./LICENSE.txt).
