@@ -1,4 +1,3 @@
-version: 1
 ignore:
   # Ignore the dummy JWT tokens in historical .env.local.example at specific commit
   - path: ".env.local.example"
