@@ -2,5 +2,8 @@
 # These are example JWT tokens in .env.local.example (deleted file) that are not real secrets
 
 ignore:
-  # Ignore the entire .env.local.example file in history (deleted file with dummy values)
+  # Ignore the dummy JWT tokens in historical .env.local.example
   - path: ".env.local.example"
+    match: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\\.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByb2plY3QtcmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDQxMDUyMDAsImV4cCI6MjAyMDA2MTIwMH0\\.dummy-anon-key"
+  - path: ".env.local.example"
+    match: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\\.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByb2plY3QtcmVmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcwNDEwNTIwMCwiZXhwIjoyMDIwMDYxMjAwfQ\\.dummy-service-role-key"
