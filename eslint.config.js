@@ -1,0 +1,251 @@
+/**
+ * Strict ESLint flat config for TypeScript + React.
+ * Type-checked rules, complexity/size limits, no any, warnings as errors (--max-warnings 0).
+ */
+const js = require('@eslint/js');
+const tseslint = require('typescript-eslint');
+const reactPlugin = require('eslint-plugin-react');
+const reactHooksPlugin = require('eslint-plugin-react-hooks');
+const jsxA11yPlugin = require('eslint-plugin-jsx-a11y');
+const unicornPlugin = require('eslint-plugin-unicorn');
+const importPlugin = require('eslint-plugin-import');
+const promisePlugin = require('eslint-plugin-promise');
+const eslintConfigPrettier = require('eslint-config-prettier');
+
+module.exports = tseslint.config(
+  {
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      'out/**',
+      'dist/**',
+      'build/**',
+      'coverage/**',
+      '.stryker-tmp/**',
+      'reports/**',
+      '.verify-evidence/**',
+      '.cursor/**',
+      'skills/**',
+      'attached_assets/**',
+      'docs/**',
+      'next-env.d.ts',
+      '*.config.js',
+      '*.config.mjs',
+      'next.config.js',
+      'postcss.config.mjs',
+      'middleware.ts',
+      'middleware-custom.ts',
+      'scripts/**',
+      'clear-cache.ps1',
+    ],
+  },
+  js.configs.recommended,
+  ...tseslint.configs.strictTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
+  reactPlugin.configs.flat.recommended,
+  reactPlugin.configs.flat['jsx-runtime'],
+  reactHooksPlugin.configs['recommended-latest'],
+  jsxA11yPlugin.flatConfigs.recommended,
+  importPlugin.flatConfigs.recommended,
+  importPlugin.flatConfigs.typescript,
+  promisePlugin.configs['flat/recommended'],
+  eslintConfigPrettier,
+  {
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.eslint.json'],
+        tsconfigRootDir: __dirname,
+      },
+    },
+  },
+  {
+    plugins: {
+      unicorn: unicornPlugin,
+    },
+    settings: {
+      react: { version: '18.3' },
+      'import/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+          project: ['./tsconfig.json'],
+        },
+        node: { extensions: ['.js', '.jsx', '.ts', '.tsx'] },
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unsafe-assignment': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+      '@typescript-eslint/no-unsafe-member-access': 'error',
+      '@typescript-eslint/no-unsafe-return': 'error',
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports', fixStyle: 'separate-type-imports' },
+      ],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: { attributes: false } },
+      ],
+      '@typescript-eslint/require-await': 'error',
+      '@typescript-eslint/no-unnecessary-condition': 'error',
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      '@typescript-eslint/prefer-optional-chain': 'error',
+      '@typescript-eslint/restrict-template-expressions': [
+        'error',
+        { allowNumber: true, allowBoolean: true },
+      ],
+      '@typescript-eslint/no-confusing-void-expression': 'error',
+      '@typescript-eslint/array-type': ['error', { default: 'array-simple' }],
+      '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      '@typescript-eslint/no-import-type-side-effects': 'error',
+      '@typescript-eslint/prefer-readonly-parameter-types': 'off',
+      '@typescript-eslint/no-deprecated': 'off',
+      '@typescript-eslint/unified-signatures': 'off',
+      '@typescript-eslint/no-unnecessary-type-parameters': 'off',
+      '@typescript-eslint/non-nullable-type-assertion-style': 'off',
+      '@typescript-eslint/dot-notation': 'error',
+      '@typescript-eslint/no-base-to-string': 'error',
+      '@typescript-eslint/only-throw-error': 'error',
+      '@typescript-eslint/related-getter-setter-pairs': 'off',
+      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
+
+      complexity: ['error', { max: 15 }],
+      'max-depth': ['error', { max: 4 }],
+      'max-lines': ['error', { max: 400, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': [
+        'error',
+        { max: 120, skipBlankLines: true, skipComments: true, IIFEs: true },
+      ],
+      'max-nested-callbacks': ['error', { max: 4 }],
+      'max-params': ['error', { max: 6 }],
+
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+      'no-debugger': 'error',
+      'no-alert': 'error',
+      'prefer-const': 'error',
+      'no-var': 'error',
+      eqeqeq: ['error', 'always'],
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+
+      'react/prop-types': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-no-target-blank': 'error',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'error',
+
+      'import/no-unresolved': 'off',
+      'import/no-duplicates': 'error',
+      'import/named': 'off',
+      'import/namespace': 'off',
+      'import/default': 'off',
+      'import/no-named-as-default': 'off',
+      'import/no-named-as-default-member': 'off',
+
+      'unicorn/prefer-node-protocol': 'error',
+      'unicorn/prefer-number-properties': 'error',
+      'unicorn/prefer-string-replace-all': 'error',
+      'unicorn/no-instanceof-array': 'error',
+      'unicorn/error-message': 'error',
+      'unicorn/throw-new-error': 'error',
+      'unicorn/prefer-includes': 'error',
+      'unicorn/prefer-array-some': 'error',
+      'unicorn/no-useless-fallback-in-spread': 'error',
+      'unicorn/no-negated-condition': 'off',
+      'unicorn/no-await-expression-member': 'off',
+      'unicorn/prevent-abbreviations': 'off',
+      'unicorn/filename-case': 'off',
+      'unicorn/no-null': 'off',
+      'unicorn/prefer-module': 'off',
+      'unicorn/prefer-top-level-await': 'off',
+      'unicorn/no-array-reduce': 'off',
+      'unicorn/consistent-function-scoping': 'off',
+      'unicorn/prefer-code-point': 'off',
+      'unicorn/no-array-callback-reference': 'off',
+      'unicorn/no-anonymous-default-export': 'off',
+      'unicorn/prefer-export-from': 'off',
+      'unicorn/prefer-ternary': 'off',
+      'unicorn/prefer-switch': 'off',
+      'unicorn/no-useless-undefined': 'off',
+
+      'promise/always-return': 'off',
+      'promise/catch-or-return': 'off',
+    },
+  },
+  {
+    files: ['test/**/*.ts', 'test/**/*.tsx'],
+    rules: {
+      'max-lines-per-function': 'off',
+      'max-lines': 'off',
+      complexity: 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-confusing-void-expression': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
+      'no-console': 'off',
+    },
+  },
+  {
+    files: ['app/api/**/*.ts', 'lib/db*.ts', 'lib/seed-demo.ts', 'lib/auth.ts', 'lib/db-supabase.ts'],
+    rules: {
+      'max-lines-per-function': ['error', { max: 160, skipBlankLines: true, skipComments: true }],
+      'max-lines': ['error', { max: 500, skipBlankLines: true, skipComments: true }],
+      complexity: ['error', { max: 22 }],
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      'max-depth': ['error', { max: 5 }],
+      'max-params': ['error', { max: 8 }],
+    },
+  },
+  {
+    files: ['app/**/page.tsx', 'components/**/*.tsx'],
+    rules: {
+      'max-lines-per-function': ['error', { max: 450, skipBlankLines: true, skipComments: true }],
+      'max-lines': ['error', { max: 500, skipBlankLines: true, skipComments: true }],
+      complexity: ['error', { max: 30 }],
+      'no-alert': 'off',
+      'jsx-a11y/label-has-associated-control': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-floating-promises': 'error',
+      // Client fetch JSON is narrowed at the call site via lib/json helpers where practical.
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
+    },
+  },
+  {
+    files: ['lib/supabase*.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  }
+);

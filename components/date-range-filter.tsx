@@ -1,21 +1,21 @@
 'use client';
 
-import { useState, startTransition } from 'react';
 import { format, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear } from 'date-fns';
 import { Calendar } from 'lucide-react';
+import { useState, startTransition } from 'react';
 
 export interface DateRange {
   startDate: string;
   endDate: string;
 }
 
-interface DateRangeFilterProps {
+interface DateRangeFilterProperties {
   onFilterChange: (range: DateRange | null) => void;
 }
 
 type QuickFilter = 'month' | '3months' | '6months' | 'year' | 'all' | 'custom';
 
-export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
+export function DateRangeFilter({ onFilterChange }: DateRangeFilterProperties) {
   const [activeFilter, setActiveFilter] = useState<QuickFilter>('all');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
@@ -36,36 +36,42 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
     const today = new Date();
 
     switch (filterId) {
-      case 'month':
+      case 'month': {
         onFilterChange({
           startDate: format(startOfMonth(today), 'yyyy-MM-dd'),
           endDate: format(endOfMonth(today), 'yyyy-MM-dd'),
         });
         break;
-      case '3months':
+      }
+      case '3months': {
         onFilterChange({
           startDate: format(startOfMonth(subMonths(today, 2)), 'yyyy-MM-dd'),
           endDate: format(endOfMonth(today), 'yyyy-MM-dd'),
         });
         break;
-      case '6months':
+      }
+      case '6months': {
         onFilterChange({
           startDate: format(startOfMonth(subMonths(today, 5)), 'yyyy-MM-dd'),
           endDate: format(endOfMonth(today), 'yyyy-MM-dd'),
         });
         break;
-      case 'year':
+      }
+      case 'year': {
         onFilterChange({
           startDate: format(startOfYear(today), 'yyyy-MM-dd'),
           endDate: format(endOfYear(today), 'yyyy-MM-dd'),
         });
         break;
-      case 'all':
+      }
+      case 'all': {
         onFilterChange(null);
         break;
-      case 'custom':
+      }
+      case 'custom': {
         // Custom será aplicado quando usuário definir as datas
         break;
+      }
     }
   };
 
@@ -88,7 +94,7 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
         {quickFilters.map((filter) => (
           <button
             key={filter.id}
-            onClick={() => applyQuickFilter(filter.id)}
+            onClick={() => { applyQuickFilter(filter.id); }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeFilter === filter.id
                 ? 'bg-blue-600 text-white'
@@ -110,7 +116,7 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
             <input
               type="date"
               value={customStartDate}
-              onChange={(e) => setCustomStartDate(e.target.value)}
+              onChange={(e) => { setCustomStartDate(e.target.value); }}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -121,7 +127,7 @@ export function DateRangeFilter({ onFilterChange }: DateRangeFilterProps) {
             <input
               type="date"
               value={customEndDate}
-              onChange={(e) => setCustomEndDate(e.target.value)}
+              onChange={(e) => { setCustomEndDate(e.target.value); }}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>

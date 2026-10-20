@@ -1,325 +1,147 @@
-# Sistema de Controle de Férias
+# Sistema de Férias
 
-Sistema completo de gestão de férias profissionais com dashboard de impacto financeiro, desenvolvido com Next.js, TypeScript e Tailwind CSS.
+Vacation management for Brazilian teams: track acquisition and usage periods, revenue impact, and professionals in one Next.js app.
 
-## 📋 Funcionalidades
+[![CI](https://github.com/unchain0/sistema-ferias/actions/workflows/ci.yml/badge.svg)](https://github.com/unchain0/sistema-ferias/actions/workflows/ci.yml)
+[![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](./.nvmrc)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](./tsconfig.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.txt)
+[![Coverage](https://img.shields.io/badge/coverage-90%25%20branches-success)](./package.json)
 
-- **Autenticação de Usuários** - Sistema seguro de login e registro
-- **Gestão de Profissionais** - Cadastro e gerenciamento de profissionais com informações de faturamento
-- **Períodos de Férias** - Controle de períodos aquisitivos e de gozo
-- **Cálculos Automáticos** - Total de dias e abatimento de faturamento calculados automaticamente
-- **Dashboard Financeiro** - Visualização do impacto financeiro das férias com gráficos interativos
-- **Interface Moderna** - UI limpa e responsiva com dark mode
+## Live UI
 
-## 🚀 Tecnologias
+Login screen (running app on `localhost:5000`):
 
-- **Next.js 15** - Framework React com App Router
-- **TypeScript** - Tipagem estática
-- **Tailwind CSS** - Framework CSS utility-first
-- **NextAuth.js** - Autenticação
-- **Recharts** - Visualização de dados
-- **Lucide React** - Ícones modernos
-- **date-fns** - Manipulação de datas
+![Login page of Sistema de Férias](docs/assets/login.png)
 
-## 📦 Instalação
+Demo dashboard after seed login:
 
-**Clone o repositório**
+![Dashboard with vacation analytics](docs/assets/dashboard.png)
+
+## Features
+
+- Acquisition and usage period tracking per professional
+- Dashboard with vacation days and revenue impact
+- Professional CRUD with client manager and monthly revenue
+- Demo mode with seeded data when Supabase is unavailable
+- Rate limiting on auth endpoints
+- Zod input validation and UUIDv7 identifiers (OS CSPRNG)
+- NextAuth credentials auth with bcrypt password hashing
+
+## Quick start
+
+**Prerequisites:** Node.js 22+ (see `.nvmrc`), npm 10+
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/unchain0/sistema-ferias.git
 cd sistema-ferias
-```
-
-**Instale as dependências**
-
-```bash
-npm install
-```
-
-**Configure as variáveis de ambiente**
-
-Crie um arquivo `.env.local` na raiz do projeto:
-
-```env
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-secret-key-here
-```
-
-Para gerar uma chave secreta segura, execute:
-
-```bash
-openssl rand -base64 32
-```
-
-**Execute o servidor de desenvolvimento**
-
-```bash
+npm ci --legacy-peer-deps
+cp .env.example .env.local
+# Set at least NEXTAUTH_SECRET (32+ chars) and NEXTAUTH_URL=http://localhost:5000
 npm run dev
 ```
 
-**Acesse a aplicação**
+Open [http://localhost:5000](http://localhost:5000).
 
-Abra [http://localhost:3000](http://localhost:3000) no seu navegador
+### Demo account
 
-## 📖 Como Usar
+| Field    | Value                     |
+|----------|---------------------------|
+| Email    | `demo@sistema-ferias.com` |
+| Password | `demo123`                 |
 
-### 🎯 Modo Demonstração (Recomendado para Primeiro Acesso)
+Demo mode works without Supabase using an in-memory seed store.
 
-Na tela de login, clique no botão **"Acessar Demonstração"** para explorar o sistema com dados de exemplo pré-carregados:
+## Configuration
 
-- **12 profissionais** cadastrados
-- **42 períodos de férias** com distribuição variada ao longo de 2024
-- **Dashboard completo** com gráficos interativos e métricas
-- **Padrões realistas** - picos em julho (8 férias) e dezembro (7 férias)
-- **Visualização detalhada** de impacto financeiro mensal
-- **Somente visualização** - modificações não são permitidas
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEXTAUTH_SECRET` | NextAuth signing secret | Yes |
+| `NEXTAUTH_URL` | Public app URL | Yes |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | No (demo works without) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | No |
+| `SUPABASE_JWT_SECRET` | Supabase JWT secret | Yes (when using Supabase) |
+| `DEMO_MODE` | Force demo path (`true`/`false`) | No |
 
-Credenciais de demonstração (caso queira fazer login manual):
+See [`.env.example`](./.env.example). Never commit real secrets.
 
-- Email: `demo@sistema-ferias.com`
-- Senha: `demo123`
+## Stack
 
-### 1. Primeiro Acesso (Criando Conta Própria)
+- Next.js 15 App Router, React 18, TypeScript (strict)
+- Tailwind CSS
+- Supabase PostgreSQL with JSON/memory fallback for demo
+- NextAuth.js, Zod, c8 coverage, fast-check property tests, Stryker mutation tests
 
-- Acesse `/register` para criar uma conta
-- Faça login com suas credenciais
-
-### 2. Cadastrar Profissionais
-
-- Navegue até "Profissionais"
-- Clique em "Novo Profissional"
-- Preencha os dados:
-  - Nome do profissional
-  - Gestor no cliente
-  - Faturamento mensal
-
-### 3. Registrar Férias
-
-- Navegue até "Férias"
-- Clique em "Novo Período"
-- Selecione o profissional
-- Informe as datas:
-  - Período aquisitivo (início e fim)
-  - Período de gozo (início e fim)
-- O sistema calculará automaticamente:
-  - Total de dias de férias
-  - Abatimento no faturamento
-
-### 4. Visualizar Dashboard
-
-- Navegue até "Dashboard"
-- Visualize:
-  - Total de profissionais
-  - Total de dias de férias
-  - Impacto financeiro total
-  - Gráficos por mês
-  - Tabela de impacto por profissional
-
-## 🗂️ Estrutura do Projeto
-
-```txt
-sistema-ferias/
-├── app/                          # App Router do Next.js
-│   ├── api/                      # API Routes
-│   │   ├── auth/                 # Autenticação
-│   │   ├── dashboard/            # Dados do dashboard
-│   │   ├── professionals/        # CRUD de profissionais
-│   │   └── vacations/            # CRUD de férias
-│   ├── dashboard/                # Página do dashboard
-│   ├── login/                    # Página de login
-│   ├── professionals/            # Página de profissionais
-│   ├── register/                 # Página de registro
-│   ├── vacations/                # Página de férias
-│   ├── globals.css               # Estilos globais
-│   └── layout.tsx                # Layout raiz
-├── components/                   # Componentes React reutilizáveis
-│   ├── Button.tsx
-│   ├── Card.tsx
-│   ├── Input.tsx
-│   ├── LoadingSpinner.tsx
-│   ├── Navbar.tsx
-│   └── Providers.tsx
-├── lib/                          # Funções utilitárias
-│   ├── auth.ts                   # Lógica de autenticação
-│   ├── auth-config.ts            # Configuração NextAuth
-│   ├── db.ts                     # Funções de banco de dados
-│   └── utils.ts                  # Utilitários gerais
-├── types/                        # Definições TypeScript
-│   ├── index.ts                  # Tipos principais
-│   └── next-auth.d.ts            # Tipos NextAuth
-├── data/                         # Arquivos de dados JSON (criado automaticamente)
-├── middleware.ts                 # Middleware de autenticação
-├── next.config.js                # Configuração Next.js
-├── tailwind.config.ts            # Configuração Tailwind
-└── package.json                  # Dependências
+```mermaid
+flowchart LR
+  Browser --> NextApp
+  NextApp --> NextAuth
+  NextApp --> API
+  API --> DbSwitch
+  DbSwitch --> Supabase
+  DbSwitch --> SeedDemo
 ```
 
-## 💾 Armazenamento de Dados
-
-O sistema utiliza arquivos JSON locais para armazenamento de dados. Os arquivos são criados automaticamente na pasta `data/`:
-
-- `users.json` - Dados dos usuários
-- `professionals.json` - Dados dos profissionais
-- `vacations.json` - Dados dos períodos de férias
-
-**Nota**: Para produção, considere migrar para um banco de dados real (PostgreSQL, MongoDB, etc.)
-
-## 🎨 Design
-
-- **Tipografia**: PT Sans (Google Fonts)
-- **Cores**: Paleta moderna com suporte a dark mode
-- **Layout**: Limpo e direto com apresentação clara de dados
-- **Ícones**: Lucide React - simples e reconhecíveis
-- **Animações**: Transições suaves nas atualizações
-
-## 🔒 Segurança
-
-- Senhas criptografadas com bcrypt
-- Autenticação JWT via NextAuth.js
-- Rotas protegidas via middleware
-- Validação de dados no servidor
-- Isolamento de dados por usuário
-
-## 🛠️ Scripts Disponíveis
+## Development
 
 ```bash
-npm run dev      # Inicia o servidor de desenvolvimento
-npm run build    # Cria build de produção
-npm run start    # Inicia o servidor de produção
-npm run lint     # Executa o linter
+npm run lint          # ESLint strict type-checked, max-warnings 0
+npm run typecheck     # tsc --noEmit (app + node configs)
+npm run complexity    # complexity and size limits via ESLint
+npm test              # unit + property + regression tests
+npm run test:coverage # c8 with 90% branch gate on pure lib modules
+npm run test:property # fast-check properties
+npm run test:mutation # Stryker on pure lib modules
+npm run build         # production build
 ```
 
-## 🔧 Solução de Problemas
+### Engineering standards
 
-### Erro de Cache do Webpack
+- TypeScript: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`
+- ESLint: `strictTypeChecked`, complexity ≤ 15 (pages higher), max file/function size
+- IDs: UUIDv7 via `lib/uuid-v7.ts` and `crypto.randomBytes` (OS CSPRNG)
+- Coverage: ≥ 90% branches on covered pure modules
+- CI treats warnings as errors; no `continue-on-error` / `|| true` on quality gates
 
-Se você encontrar o erro `[webpack.cache.PackFileCacheStrategy] Caching failed for pack`:
+## CI/CD and quality
 
-**Solução rápida (PowerShell):**
+GitHub Actions (`.github/workflows/ci.yml`) on `ubuntu-latest`:
 
-```powershell
-.\clear-cache.ps1
-npm run dev
+1. Lint, typecheck, complexity
+2. Tests and 90% branch coverage
+3. audit-ci, gitleaks, OSV scanner, knip
+4. Stryker mutation testing
+5. Production build
+6. actionlint + zizmor (pinned action SHAs, `contents: read`)
+
+Concurrency cancels in-progress runs on the same ref. npm cache is enabled.
+
+## Project layout
+
+```
+app/            # App Router pages and API routes
+components/     # UI components
+lib/            # Auth, storage switch, validation, UUIDv7, utils
+test/           # node:test unit, property, and regression tests
+docs/assets/    # Real screenshots from the running app
+.github/        # CI, gitleaks, audit-ci, osv-scanner config
 ```
 
-**Solução manual:**
+## Status
 
-```powershell
-# Parar o servidor (Ctrl+C)
-Remove-Item -Recurse -Force .next
-npm run dev
-```
+| Field | Value |
+|-------|-------|
+| Objective | Manage vacation periods and revenue impact for professionals |
+| Status | Active development |
+| Demo | Built-in seed account (no external DB required) |
 
-Este erro foi corrigido na configuração do webpack, mas pode aparecer ocasionalmente. A configuração atual usa cache em memória no desenvolvimento para evitar esse problema.
+## Contributing
 
-## 📱 Responsividade
+1. Fork and create a branch
+2. Use Conventional Commits (`feat:`, `fix:`, `chore:`, …)
+3. Keep `npm run lint`, `typecheck`, and `test:coverage` green
+4. Open a PR against `main`
 
-A aplicação é totalmente responsiva e funciona em:
+## License
 
-- Desktop (1024px+)
-- Tablet (768px - 1023px)
-- Mobile (< 768px)
-
-## 🌙 Dark Mode
-
-O sistema suporta dark mode automático baseado nas preferências do sistema operacional do usuário.
-
-## 🚀 Deploy
-
-### Deploy na Vercel (Recomendado)
-
-A Vercel é a plataforma oficial para Next.js e oferece deploy gratuito com:
-
-- ✅ HTTPS automático
-- ✅ Proteção DDoS incluída
-- ✅ CDN global
-- ✅ Preview URLs para cada PR
-- ✅ Zero configuração necessária
-
-#### Opção 1: Via Dashboard Web
-
-1. Acesse o [vercel](https://vercel.com/new)
-2. Conecte sua conta GitHub
-3. Importe este repositório
-4. Configure a variável de ambiente:
-   - Clique em **Add** em "Environment Variables"
-   - **Name:** `NEXTAUTH_SECRET`
-   - **Value:** Sua chave gerada (gere com comando abaixo)
-   - Selecione todos os ambientes (Production, Preview, Development)
-   - Salve
-
-   > 💡 **Nota:** A `NEXTAUTH_URL` é detectada automaticamente pela Vercel!
-
-5. Clique em "Deploy"
-
-#### Opção 2: Via CLI
-
-```bash
-# Instalar Vercel CLI
-npm install -g vercel
-
-# Fazer login
-vercel login
-
-# Deploy em produção
-vercel --prod
-```
-
-#### Configurar Variável de Ambiente
-
-```bash
-# Adicionar NEXTAUTH_SECRET (OBRIGATÓRIO)
-vercel env add NEXTAUTH_SECRET production
-```
-
-**Gere uma chave segura com:**
-
-```bash
-# No Git Bash ou WSL (Windows)
-openssl rand -base64 32
-
-# Ou no PowerShell
-[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))
-```
-
-> 💡 **Dica:** A `NEXTAUTH_URL` não é necessária - a Vercel detecta automaticamente!
-
-### ⚠️ Importante: Persistência de Dados
-
-Esta aplicação usa **armazenamento adaptativo**:
-
-**Desenvolvimento Local:**
-- ✅ Dados salvos em arquivos JSON (`/data` folder)
-- ✅ Dados persistem entre reinicializações
-
-**Produção (Vercel):**
-- ✅ O **modo demonstração** funciona perfeitamente (in-memory)
-- ⚠️ **SEM banco de dados:** Armazenamento volátil - dados perdidos a cada reinicialização
-- ⚠️ Dados de usuários **não persistem** entre deploys
-
-**🎯 Para Produção Real - Use Supabase!**
-
-Este projeto está **pronto para Supabase** - basta configurar! Veja o guia completo em [`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md)
-
-**Benefícios do Supabase:**
-- ✅ PostgreSQL real e robusto
-- ✅ Dados persistem permanentemente
-- ✅ Gratuito até 500MB
-- ✅ Configuração em ~10 minutos
-- ✅ Código já está preparado!
-
-## 📄 Licença
-
-Este projeto é privado e de uso interno.
-
-## 🤝 Contribuindo
-
-Para contribuir com o projeto:
-
-1. Crie uma branch para sua feature
-2. Faça commit das alterações
-3. Abra um Pull Request
-
-## 📞 Suporte
-
-Para questões ou suporte, entre em contato com a equipe de desenvolvimento.
+MIT. See [LICENSE.txt](./LICENSE.txt).

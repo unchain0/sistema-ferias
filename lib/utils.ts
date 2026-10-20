@@ -24,7 +24,7 @@ export function formatCurrency(value: number): string {
 
 export function formatDateToPtBR(dateString: string): string {
   const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
+  if (Number.isNaN(date.getTime())) {
     return dateString; // Return original string if date is invalid
   }
   return date.toLocaleDateString('pt-BR');
@@ -35,8 +35,8 @@ export function formatDateToPtBR(dateString: string): string {
  * Accepts: Date object, ISO string, or dd/mm/yyyy string
  */
 export function formatDateForInput(date: string | Date | null | undefined): string {
-  if (!date) return '';
-  
+  if (date === null || date === undefined) return '';
+
   // If it's a Date object
   if (date instanceof Date) {
     const year = date.getFullYear();
@@ -44,20 +44,21 @@ export function formatDateForInput(date: string | Date | null | undefined): stri
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
-  
+
   // If it comes in Brazilian format dd/mm/yyyy
   if (typeof date === 'string' && date.includes('/')) {
     const [day, month, year] = date.split('/');
-    if (year && month && day) {
+    if (year !== undefined && month !== undefined && day !== undefined) {
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
   }
-  
+
   // If it's already in ISO format yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss
   if (typeof date === 'string' && date.includes('-')) {
-    return date.split('T')[0]; // Remove time if exists
+    const parts = date.split('T');
+    return parts[0] ?? ''; // Remove time if exists
   }
-  
+
   return '';
 }
 
@@ -65,27 +66,27 @@ export function formatDateForInput(date: string | Date | null | undefined): stri
  * Converts date from ISO format (yyyy-MM-dd) to Brazilian format (dd/mm/yyyy)
  */
 export function convertISOToBR(isoDate: string): string {
-  if (!isoDate) return '';
-  
+  if (isoDate === '') return '';
+
   // Handle ISO datetime format
-  const dateOnly = isoDate.split('T')[0];
+  const dateOnly = isoDate.split('T')[0] ?? '';
   const [year, month, day] = dateOnly.split('-');
-  
-  if (year && month && day) {
+
+  if (year !== undefined && month !== undefined && day !== undefined) {
     return `${day}/${month}/${year}`;
   }
-  
+
   return '';
 }
 
-export function cn(...classes: (string | undefined | null | false)[]): string {
+export function cn(...classes: Array<string | undefined | null | false>): string {
   return classes.filter(Boolean).join(' ');
 }
 
-// Given acquisition period, compute concessivo period (período concessivo - the 12-month period 
+// Given acquisition period, compute concessivo period (período concessivo - the 12-month period
 // after acquisition when vacation can be taken, as defined in Brazilian labor law)
 export function computeConcessivePeriod(
-  acquisitionStartDate: string,
+  _acquisitionStartDate: string,
   acquisitionEndDate: string
 ): { start: string; end: string } {
   const endParsed = parseISO(acquisitionEndDate);
