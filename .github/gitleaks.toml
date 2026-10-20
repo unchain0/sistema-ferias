@@ -11,44 +11,21 @@ useDefault = true
 [allowlist]
 description = "Allowlisted patterns for test fixtures and demo credentials"
 paths = [
-  "test/**/*",
-  "**/*.test.ts",
-  "**/*.test.tsx",
-  "lib/seed-demo.ts",
+  "test/.*",
+  ".*\\.test\\.ts",
+  ".*\\.test\\.tsx",
+  "lib/seed-demo\\.ts",
+  "\\.env\\.example",
+  "\\.env\\.local\\.example",
 ]
 commits = []
 stoplists = []
-
-[[allowlist.regexes]]
-description = "Demo credentials used in tests and seed data"
-regex = '''(?i)(demo|test|example|fake|mock)['\"\\s:=]{1,5}(password|secret|key|token)['\"\\s:=]{1,5}(demo123|test123|example|fake|mock)'''
-
-[[allowlist.regexes]]
-description = "UUIDv7 patterns that look like secrets but are test IDs"
-regex = '01941f29-7c00-7e43-b999-cafa1b9c8ee9'
-
-[[allowlist.regexes]]
-description = "CI dummy secrets in workflow files"
-regex = 'ci-dummy-secret-not-used-in-production'
-
-[[allowlist.regexes]]
-description = "Test placeholder Supabase URLs"
-regex = 'https://ci-placeholder\\.supabase\\.co'
-
-[[allowlist.regexes]]
-description = "Test placeholder Supabase keys"
-regex = 'ci-dummy-anon-key-not-used-in-production'
-
-[[allowlist.regexes]]
-description = "Non-secret test keys (JWT-shaped but not real)"
-regex = 'test-(jwt-secret|nextauth-secret|anon-key)-not-a-credential'
-
-# Generic allowlist for obviously non-secret patterns
-[[allowlist.regexes]]
-description = "Placeholder/example values in documentation"
-regex = '''(?i)(your-secret-key-here|your-password-here|example\\.com|placeholder|changeme|changethis|xxx+|yyy+|zzz+|123456|abcdef)'''
-
-# NEXTAUTH_SECRET in .env.example is a placeholder
-[[allowlist.paths]]
-description = "Environment example file"
-path = ".env.example"
+regexes = [
+  "(?i)(demo|test|example|fake|mock)['\"\\s:=]{1,5}(password|secret|key|token)['\"\\s:=]{1,5}(demo123|test123|example|fake|mock)",
+  "01941f29-7c00-7e43-b999-cafa1b9c8ee9",
+  "ci-dummy-secret-not-used-in-production",
+  "https://ci-placeholder\\.supabase\\.co",
+  "ci-dummy-anon-key-not-used-in-production",
+  "test-(jwt-secret|nextauth-secret|anon-key)-not-a-credential",
+  "(?i)(your-secret-key-here|your-password-here|example\\.com|placeholder|changeme|changethis|xxx+|yyy+|zzz+|123456|abcdef)",
+]

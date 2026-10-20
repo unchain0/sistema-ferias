@@ -3,7 +3,7 @@
 Vacation management for Brazilian teams: track acquisition and usage periods, revenue impact, and professionals in one Next.js app.
 
 [![CI](https://github.com/unchain0/sistema-ferias/actions/workflows/ci.yml/badge.svg)](https://github.com/unchain0/sistema-ferias/actions/workflows/ci.yml)
-[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](./.nvmrc)
+[![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](./.nvmrc)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](./tsconfig.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.txt)
 [![Coverage](https://img.shields.io/badge/coverage-90%25%20branches-success)](./package.json)
@@ -30,7 +30,7 @@ Demo dashboard after seed login:
 
 ## Quick start
 
-**Prerequisites:** Node.js 20+ (see `.nvmrc`), npm 10+
+**Prerequisites:** Node.js 22+ (see `.nvmrc`), npm 10+
 
 ```bash
 git clone https://github.com/unchain0/sistema-ferias.git
@@ -60,7 +60,7 @@ Demo mode works without Supabase using an in-memory seed store.
 | `NEXTAUTH_URL` | Public app URL | Yes |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | No (demo works without) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | No |
-| `SUPABASE_JWT_SECRET` | Supabase JWT secret | No |
+| `SUPABASE_JWT_SECRET` | Supabase JWT secret | Yes (when using Supabase) |
 | `DEMO_MODE` | Force demo path (`true`/`false`) | No |
 
 See [`.env.example`](./.env.example). Never commit real secrets.

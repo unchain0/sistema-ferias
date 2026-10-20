@@ -17,10 +17,11 @@ import {
 function hasSupabaseEnvironment(): boolean {
   const url = process.env['NEXT_PUBLIC_SUPABASE_URL'];
   const key = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
+  const jwtSecret = process.env['SUPABASE_JWT_SECRET'];
   const demoMode = process.env['DEMO_MODE'] === 'true';
   // DEMO_MODE=true forces demo/fallback storage even if Supabase is configured
   if (demoMode) return false;
-  return url !== undefined && url !== '' && key !== undefined && key !== '';
+  return url !== undefined && url !== '' && key !== undefined && key !== '' && jwtSecret !== undefined && jwtSecret !== '';
 }
 
 async function withStorageFallback<T>(
