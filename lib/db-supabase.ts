@@ -177,8 +177,8 @@ export async function updateProfessional(
   updates: Readonly<Partial<Professional>>
 ): Promise<Professional | null> {
   const updateData: Record<string, unknown> = {};
-  if (updates.name !== undefined) updateData['name'] = updates.name;
-  if (updates.clientManager !== undefined) updateData['client_manager'] = updates.clientManager;
+  if (updates.name !== undefined && updates.name !== '') updateData['name'] = updates.name;
+  if (updates.clientManager !== undefined && updates.clientManager !== '') updateData['client_manager'] = updates.clientManager;
   if (updates.monthlyRevenue !== undefined) updateData['monthly_revenue'] = updates.monthlyRevenue;
 
   const s = createSupabaseForClaims({ sub: userId });
