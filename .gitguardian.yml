@@ -1,0 +1,6 @@
+# GitGuardian configuration to ignore known false positives in git history
+# These are example JWT tokens in .env.local.example (deleted file) that are not real secrets
+
+ignore:
+  # Ignore the entire .env.local.example file in history (deleted file with dummy values)
+  - path: ".env.local.example"
