@@ -1,45 +1,68 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth-config';
 import { getVacationPeriods, createVacationPeriod, getProfessionalById } from '@/lib/db-switch';
-import { VacationPeriod } from '@/types';
-import { calculateVacationDays, calculateRevenueDeduction } from '@/lib/utils';
 import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
+import { calculateVacationDays, calculateRevenueDeduction } from '@/lib/utils';
 
-export async function GET(request: Request) {
+interface CreateVacationBody {
+  readonly professionalId: string;
+  readonly acquisitionStartDate: string;
+  readonly acquisitionEndDate: string;
+  readonly usageStartDate: string;
+  readonly usageEndDate: string;
+}
+
+const VALID_ORDER_FIELDS = [
+  'id',
+  'professionalId',
+  'userId',
+  'acquisitionStartDate',
+  'acquisitionEndDate',
+  'usageStartDate',
+  'usageEndDate',
+  'totalDays',
+  'revenueDeduction',
+  'createdAt',
+] as const;
+
+type ValidOrderField = typeof VALID_ORDER_FIELDS[number];
+
+export async function GET(request: Request): Promise<ReturnType<typeof NextResponse.json>> {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
+  if (session?.user?.id === undefined) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
   // Parse pagination and ordering params with sensible defaults
   const { searchParams } = new URL(request.url);
-  const limitParam = searchParams.get('limit');
-  const offsetParam = searchParams.get('offset');
-  const orderParam = searchParams.get('order') || 'createdAt:desc';
+  const limitParameter = searchParams.get('limit');
+  const offsetParameter = searchParams.get('offset');
+  const orderParameter = searchParams.get('order') ?? 'createdAt:desc';
 
-  const limit = Math.min(Math.max(parseInt(limitParam || '50', 10) || 50, 1), 200);
-  const offset = Math.max(parseInt(offsetParam || '0', 10) || 0, 0);
+  const parsedLimit = Number.parseInt(limitParameter ?? '50', 10);
+  const parsedOffset = Number.parseInt(offsetParameter ?? '0', 10);
+  const limit = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 200) : 50;
+  const offset = Number.isFinite(parsedOffset) ? Math.max(parsedOffset, 0) : 0;
 
-  const [orderField, orderDir] = orderParam.split(':');
-  
-  // Validate orderField to ensure it's a valid key of VacationPeriod
-  const validOrderFields = ['id', 'professionalId', 'userId', 'acquisitionStartDate', 'acquisitionEndDate', 
-                            'usageStartDate', 'usageEndDate', 'totalDays', 'revenueDeduction', 'createdAt', 'updatedAt'];
-  const validatedOrderField = validOrderFields.includes(orderField) ? orderField : 'createdAt';
+  const [orderFieldRaw, orderDirectionRaw] = orderParameter.split(':');
+  const orderDirection = orderDirectionRaw?.toLowerCase() === 'asc' ? 1 : -1;
+  const validatedOrderField: ValidOrderField = VALID_ORDER_FIELDS.includes(orderFieldRaw as ValidOrderField)
+    ? (orderFieldRaw as ValidOrderField)
+    : 'createdAt';
 
   const all = await getVacationPeriods(session.user.id);
 
   // Stable sort to avoid shifting order between responses
   const sorted = [...all].sort((a, b) => {
-    const dir = orderDir?.toLowerCase() === 'asc' ? 1 : -1;
-    const aVal = (a as any)[validatedOrderField as keyof VacationPeriod] ?? '';
-    const bVal = (b as any)[validatedOrderField as keyof VacationPeriod] ?? '';
-    if (aVal < bVal) return -1 * dir;
-    if (aVal > bVal) return 1 * dir;
+    const aValue = a[validatedOrderField] ?? '';
+    const bValue = b[validatedOrderField] ?? '';
+    if (aValue < bValue) return -1 * orderDirection;
+    if (aValue > bValue) return 1 * orderDirection;
     // tie-breaker by id for determinism
-    return a.id.localeCompare(b.id) * dir;
+    return a.id.localeCompare(b.id) * orderDirection;
   });
 
   const paged = sorted.slice(offset, offset + limit);
@@ -53,19 +76,20 @@ export async function GET(request: Request) {
   return NextResponse.json(paged, { headers });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<ReturnType<typeof NextResponse.json>> {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
+  if (session?.user?.id === undefined) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
+   
   if (isDemoUser(session.user.email)) {
     return createDemoProtectionResponse();
   }
 
   try {
-    const data = await request.json();
+    const data = (await request.json()) as CreateVacationBody;
     const {
       professionalId,
       acquisitionStartDate,
@@ -74,16 +98,30 @@ export async function POST(request: Request) {
       usageEndDate,
     } = data;
 
-    if (!professionalId || !acquisitionStartDate || !acquisitionEndDate || !usageStartDate || !usageEndDate) {
-      return NextResponse.json(
-        { error: 'Todos os campos são obrigatórios' },
-        { status: 400 }
-      );
+    const requiredFields: Array<[string, unknown]> = [
+      ['professionalId', professionalId],
+      ['acquisitionStartDate', acquisitionStartDate],
+      ['acquisitionEndDate', acquisitionEndDate],
+      ['usageStartDate', usageStartDate],
+      ['usageEndDate', usageEndDate],
+    ];
+
+    for (const [fieldName, value] of requiredFields) {
+      if (
+        value === undefined ||
+        value === null ||
+        (typeof value === 'string' && value.trim() === '')
+      ) {
+        return NextResponse.json(
+          { error: `Campo obrigatório ausente: ${fieldName}` },
+          { status: 400 }
+        );
+      }
     }
 
     const professional = await getProfessionalById(professionalId, session.user.id);
-    
-    if (!professional) {
+
+    if (professional === null) {
       return NextResponse.json(
         { error: 'Profissional não encontrado' },
         { status: 404 }

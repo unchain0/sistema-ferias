@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+
 import {
   getUserByEmail,
   createUser,
@@ -9,18 +10,22 @@ import {
   getProfessionals,
   getVacationPeriods,
 } from '@/lib/db-switch';
-import { createDemoData, getDemoSnapshot } from '@/lib/seed-demo';
+import { DEMO_PASSWORD, getDemoSnapshot } from '@/lib/seed-demo';
 import { isStorageUnavailable } from '@/lib/storage-errors';
 
-async function persistDemoData(demoData: Awaited<ReturnType<typeof createDemoData>>) {
+interface PersistResult {
+  readonly skipped: boolean;
+  readonly createdProfessionals: number;
+  readonly createdVacations: number;
+  readonly totalProfessionals: number;
+  readonly totalVacations: number;
+}
+
+async function persistDemoData(
+  demoData: Awaited<ReturnType<typeof getDemoSnapshot>>
+): Promise<PersistResult> {
   let user = await getUserByEmail(demoData.user.email);
-  if (!user) {
-    user = await createUser({
-      email: demoData.user.email,
-      name: demoData.user.name,
-      password: demoData.user.password,
-    });
-  } else {
+  if (user !== null) {
     const existingProfessionals = await getProfessionals(user.id);
     const existingVacations = await getVacationPeriods(user.id);
     const seedProfessionalsCount = demoData.professionals.length;
@@ -30,7 +35,7 @@ async function persistDemoData(demoData: Awaited<ReturnType<typeof createDemoDat
       existingVacations.length === seedVacationsCount
     ) {
       return {
-        skipped: true as const,
+        skipped: true,
         createdProfessionals: 0,
         createdVacations: 0,
         totalProfessionals: existingProfessionals.length,
@@ -40,9 +45,15 @@ async function persistDemoData(demoData: Awaited<ReturnType<typeof createDemoDat
 
     await deleteAllVacationPeriods(user.id);
     await deleteAllProfessionals(user.id);
+  } else {
+    user = await createUser({
+      email: demoData.user.email,
+      name: demoData.user.name,
+      password: demoData.user.password,
+    });
   }
 
-  const profIdMap: Record<string, string> = {};
+  const professionalIdMap: Record<string, string> = {};
   let createdProfessionals = 0;
   for (const p of demoData.professionals) {
     const created = await createProfessional({
@@ -51,14 +62,14 @@ async function persistDemoData(demoData: Awaited<ReturnType<typeof createDemoDat
       clientManager: p.clientManager,
       monthlyRevenue: p.monthlyRevenue,
     });
-    profIdMap[p.id] = created.id;
+    professionalIdMap[p.id] = created.id;
     createdProfessionals++;
   }
 
   let createdVacations = 0;
   for (const v of demoData.vacations) {
-    const mappedProfessionalId = profIdMap[v.professionalId];
-    if (!mappedProfessionalId) continue;
+    const mappedProfessionalId = professionalIdMap[v.professionalId];
+    if (mappedProfessionalId === undefined) continue;
     await createVacationPeriod({
       professionalId: mappedProfessionalId,
       userId: user.id,
@@ -76,7 +87,7 @@ async function persistDemoData(demoData: Awaited<ReturnType<typeof createDemoDat
   const totalVacations = (await getVacationPeriods(user.id)).length;
 
   return {
-    skipped: false as const,
+    skipped: false,
     createdProfessionals,
     createdVacations,
     totalProfessionals,
@@ -84,7 +95,7 @@ async function persistDemoData(demoData: Awaited<ReturnType<typeof createDemoDat
   };
 }
 
-export async function POST() {
+export async function POST(): Promise<ReturnType<typeof NextResponse.json>> {
   try {
     // Always build the in-process seed first so demo login can proceed
     // even when external storage (Supabase) is unreachable.
@@ -97,6 +108,7 @@ export async function POST() {
           ? 'Dados demo já estavam atualizados (sem reinicialização)'
           : 'Dados demo inicializados com sucesso',
         email: demoData.user.email,
+        password: DEMO_PASSWORD,
         createdProfessionals: persisted.createdProfessionals,
         createdVacations: persisted.createdVacations,
         totalProfessionals: persisted.totalProfessionals,
@@ -109,8 +121,7 @@ export async function POST() {
       if (!isStorageUnavailable(storageError)) {
         // Unexpected logical errors still surface as 500.
         // Network/DNS/fetch failures fall through to seed-only success.
-        const message =
-          storageError instanceof Error ? storageError.message : String(storageError);
+        const message = storageError instanceof Error ? storageError.message : String(storageError);
         if (!/fetch failed|ENOTFOUND|ECONNREFUSED|duplicate|unique/i.test(message)) {
           throw storageError;
         }
@@ -119,6 +130,7 @@ export async function POST() {
       return NextResponse.json({
         message: 'Dados demo disponíveis (armazenamento externo indisponível)',
         email: demoData.user.email,
+        password: DEMO_PASSWORD,
         createdProfessionals: demoData.professionals.length,
         createdVacations: demoData.vacations.length,
         totalProfessionals: demoData.professionals.length,

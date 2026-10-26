@@ -1,0 +1,9 @@
+# Gitleaks configuration for Sistema de Férias.
+
+title = "Sistema de Férias - Secret Detection"
+
+[extend]
+useDefault = true
+
+[allowlist]
+paths = ['\.env\.local\.example']

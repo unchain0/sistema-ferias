@@ -1,7 +1,7 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { Eye, AlertCircle } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 export function DemoBanner() {
   const { data: session } = useSession();

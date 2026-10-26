@@ -1,9 +1,10 @@
 export const dynamic = 'force-static';
 import NextDynamic from 'next/dynamic';
-import { Card } from '@/components/Card';
 import { Suspense } from 'react';
 
-const LoginForm = NextDynamic(() => import('@/components/LoginForm').then(m => m.LoginForm));
+import { Card } from '@/components/card';
+
+const LoginForm = NextDynamic(() => import('@/components/login-form').then(m => m.LoginForm));
 
 export default function LoginPage() {
   return (

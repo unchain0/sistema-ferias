@@ -1,16 +1,17 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { Navbar } from '@/components/Navbar';
-import { Card } from '@/components/Card';
-import { Button } from '@/components/Button';
-import { Input } from '@/components/Input';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { Professional } from '@/types';
-import { formatCurrency } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, AlertCircle, Search } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { useState, useEffect, useMemo } from 'react';
+
+import { Button } from '@/components/button';
+import { Card } from '@/components/card';
+import { Input } from '@/components/input';
+import { LoadingSpinner } from '@/components/loading-spinner';
+import { Navbar } from '@/components/navbar';
 import { handleDemoError } from '@/lib/handle-demo-error';
+import { formatCurrency } from '@/lib/utils';
+import type { Professional } from '@/types';
 
 export default function ProfessionalsPage() {
   const { data: session } = useSession();
@@ -29,7 +30,7 @@ export default function ProfessionalsPage() {
   });
 
   useEffect(() => {
-    fetchProfessionals();
+    void fetchProfessionals();
   }, []);
 
   const fetchProfessionals = async () => {
@@ -176,14 +177,14 @@ export default function ProfessionalsPage() {
                 type="text"
                 placeholder="Buscar por nome ou gestor..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); }}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
               />
             </div>
             
             {!showForm && (
               <Button 
-                onClick={() => setShowForm(true)}
+                onClick={() => { setShowForm(true); }}
                 disabled={isDemo}
                 className="flex flex-row items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
               >
@@ -205,7 +206,7 @@ export default function ProfessionalsPage() {
               <p className="text-sm text-amber-700 dark:text-amber-400">{error}</p>
             </div>
             <button
-              onClick={() => setError(null)}
+              onClick={() => { setError(null); }}
               className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200"
             >
               <X className="w-5 h-5" />
@@ -232,7 +233,7 @@ export default function ProfessionalsPage() {
               <Input
                 label="Nome do Profissional"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => { setFormData({ ...formData, name: e.target.value }); }}
                 placeholder="João Silva"
                 required
               />
@@ -240,7 +241,7 @@ export default function ProfessionalsPage() {
               <Input
                 label="Gestor no Cliente"
                 value={formData.clientManager}
-                onChange={(e) => setFormData({ ...formData, clientManager: e.target.value })}
+                onChange={(e) => { setFormData({ ...formData, clientManager: e.target.value }); }}
                 placeholder="Maria Santos"
                 required
               />
@@ -250,7 +251,7 @@ export default function ProfessionalsPage() {
                 type="number"
                 step="0.01"
                 value={formData.monthlyRevenue}
-                onChange={(e) => setFormData({ ...formData, monthlyRevenue: e.target.value })}
+                onChange={(e) => { setFormData({ ...formData, monthlyRevenue: e.target.value }); }}
                 placeholder="15000.00"
                 required
               />
@@ -312,7 +313,7 @@ export default function ProfessionalsPage() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      onClick={() => handleEdit(professional)}
+                      onClick={() => { handleEdit(professional); }}
                       disabled={isDemo}
                       className="flex-1 flex flex-row justify-center items-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
                     >

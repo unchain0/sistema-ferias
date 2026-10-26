@@ -1,16 +1,25 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth-config';
 import { updateProfessional, deleteProfessional } from '@/lib/db-switch';
 import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
 
+interface UpdateProfessionalBody {
+  readonly name: string;
+  readonly clientManager: string;
+  readonly monthlyRevenue: string | number;
+}
+
+type RouteParameters = Promise<{ id: string }>;
+
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+  { params }: { params: RouteParameters }
+): Promise<ReturnType<typeof NextResponse.json>> {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
+  if (session?.user?.id === undefined) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
@@ -20,16 +29,16 @@ export async function PUT(
 
   try {
     const { id } = await params;
-    const data = await request.json();
+    const data = (await request.json()) as UpdateProfessionalBody;
     const updates = {
       name: data.name,
       clientManager: data.clientManager,
-      monthlyRevenue: parseFloat(data.monthlyRevenue),
+      monthlyRevenue: Number.parseFloat(String(data.monthlyRevenue)),
     };
 
     const professional = await updateProfessional(id, session.user.id, updates);
 
-    if (!professional) {
+    if (professional === null) {
       return NextResponse.json(
         { error: 'Profissional não encontrado' },
         { status: 404 }
@@ -47,12 +56,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+  _request: Request,
+  { params }: { params: RouteParameters }
+): Promise<ReturnType<typeof NextResponse.json>> {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
+  if (session?.user?.id === undefined) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 

@@ -1,24 +1,35 @@
-import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+
+import type { NextAuthOptions } from 'next-auth';
+
 import { authenticateUser } from './auth';
 
+function requireEnvironment(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value === '') {
+    throw new Error(`Missing env ${name}`);
+  }
+  return value;
+}
+
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: requireEnvironment('NEXTAUTH_SECRET'),
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Senha", type: "password" }
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Senha', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        const email = credentials?.email;
+        const password = credentials?.password;
+        if (email === undefined || email === '' || password === undefined || password === '') {
           return null;
         }
 
-        const user = await authenticateUser(credentials.email, credentials.password);
-
-        if (!user) {
+        const user = await authenticateUser(email, password);
+        if (user === null) {
           return null;
         }
 
@@ -27,8 +38,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
         };
-      }
-    })
+      },
+    }),
   ],
   session: {
     strategy: 'jwt',
@@ -37,15 +48,18 @@ export const authOptions: NextAuthOptions = {
     signIn: '/login',
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+    jwt({ token, user }) {
+      // On sign-in, NextAuth passes the user object; copy id onto the JWT.
+      const signedIn = user as { id?: string } | undefined;
+      if (signedIn?.id !== undefined) {
+        token.id = signedIn.id;
       }
       return token;
     },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
+    session({ session, token }) {
+      const sessionUser = session.user as { id?: string } | undefined;
+      if (sessionUser !== undefined && typeof token.id === 'string') {
+        sessionUser.id = token.id;
       }
       return session;
     },

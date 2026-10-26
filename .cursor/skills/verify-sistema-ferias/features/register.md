@@ -29,7 +29,7 @@ Preconditions:
 - **Open form.** `page.goto(base + '/register')`. Expect heading `Criar Conta` and button `Criar Conta`.
 - **Email validation.** Fill name, invalid email `not-an-email`, matching passwords; submit. Expect toast `Por favor, insira um email válido`.
 - **Password mismatch.** Use a valid email, different password and confirm values; submit. Expect toast `As senhas não coincidem`.
-- **Submit valid.** Name `Agente Verify`, unique email, password `senhateste123` twice. Click `Criar Conta`. Expect navigation to `/login` and toast `Conta criada com sucesso`.
+- **Submit valid.** Use `Agente Verify`, a unique email, and a runtime-generated password twice. Click `Criar Conta`. Expect navigation to `/login` and toast `Conta criada com sucesso`.
 - **Login with new account.** On `/login`, fill the same email/password, click `Entrar`. Expect `/dashboard` and heading `Dashboard de Impacto Financeiro`.
 - **Proof.** Screenshots: register form, post-register login, dashboard. Helper: `helpers/drive-register.mjs` (invoked by `helpers/run-proof.sh`).
 

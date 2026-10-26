@@ -1,0 +1,33 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "app/**/*.{ts,tsx}",
+    "lib/**/*.ts",
+    "components/**/*.tsx"
+  ],
+  "project": [
+    "**/*.{ts,tsx,js,mjs}"
+  ],
+  "ignore": [
+    ".next/**",
+    "coverage/**",
+    ".stryker-tmp/**",
+    "test/**",
+    "reports/**"
+  ],
+  "ignoreDependencies": [
+    "lint-staged",
+    "playwright",
+    "prettier",
+    "postcss-load-config",
+    "husky",
+    "autoprefixer",
+    "tailwindcss",
+    "postcss",
+    "audit-ci",
+    "@stryker-mutator/core"
+  ],
+  "ignoreBinaries": [
+    "gitleaks"
+  ]
+}

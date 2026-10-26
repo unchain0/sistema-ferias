@@ -1,14 +1,20 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth-config';
 import { getProfessionals, createProfessional } from '@/lib/db-switch';
-import { Professional } from '@/types';
 import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
 
-export async function GET() {
+interface CreateProfessionalBody {
+  readonly name: string;
+  readonly clientManager: string;
+  readonly monthlyRevenue: string | number;
+}
+
+export async function GET(): Promise<ReturnType<typeof NextResponse.json>> {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
+  if (session?.user?.id === undefined) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
@@ -16,10 +22,10 @@ export async function GET() {
   return NextResponse.json(professionals);
 }
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<ReturnType<typeof NextResponse.json>> {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
+  if (session?.user?.id === undefined) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
@@ -28,10 +34,18 @@ export async function POST(request: Request) {
   }
 
   try {
-    const data = await request.json();
+    const data = (await request.json()) as CreateProfessionalBody;
     const { name, clientManager, monthlyRevenue } = data;
 
-    if (!name || !clientManager || !monthlyRevenue) {
+    if (
+      typeof name !== 'string' ||
+      name.trim() === '' ||
+      typeof clientManager !== 'string' ||
+      clientManager.trim() === '' ||
+      monthlyRevenue === undefined ||
+      monthlyRevenue === null ||
+      (typeof monthlyRevenue === 'string' && monthlyRevenue.trim() === '')
+    ) {
       return NextResponse.json(
         { error: 'Todos os campos são obrigatórios' },
         { status: 400 }
@@ -42,7 +56,7 @@ export async function POST(request: Request) {
       userId: session.user.id,
       name,
       clientManager,
-      monthlyRevenue: parseFloat(monthlyRevenue),
+      monthlyRevenue: Number.parseFloat(String(monthlyRevenue)),
     });
     return NextResponse.json(created, { status: 201 });
   } catch (error) {

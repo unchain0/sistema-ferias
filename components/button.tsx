@@ -1,7 +1,9 @@
-import { ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+import type { ButtonHTMLAttributes } from 'react';
+
+
+interface ButtonProperties extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
 }
@@ -11,8 +13,8 @@ export function Button({
   variant = 'primary',
   size = 'md',
   className,
-  ...props
-}: ButtonProps) {
+  ...properties
+}: ButtonProperties) {
   const baseStyles = 'font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variants = {
@@ -31,7 +33,7 @@ export function Button({
   return (
     <button
       className={cn(baseStyles, variants[variant], sizes[size], className)}
-      {...props}
+      {...properties}
     >
       {children}
     </button>

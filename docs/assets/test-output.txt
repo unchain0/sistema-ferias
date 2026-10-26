@@ -1,0 +1,23 @@
+▶ utils
+  ✔ calculateVacationDays includes both endpoints (1.387877ms)
+  ✔ calculateRevenueDeduction uses 30-day month (0.123729ms)
+  ✔ formatCurrency returns BRL currency string (11.809928ms)
+  ✔ formatDateToPtBR formats valid dates and keeps invalid input (3.190487ms)
+  ✔ formatDateForInput handles Date, BR, ISO, nullish, and unknown (0.196623ms)
+  ✔ convertISOToBR converts ISO dates and empty input (0.128532ms)
+  ✔ cn joins truthy class names (0.098614ms)
+  ✔ computeConcessivePeriod starts the day after acquisition ends (0.632173ms)
+✔ utils (18.686611ms)
+▶ uuidv7
+  ✔ returns RFC 9562 version 7 identifiers (1.461066ms)
+  ✔ embeds the provided millisecond timestamp (0.238469ms)
+  ✔ produces unique values across many draws (1.588174ms)
+✔ uuidv7 (4.631915ms)
+ℹ tests 11
+ℹ suites 2
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 168.763457

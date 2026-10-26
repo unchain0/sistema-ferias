@@ -1,26 +1,26 @@
 // Script para testar conexão com banco de dados
 // Execute: node scripts/test-db-connection.js
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 // Ler .env.local manualmente
 let supabaseUrl = '';
 let supabaseKey = '';
 
 try {
-  const envPath = path.join(__dirname, '..', '.env.local');
-  const envContent = fs.readFileSync(envPath, 'utf8');
+  const environmentPath = path.join(__dirname, '..', '.env.local');
+  const environmentContent = fs.readFileSync(environmentPath, 'utf8');
   
-  envContent.split('\n').forEach(line => {
+  for (const line of environmentContent.split('\n')) {
     if (line.startsWith('NEXT_PUBLIC_SUPABASE_URL=')) {
       supabaseUrl = line.split('=')[1].trim();
     }
     if (line.startsWith('NEXT_PUBLIC_SUPABASE_ANON_KEY=')) {
       supabaseKey = line.split('=')[1].trim();
     }
-  });
-} catch (err) {
+  }
+} catch {
   // .env.local não existe ou não pode ser lido
 }
 
@@ -38,8 +38,8 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 console.log('✅ Variáveis de ambiente configuradas:');
-console.log(`   URL: ${supabaseUrl.substring(0, 30)}...`);
-console.log(`   Key: ${supabaseKey.substring(0, 30)}...`);
+console.log(`   URL: ${supabaseUrl.slice(0, 30)}...`);
+console.log(`   Key: ${supabaseKey.slice(0, 30)}...`);
 console.log('');
 console.log('➡️  Sistema usará: SUPABASE (dados persistentes!)');
 console.log('');

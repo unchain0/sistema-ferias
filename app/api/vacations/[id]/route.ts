@@ -1,17 +1,28 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth-config';
 import { updateVacationPeriod, deleteVacationPeriod, getProfessionalById } from '@/lib/db-switch';
-import { calculateVacationDays, calculateRevenueDeduction } from '@/lib/utils';
 import { isDemoUser, createDemoProtectionResponse } from '@/lib/demo-protection';
+import { calculateVacationDays, calculateRevenueDeduction } from '@/lib/utils';
+
+interface UpdateVacationBody {
+  readonly professionalId: string;
+  readonly acquisitionStartDate: string;
+  readonly acquisitionEndDate: string;
+  readonly usageStartDate: string;
+  readonly usageEndDate: string;
+}
+
+type RouteParameters = Promise<{ id: string }>;
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+  { params }: { params: RouteParameters }
+): Promise<ReturnType<typeof NextResponse.json>> {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
+  if (session?.user?.id === undefined) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
@@ -21,7 +32,7 @@ export async function PUT(
 
   try {
     const { id } = await params;
-    const data = await request.json();
+    const data = (await request.json()) as UpdateVacationBody;
     const {
       professionalId,
       acquisitionStartDate,
@@ -31,8 +42,8 @@ export async function PUT(
     } = data;
 
     const professional = await getProfessionalById(professionalId, session.user.id);
-    
-    if (!professional) {
+
+    if (professional === null) {
       return NextResponse.json(
         { error: 'Profissional não encontrado' },
         { status: 404 }
@@ -53,7 +64,7 @@ export async function PUT(
 
     const vacation = await updateVacationPeriod(id, session.user.id, updates);
 
-    if (!vacation) {
+    if (vacation === null) {
       return NextResponse.json(
         { error: 'Período de férias não encontrado' },
         { status: 404 }
@@ -71,12 +82,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+  _request: Request,
+  { params }: { params: RouteParameters }
+): Promise<ReturnType<typeof NextResponse.json>> {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
+  if (session?.user?.id === undefined) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 

@@ -7,15 +7,17 @@ const requestCounts = new Map<string, { count: number; resetTime: number }>();
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
-  
-  if (forwarded) {
-    return forwarded.split(',')[0].trim();
+
+  if (forwarded !== null && forwarded !== '') {
+    const parts = forwarded.split(',');
+    const firstIp = parts[0];
+    if (firstIp !== undefined) return firstIp.trim();
   }
-  
-  if (realIP) {
+
+  if (realIP !== null && realIP !== '') {
     return realIP;
   }
-  
+
   return 'unknown';
 }
 
@@ -23,7 +25,7 @@ function checkRateLimit(ip: string, limit: number, windowMs: number): boolean {
   const now = Date.now();
   const record = requestCounts.get(ip);
 
-  if (!record || now > record.resetTime) {
+  if (record === undefined || now > record.resetTime) {
     requestCounts.set(ip, { count: 1, resetTime: now + windowMs });
     return true;
   }
@@ -46,7 +48,7 @@ setInterval(() => {
   }
 }, 60000); // Clean up every minute
 
-export function customSecurityMiddleware(request: NextRequest) {
+export function customSecurityMiddleware(request: NextRequest): NextResponse {
   const ip = getClientIP(request);
   const pathname = request.nextUrl.pathname;
 
@@ -54,7 +56,7 @@ export function customSecurityMiddleware(request: NextRequest) {
   if (pathname.startsWith('/api/')) {
     // 100 requests per minute per IP
     const allowed = checkRateLimit(`api:${ip}`, 100, 60000);
-    
+
     if (!allowed) {
       return new NextResponse(
         JSON.stringify({ error: 'Muitas requisições. Tente novamente em alguns segundos.' }),
@@ -70,7 +72,7 @@ export function customSecurityMiddleware(request: NextRequest) {
   }
 
   // Block common attack patterns
-  const userAgent = request.headers.get('user-agent') || '';
+  const userAgent = request.headers.get('user-agent') ?? '';
   const suspiciousPatterns = [
     'sqlmap',
     'nikto',
@@ -81,16 +83,16 @@ export function customSecurityMiddleware(request: NextRequest) {
     'acunetix',
   ];
 
-  if (suspiciousPatterns.some(pattern => userAgent.toLowerCase().includes(pattern))) {
+  if (suspiciousPatterns.some((pattern) => userAgent.toLowerCase().includes(pattern))) {
     return new NextResponse('Forbidden', { status: 403 });
   }
 
   // Block requests with suspicious query parameters
   const url = request.nextUrl;
   const suspiciousParams = ['<script', 'javascript:', 'onerror=', 'onload=', '../', '..\\'];
-  
+
   for (const param of url.searchParams.values()) {
-    if (suspiciousParams.some(pattern => param.toLowerCase().includes(pattern))) {
+    if (suspiciousParams.some((pattern) => param.toLowerCase().includes(pattern))) {
       return new NextResponse('Bad Request', { status: 400 });
     }
   }
