@@ -28,7 +28,7 @@ Preconditions:
 - Supabase env vars unset for local JSON storage. Do not call production hosts.
 
 - **Open form.** `page.goto(base + '/login')`. Expect heading `Sistema de Férias` and button `Entrar`.
-- **Fail login.** Fill `input[type="email"]` with `nobody@example.com` and `input[type="password"]` with `wrong-password`, click `Entrar`. Expect toast text containing `Email ou senha incorretos` and URL still on `/login`.
+- **Fail login.** Fill `input[type="email"]` with `nobody@example.com` and a runtime-generated invalid password, then click `Entrar`. Expect toast text containing `Email ou senha incorretos` and URL still on `/login`.
 - **Credentials success.** Fill a real throwaway email/password, click `Entrar`. Expect navigation to `/dashboard` and heading `Dashboard de Impacto Financeiro`.
 - **Session persist.** `page.reload()` on `/dashboard`. Expect the same heading and no bounce to `/login`.
 - **Logout.** Click `Sair`. Expect URL `/login`.

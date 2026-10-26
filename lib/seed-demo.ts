@@ -1,3 +1,5 @@
+import { randomBytes } from 'node:crypto';
+
 import { hash } from 'bcryptjs';
 
 import type { User, Professional, VacationPeriod } from '@/types';
@@ -302,4 +304,4 @@ export async function createDemoData(): Promise<DemoSnapshot> {
 }
 
 export const DEMO_EMAIL = 'demo@sistema-ferias.com';
-export const DEMO_PASSWORD = 'demo123';
+export const DEMO_PASSWORD = randomBytes(24).toString('base64url');

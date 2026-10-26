@@ -10,7 +10,7 @@ import {
   getProfessionals,
   getVacationPeriods,
 } from '@/lib/db-switch';
-import { getDemoSnapshot } from '@/lib/seed-demo';
+import { DEMO_PASSWORD, getDemoSnapshot } from '@/lib/seed-demo';
 import { isStorageUnavailable } from '@/lib/storage-errors';
 
 interface PersistResult {
@@ -108,6 +108,7 @@ export async function POST(): Promise<ReturnType<typeof NextResponse.json>> {
           ? 'Dados demo já estavam atualizados (sem reinicialização)'
           : 'Dados demo inicializados com sucesso',
         email: demoData.user.email,
+        password: DEMO_PASSWORD,
         createdProfessionals: persisted.createdProfessionals,
         createdVacations: persisted.createdVacations,
         totalProfessionals: persisted.totalProfessionals,
@@ -129,6 +130,7 @@ export async function POST(): Promise<ReturnType<typeof NextResponse.json>> {
       return NextResponse.json({
         message: 'Dados demo disponíveis (armazenamento externo indisponível)',
         email: demoData.user.email,
+        password: DEMO_PASSWORD,
         createdProfessionals: demoData.professionals.length,
         createdVacations: demoData.vacations.length,
         totalProfessionals: demoData.professionals.length,

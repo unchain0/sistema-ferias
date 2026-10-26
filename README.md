@@ -45,10 +45,7 @@ Open [http://localhost:5000](http://localhost:5000).
 
 ### Demo account
 
-| Field    | Value                     |
-|----------|---------------------------|
-| Email    | `demo@sistema-ferias.com` |
-| Password | `demo123`                 |
+Use **Acessar Demonstração** on the login screen. The app creates a runtime-only credential for the read-only demo session.
 
 Demo mode works without Supabase using an in-memory seed store.
 

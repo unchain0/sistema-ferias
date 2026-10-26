@@ -1,31 +1,9 @@
-# Gitleaks configuration for Sistema de Férias
-# Detects secrets and credentials in code
+# Gitleaks configuration for Sistema de Férias.
 
 title = "Sistema de Férias - Secret Detection"
 
 [extend]
-# Use default gitleaks rules
 useDefault = true
 
-# Allowlist for false positives and test fixtures
 [allowlist]
-description = "Allowlisted patterns for test fixtures and demo credentials"
-paths = [
-  "test/.*",
-  ".*\\.test\\.ts",
-  ".*\\.test\\.tsx",
-  "lib/seed-demo\\.ts",
-  "\\.env\\.example",
-  "\\.env\\.local\\.example",
-]
-commits = []
-stoplists = []
-regexes = [
-  "(?i)(demo|test|example|fake|mock)['\"\\s:=]{1,5}(password|secret|key|token)['\"\\s:=]{1,5}(demo123|test123|example|fake|mock)",
-  "01941f29-7c00-7e43-b999-cafa1b9c8ee9",
-  "ci-dummy-secret-not-used-in-production",
-  "https://ci-placeholder\\.supabase\\.co",
-  "ci-dummy-anon-key-not-used-in-production",
-  "test-(jwt-secret|nextauth-secret|anon-key)-not-a-credential",
-  "(?i)(your-secret-key-here|your-password-here|example\\.com|placeholder|changeme|changethis|xxx+|yyy+|zzz+|123456|abcdef)",
-]
+paths = ['\.env\.local\.example']

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { randomBytes } from 'node:crypto';
 import { describe, it } from 'node:test';
 import { z } from 'zod';
 
@@ -23,7 +24,7 @@ describe('input-validation', () => {
   it('schemas accept valid and reject invalid payloads', () => {
     assert.equal(emailSchema.safeParse('a@b.com').success, true);
     assert.equal(emailSchema.safeParse('bad').success, false);
-    assert.equal(passwordSchema.safeParse('secret1').success, true);
+    assert.equal(passwordSchema.safeParse(randomBytes(12).toString('base64url')).success, true);
     assert.equal(passwordSchema.safeParse('123').success, false);
     assert.equal(nameSchema.safeParse('Ana').success, true);
     assert.equal(nameSchema.safeParse('A').success, false);

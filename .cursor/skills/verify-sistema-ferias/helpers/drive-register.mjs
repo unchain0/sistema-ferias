@@ -5,6 +5,7 @@
  *   VERIFY_BASE_URL       default http://127.0.0.1:5055
  *   VERIFY_EVIDENCE_DIR   required for screenshots
  */
+import { randomBytes } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -39,7 +40,7 @@ mkdirSync(evidenceDir, { recursive: true });
 
 const stamp = Date.now();
 const email = `verify+${stamp}@example.com`;
-const password = 'senhateste123';
+const password = randomBytes(24).toString('base64url');
 const name = 'Agente Verify';
 
 const lines = [];
@@ -94,7 +95,9 @@ async function main() {
 
     const demoResp = await page.request.post(`${base}/api/auth/init-demo`);
     const demoStatus = demoResp.status();
-    const demoBody = (await demoResp.text()).slice(0, 300);
+    const demoBody = (await demoResp.text())
+      .replace(/("password"\s*:\s*")[^"]*(")/, '$1***$2')
+      .slice(0, 300);
     log(`init-demo status=${demoStatus} body=${demoBody.replace(/\s+/g, ' ')}`);
     log(
       demoStatus >= 400

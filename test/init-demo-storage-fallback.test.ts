@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { randomBytes } from 'node:crypto';
 import { describe, it } from 'node:test';
 
 /**
@@ -42,10 +43,9 @@ describe('init-demo storage fallback', () => {
   it('POST /api/auth/init-demo returns 200 with storage=seed when Supabase fetch fails', async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL =
       'https://this-project-does-not-exist-xyz.supabase.co';
-    // Non-empty placeholders only (not real credentials; avoid JWT-shaped fixtures).
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key-not-a-credential';
-    process.env.SUPABASE_JWT_SECRET = 'test-jwt-secret-not-a-credential';
-    process.env.NEXTAUTH_SECRET = 'test-nextauth-secret-not-a-credential';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = randomBytes(24).toString('base64url');
+    process.env.SUPABASE_JWT_SECRET = randomBytes(24).toString('base64url');
+    process.env.NEXTAUTH_SECRET = randomBytes(32).toString('base64url');
     process.env.VERCEL = '1';
 
     // Isolate module graph so hasSupabaseEnv() sees the dead URL.
@@ -58,12 +58,14 @@ describe('init-demo storage fallback', () => {
     const body = (await response.json()) as {
       error?: string;
       email?: string;
+      password?: string;
       storage?: string;
       totalProfessionals?: number;
       totalVacations?: number;
     };
     assert.equal(body.error, undefined, `body=${JSON.stringify(body)}`);
     assert.equal(body.email, 'demo@sistema-ferias.com');
+    assert.match(body.password ?? '', /^[A-Za-z0-9_-]{32}$/);
     assert.ok(
       body.storage === 'seed' || body.storage === 'persisted',
       `unexpected storage=${body.storage}`
@@ -75,14 +77,14 @@ describe('init-demo storage fallback', () => {
   it('authenticateUser accepts demo credentials without reachable Supabase', async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL =
       'https://this-project-does-not-exist-xyz.supabase.co';
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key-not-a-credential';
-    process.env.SUPABASE_JWT_SECRET = 'test-jwt-secret-not-a-credential';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = randomBytes(24).toString('base64url');
+    process.env.SUPABASE_JWT_SECRET = randomBytes(24).toString('base64url');
     process.env.VERCEL = '1';
 
     const suffix = `?auth=${Date.now()}`;
     const authenticationModule = await import(`../lib/auth.ts${suffix}`);
     const { authenticateUser } = authenticationModule as { authenticateUser: (email: string, password: string) => Promise<{ email: string; id: string } | null> };
-    const seedModule = await import(`../lib/seed-demo.ts${suffix}`);
+    const seedModule = await import('../lib/seed-demo.ts');
     const { DEMO_EMAIL, DEMO_PASSWORD, DEMO_USER_ID } = seedModule as { DEMO_EMAIL: string; DEMO_PASSWORD: string; DEMO_USER_ID: string };
 
     const user = await authenticateUser(DEMO_EMAIL, DEMO_PASSWORD);

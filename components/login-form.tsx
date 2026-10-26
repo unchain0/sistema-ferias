@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 
 import { Button } from '@/components/button';
 import { Input } from '@/components/input';
-import { errorMessage, readJson } from '@/lib/json';
+import { asRecord, errorMessage, readJson } from '@/lib/json';
 
 
 export function LoginForm() {
@@ -55,9 +55,16 @@ export function LoginForm() {
         setDemoLoading(false);
         return;
       }
+      const body = asRecord(await readJson(res).catch(() => ({})));
+      const password = typeof body['password'] === 'string' ? body['password'] : '';
+      if (password === '') {
+        toast.error('❌ Erro ao acessar demonstração');
+        return;
+      }
+
       const result = await signIn('credentials', {
         email: 'demo@sistema-ferias.com',
-        password: 'demo123',
+        password,
         redirect: false,
       });
 
