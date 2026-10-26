@@ -23,11 +23,23 @@ export function formatCurrency(value: number): string {
 }
 
 export function formatDateToPtBR(dateString: string): string {
+  if (!dateString) return '';
+  const dateOnly = dateString.split('T')[0];
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) {
+    const [year, month, day] = dateOnly.split('-');
+    return `${day}/${month}/${year}`;
+  }
   const date = new Date(dateString);
   if (isNaN(date.getTime())) {
-    return dateString; // Return original string if date is invalid
+    return dateString;
   }
   return date.toLocaleDateString('pt-BR');
+}
+
+/** Acquisition period ends the day before the start anniversary (CLT: 12 months). */
+export function computeAcquisitionEndDate(acquisitionStartDate: string): string {
+  const start = parseISO(acquisitionStartDate);
+  return format(addDays(addYears(start, 1), -1), 'yyyy-MM-dd');
 }
 
 /**
