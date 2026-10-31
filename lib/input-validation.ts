@@ -44,7 +44,7 @@ export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): { succe
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: error.errors.map(e => e.message).join(', ')
+        error: error.issues.map((issue) => issue.message).join(', ')
       };
     }
     return {
